@@ -2,7 +2,8 @@
 
 ## Requirements
 
-* JDK 17 or newer (CI uses Zulu 17; JDK 21 works locally).
+* **JDK 21** (CI uses Zulu 21). The app targets Java 17 bytecode, but Robolectric needs Java 21
+  to run the Android SDK 36 sandbox used by the UI tests.
 * Android SDK with platform `android-37` (compileSdk 37). Android Studio installs it; on the
   command line, point `sdk.dir` in `FocusFlow/local.properties` at your SDK (not committed).
 * No emulator is needed for the default test suite: UI tests run on the JVM with Robolectric.
@@ -37,7 +38,7 @@ build.
 ## Notes
 
 * Robolectric's SDK 36 shadows need `--add-opens=java.base/jdk.internal.access=ALL-UNNAMED`
-  on JDK 17+; this is configured in `app/build.gradle.kts`.
+  on JDK 21; this is configured in `app/build.gradle.kts`.
 * `org.gradle.jvmargs=-Xmx2048m` keeps builds usable on 8 GB machines. CI uses the shared
   `.github/ci-gradle.properties` (more memory, no daemon, warnings as errors).
 * Lint ignores test sources (`lint { ignoreTestSources = true }`): with AGP 9.3, analysing the
