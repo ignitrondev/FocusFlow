@@ -106,7 +106,7 @@ Decisions for FocusFlow:
 **Decision (approved 2026-11-07):** FocusFlow code is **Apache-2.0**, new files carry
 `Copyright <year> IgnitronDev`. Files adapted from a sample keep their original Google header,
 plus a note that they were modified (Apache-2.0 §4(b)). The repository as a whole is **not**
-relicensed. `FocusFlow/LICENSE` and `FocusFlow/NOTICE` are added in Phase 7.
+relicensed. `FocusFlow/LICENSE` (unmodified Apache-2.0 text) and `FocusFlow/NOTICE` (attribution) were added on 2026-11-07.
 
 ## 6. Proposed modifications
 

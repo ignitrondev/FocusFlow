@@ -1,0 +1,16 @@
+FocusFlow
+Copyright 2026 IgnitronDev
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+FocusFlow is developed inside IgnitronDev's fork of android/compose-samples
+(https://github.com/android/compose-samples), Copyright The Android Open Source
+Project, licensed under the Apache License, Version 2.0. The following FocusFlow
+files are copied or adapted from that repository:
+
+  - .editorconfig, buildscripts/toml-updater-config.gradle
+  - the Spotless setup in build.gradle.kts and the structure of app/build.gradle.kts
+  - gradle/libs.versions.toml (entries and versions, reduced to what FocusFlow uses)
+
+The Gradle wrapper (gradlew, gradlew.bat, gradle/wrapper/) is part of Gradle,
+Copyright the original authors, licensed under the Apache License, Version 2.0.
