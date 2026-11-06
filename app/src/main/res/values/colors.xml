@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 IgnitronDev
+  SPDX-License-Identifier: Apache-2.0
+  -->
+<resources>
+    <color name="focusflow_background">#FFFBF8FF</color>
+    <color name="focusflow_brand">#FF4A55C8</color>
+    <color name="ic_launcher_background">#FF4A55C8</color>
+</resources>

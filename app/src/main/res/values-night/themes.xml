@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 IgnitronDev
+  SPDX-License-Identifier: Apache-2.0
+  -->
+<resources>
+    <style name="Theme.FocusFlow" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/focusflow_background</item>
+    </style>
+</resources>

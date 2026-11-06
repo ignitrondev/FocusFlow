@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 IgnitronDev
+  SPDX-License-Identifier: Apache-2.0
+  -->
+<resources>
+    <!-- Window theme. Compose draws the UI; this only sets the window background and bars. -->
+    <style name="Theme.FocusFlow" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/focusflow_background</item>
+    </style>
+
+    <style name="Theme.FocusFlow.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/focusflow_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+        <item name="postSplashScreenTheme">@style/Theme.FocusFlow</item>
+    </style>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 IgnitronDev
+  SPDX-License-Identifier: Apache-2.0
+  -->
+<full-backup-content>
+    <include domain="file" path="datastore/user_preferences.preferences_pb" />
+</full-backup-content>
