@@ -3,7 +3,9 @@
   Copyright 2026 IgnitronDev
   SPDX-License-Identifier: Apache-2.0
   -->
-<!-- Only the folder for images the user chooses to share is exposed to other apps. -->
+<!-- Only these cache folders are exposed, per request, to the app the user picks. -->
 <paths>
     <cache-path name="shared" path="shared/" />
+    <!-- Where the camera app writes the photo taken for a statistics card. -->
+    <cache-path name="camera" path="camera/" />
 </paths>

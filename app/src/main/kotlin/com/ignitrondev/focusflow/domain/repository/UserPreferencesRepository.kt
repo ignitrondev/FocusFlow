@@ -25,4 +25,6 @@ interface UserPreferencesRepository {
     suspend fun setThemeMode(themeMode: ThemeMode)
 
     suspend fun setUseDynamicColor(useDynamicColor: Boolean)
+
+    suspend fun setShareRole(role: String)
 }

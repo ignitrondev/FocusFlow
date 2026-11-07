@@ -42,4 +42,6 @@ navigation/     Top-level destinations and the adaptive NavigationSuiteScaffold
 * DataStore Preferences: appearance and timer settings.
 * Nothing leaves the device; the app has no network permission. Sharing a statistics card writes a
   PNG to the app cache and hands it, through `FileProvider` and Android's share sheet, to the app
-  the user picks; only that app gets read access to that one file.
+  the user picks; only that app gets read access to that one file. A photo for the card comes from
+  the camera app (writing to a cache file it is granted for that capture) or Android's photo
+  picker, so no camera or storage permission is requested; it is only kept in the cache.

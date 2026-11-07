@@ -32,7 +32,7 @@ Jetpack Compose by [IgnitronDev](https://ignitrondev.space).
 | Alerts | Sound and vibration when a session ends, also with the app closed; pick any alarm or notification sound; notification with the time left in large digits, Pause and Resume |
 | History | Every session by day, including the ones you stopped early |
 | Statistics | Today, this week, daily average, average session, streak, all time, and a 7-day chart |
-| Share | A Strava-style card of your day or week (1080×1350 image) for Instagram, WhatsApp, X and any other app |
+| Share | A Strava-style card of your day or week (1080×1350 image) with your role and, if you like, a photo of where you are working, for Instagram, WhatsApp, X and any other app |
 | Everywhere | Light and dark theme, wallpaper colors, phones, foldables and tablets, large font sizes, TalkBack |
 
 ## Download

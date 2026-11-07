@@ -12,6 +12,9 @@ All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://
 ### Added
 - Share a Strava-style statistics card (today or this week) through Android's share sheet:
   a 1080×1350 image with focus time, sessions, daily average, streak and the last 7 days.
+- The card shows your role (e.g. "Software Engineer", asked once and remembered) and can use a
+  photo of where you are working as its background, taken with the camera app or picked with
+  Android's photo picker. No camera or storage permission is needed.
 - Current streak: consecutive days with a completed focus session.
 
 - Pick the alert sound with Android's sound picker (Settings → Notifications → Alert sound),

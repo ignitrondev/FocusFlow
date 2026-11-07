@@ -16,20 +16,27 @@
 package com.ignitrondev.focusflow.feature.statistics
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.core.content.IntentCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ignitrondev.focusflow.MainActivity
 import com.ignitrondev.focusflow.domain.timer.TimerRepository
 import com.ignitrondev.focusflow.platform.ShareImage
 import com.ignitrondev.focusflow.testing.FakeTimeSource
+import com.ignitrondev.focusflow.testing.FakeUserPreferencesRepository
+import com.ignitrondev.focusflow.testing.resetFileProviderCache
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
@@ -64,8 +71,11 @@ class ShareStatisticsTest {
 
     @Inject lateinit var clock: FakeTimeSource
 
+    @Inject lateinit var preferences: FakeUserPreferencesRepository
+
     @Before
     fun setUp() {
+        resetFileProviderCache()
         hiltRule.inject()
         runBlocking {
             timerRepository.start()
@@ -74,12 +84,44 @@ class ShareStatisticsTest {
         }
     }
 
-    @Test
-    fun sharingSendsAHighResolutionImageThroughTheShareSheet() {
+    private fun openShareSheet() {
         composeRule.onNodeWithTag("nav_Statistics").performClick()
         composeRule.waitUntilAtLeastOneExists(hasTestTag("shareStatistics"), 5_000)
         composeRule.onNodeWithTag("shareStatistics").performClick()
         composeRule.waitUntilAtLeastOneExists(hasTestTag("shareCard"), 5_000)
+    }
+
+    @Test
+    fun roleIsRequiredBeforeSharingAndIsRemembered() {
+        openShareSheet()
+        composeRule.onNodeWithTag("shareButton").assertIsNotEnabled()
+
+        composeRule.onNodeWithTag("shareRole").performTextInput("Software Engineer")
+
+        composeRule.onNodeWithTag("shareButton").assertIsEnabled()
+        composeRule.onNodeWithTag("shareCard").captureToImage()
+        composeRule.onNodeWithTag("shareButton").performClick()
+        composeRule.waitUntil(5_000) { preferences.userPreferences.value.shareRole == "Software Engineer" }
+    }
+
+    @Test
+    fun takePhotoOpensTheCameraAppWithAPrivateOutputFile() {
+        shadowOf(composeRule.activity.packageManager).setSystemFeature(PackageManager.FEATURE_CAMERA_ANY, true)
+        openShareSheet()
+
+        composeRule.onNodeWithTag("sharePhotoCamera").performClick()
+        composeRule.waitForIdle()
+
+        val started = shadowOf(composeRule.activity).nextStartedActivityForResult.intent
+        assertEquals(MediaStore.ACTION_IMAGE_CAPTURE, started.action)
+        val output = IntentCompat.getParcelableExtra(started, MediaStore.EXTRA_OUTPUT, Uri::class.java)!!
+        assertEquals("${composeRule.activity.packageName}.fileprovider", output.authority)
+    }
+
+    @Test
+    fun sharingSendsAHighResolutionImageThroughTheShareSheet() {
+        openShareSheet()
+        composeRule.onNodeWithTag("shareRole").performTextInput("Software Engineer")
 
         // On a device the visible card has been drawn by now. Robolectric does not draw the bottom
         // sheet's window on its own, so draw it once, as the screen would.

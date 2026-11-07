@@ -82,13 +82,19 @@ fun NavGraphBuilder.statisticsScreen() {
     composable<StatisticsRoute> {
         val viewModel: StatisticsViewModel = hiltViewModel()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-        StatisticsScreen(uiState)
+        val shareRole by viewModel.shareRole.collectAsStateWithLifecycle()
+        StatisticsScreen(uiState, shareRole = shareRole, onSaveShareRole = viewModel::saveShareRole)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StatisticsScreen(uiState: StatisticsUiState, modifier: Modifier = Modifier) {
+fun StatisticsScreen(
+    uiState: StatisticsUiState,
+    modifier: Modifier = Modifier,
+    shareRole: String = "",
+    onSaveShareRole: (String) -> Unit = {},
+) {
     var sharing by rememberSaveable { mutableStateOf(false) }
     val statistics = (uiState as? StatisticsUiState.Success)?.statistics?.takeUnless { it.isEmpty }
     Scaffold(
@@ -107,7 +113,7 @@ fun StatisticsScreen(uiState: StatisticsUiState, modifier: Modifier = Modifier) 
         },
     ) { innerPadding ->
         if (sharing && statistics != null) {
-            ShareStatisticsSheet(statistics, onDismiss = { sharing = false })
+            ShareStatisticsSheet(statistics, savedRole = shareRole, onSaveRole = onSaveShareRole, onDismiss = { sharing = false })
         }
         when {
             uiState is StatisticsUiState.Success && !uiState.statistics.isEmpty -> StatisticsContent(

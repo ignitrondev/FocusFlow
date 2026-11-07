@@ -45,6 +45,9 @@ use the rail instead of a bottom bar.
 - [ ] TalkBack: navigate the timer, history and statistics screens.
 - [ ] Statistics → Share: the card looks right in Instagram (feed and story), WhatsApp and X;
       Today and This week.
+- [ ] Share with a photo: taken with the camera (portrait and landscape, upright on the card) and
+      picked from the gallery; text readable on a bright photo; Share stays disabled until the
+      role is filled in, and the role is remembered next time.
 - [ ] Dark theme and wallpaper colors (Android 12+).
 
 ## Known gaps

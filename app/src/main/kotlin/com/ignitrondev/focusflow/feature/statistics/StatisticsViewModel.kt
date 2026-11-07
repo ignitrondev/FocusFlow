@@ -17,6 +17,7 @@ package com.ignitrondev.focusflow.feature.statistics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ignitrondev.focusflow.domain.repository.UserPreferencesRepository
 import com.ignitrondev.focusflow.domain.statistics.FocusStatistics
 import com.ignitrondev.focusflow.domain.statistics.FocusStatisticsCalculator
 import com.ignitrondev.focusflow.domain.timer.FocusSessionRepository
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 sealed interface StatisticsUiState {
     data object Loading : StatisticsUiState
@@ -40,7 +42,20 @@ sealed interface StatisticsUiState {
 }
 
 @HiltViewModel
-class StatisticsViewModel @Inject constructor(focusSessionRepository: FocusSessionRepository, timeSource: TimeSource) : ViewModel() {
+class StatisticsViewModel @Inject constructor(
+    focusSessionRepository: FocusSessionRepository,
+    timeSource: TimeSource,
+    private val userPreferencesRepository: UserPreferencesRepository,
+) : ViewModel() {
+    /** The role last used on a shared card, so the user does not type it every time. */
+    val shareRole: StateFlow<String> = userPreferencesRepository.userPreferences
+        .map { it.shareRole }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
+
+    fun saveShareRole(role: String) {
+        viewModelScope.launch { userPreferencesRepository.setShareRole(role) }
+    }
+
     val uiState: StateFlow<StatisticsUiState> = focusSessionRepository.observeSessions()
         .map { sessions ->
             val zone = timeSource.zone()

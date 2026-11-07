@@ -34,4 +34,6 @@ constructor() : UserPreferencesRepository {
     override suspend fun setThemeMode(themeMode: ThemeMode) = state.update { it.copy(themeMode = themeMode) }
 
     override suspend fun setUseDynamicColor(useDynamicColor: Boolean) = state.update { it.copy(useDynamicColor = useDynamicColor) }
+
+    override suspend fun setShareRole(role: String) = state.update { it.copy(shareRole = role.trim()) }
 }

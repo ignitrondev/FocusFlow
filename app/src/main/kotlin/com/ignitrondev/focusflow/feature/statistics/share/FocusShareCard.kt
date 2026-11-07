@@ -16,6 +16,7 @@
 package com.ignitrondev.focusflow.feature.statistics.share
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,8 +44,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
@@ -51,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -72,6 +78,18 @@ private val OnCard = Color.White
 private val OnCardMuted = Color.White.copy(alpha = 0.72f)
 private val BarTrack = Color.White.copy(alpha = 0.16f)
 private val BarToday = Color(0xFF9EF2E6)
+private val PhotoScrim = Brush.verticalGradient(
+    0f to Color.Black.copy(alpha = 0.55f),
+    0.2f to Color.Black.copy(alpha = 0.15f),
+    0.35f to Color.Black.copy(alpha = 0.35f),
+    0.6f to Color.Black.copy(alpha = 0.65f),
+    1f to Color.Black.copy(alpha = 0.85f),
+)
+private val PhotoTextShadow = Shadow(color = Color.Black.copy(alpha = 0.5f), offset = Offset(0f, 2f), blurRadius = 12f)
+private val LocalCardTextShadow = staticCompositionLocalOf<Shadow?> { null }
+
+@Composable
+private fun TextStyle.onCard(): TextStyle = copy(shadow = LocalCardTextShadow.current)
 
 /**
  * A Strava-style summary of the user's focus, in a 4:5 portrait card (an Instagram feed post).
@@ -79,9 +97,19 @@ private val BarToday = Color(0xFF9EF2E6)
  * full-bleed, as social apps expect; the preview rounds the corners on screen only.
  */
 @Composable
-fun FocusShareCard(statistics: FocusStatistics, period: SharePeriod, modifier: Modifier = Modifier) {
+fun FocusShareCard(
+    statistics: FocusStatistics,
+    period: SharePeriod,
+    modifier: Modifier = Modifier,
+    role: String = "",
+    photo: ImageBitmap? = null,
+) {
     val density = LocalDensity.current
-    CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale = 1f)) {
+    CompositionLocalProvider(
+        LocalDensity provides Density(density.density, fontScale = 1f),
+        // A soft shadow under the text only when it sits on a photo, where the background is unknown.
+        LocalCardTextShadow provides if (photo != null) PhotoTextShadow else null,
+    ) {
         val locale = LocalConfiguration.current.locales[0]
         val focusMillis = if (period == SharePeriod.Today) statistics.today.focusMillis else statistics.weekFocusMillis
         val sessions = if (period == SharePeriod.Today) statistics.today.sessions else statistics.weekSessions
@@ -95,30 +123,46 @@ fun FocusShareCard(statistics: FocusStatistics, period: SharePeriod, modifier: M
                 statistics.today.date.format(DateTimeFormatter.ofPattern("d MMM", locale)),
             )
         }
-        Box(
-            modifier
-                .aspectRatio(4f / 5f)
-                .background(CardGradient)
-                .padding(24.dp),
-        ) {
-            Column(Modifier.fillMaxSize()) {
+        Box(modifier.aspectRatio(4f / 5f).background(CardGradient)) {
+            if (photo != null) {
+                Image(
+                    bitmap = photo,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+                // Keeps white text readable on any photo: darker at the top (header) and much
+                // darker at the bottom, where the numbers are.
+                Box(Modifier.fillMaxSize().background(PhotoScrim))
+            }
+            Column(Modifier.fillMaxSize().padding(24.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     LogoMark(Modifier.size(22.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(
                         stringResource(R.string.app_name),
                         color = OnCard,
-                        style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold),
+                        style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold).onCard(),
                     )
                 }
                 Spacer(Modifier.height(4.dp))
-                Text(periodLabel, color = OnCardMuted, style = TextStyle(fontSize = 13.sp))
+                Text(periodLabel, color = OnCardMuted, style = TextStyle(fontSize = 13.sp).onCard())
                 Spacer(Modifier.weight(1f))
-                Text(stringResource(R.string.share_card_focus_time).uppercase(locale), color = OnCardMuted, style = LabelStyle)
+                if (role.isNotBlank()) {
+                    Text(
+                        role.trim(),
+                        color = OnCard,
+                        style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.SemiBold, lineHeight = 28.sp).onCard(),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Spacer(Modifier.height(16.dp))
+                }
+                Text(stringResource(R.string.share_card_focus_time).uppercase(locale), color = OnCardMuted, style = LabelStyle.onCard())
                 Text(
                     durationText(focusMillis),
                     color = OnCard,
-                    style = TextStyle(fontSize = 50.sp, fontWeight = FontWeight.Bold, lineHeight = 54.sp, fontFeatureSettings = "tnum"),
+                    style = FocusTimeStyle.onCard(),
                     maxLines = 1,
                 )
                 Spacer(Modifier.height(16.dp))
@@ -138,7 +182,7 @@ fun FocusShareCard(statistics: FocusStatistics, period: SharePeriod, modifier: M
                 Text(
                     stringResource(R.string.share_card_footer),
                     color = OnCardMuted,
-                    style = TextStyle(fontSize = 12.sp),
+                    style = TextStyle(fontSize = 12.sp).onCard(),
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.End,
                 )
@@ -147,13 +191,14 @@ fun FocusShareCard(statistics: FocusStatistics, period: SharePeriod, modifier: M
     }
 }
 
+private val FocusTimeStyle = TextStyle(fontSize = 50.sp, fontWeight = FontWeight.Bold, lineHeight = 54.sp, fontFeatureSettings = "tnum")
 private val LabelStyle = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp)
 
 @Composable
 private fun Metric(label: String, value: String) {
     Column {
-        Text(label.uppercase(), color = OnCardMuted, style = LabelStyle)
-        Text(value, color = OnCard, style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.SemiBold), maxLines = 1)
+        Text(label.uppercase(), color = OnCardMuted, style = LabelStyle.onCard())
+        Text(value, color = OnCard, style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.SemiBold).onCard(), maxLines = 1)
     }
 }
 
@@ -187,7 +232,7 @@ private fun WeekBars(days: List<DayFocus>, locale: java.util.Locale) {
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     color = OnCardMuted,
-                    style = TextStyle(fontSize = 11.sp),
+                    style = TextStyle(fontSize = 11.sp).onCard(),
                 )
             }
         }
@@ -232,6 +277,7 @@ private fun FocusShareCardPreview() {
             weekStart = today.minusDays(6),
             currentStreakDays = 5,
         ),
+        role = "Software Engineer",
         period = SharePeriod.Week,
     )
 }

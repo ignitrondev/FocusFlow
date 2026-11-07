@@ -50,6 +50,7 @@ constructor(private val dataStore: DataStore<Preferences>) :
                 UserPreferences(
                     themeMode = preferences[Keys.THEME_MODE].toThemeMode(),
                     useDynamicColor = preferences[Keys.USE_DYNAMIC_COLOR] ?: false,
+                    shareRole = preferences[Keys.SHARE_ROLE].orEmpty(),
                 )
             }.distinctUntilChanged()
 
@@ -61,13 +62,19 @@ constructor(private val dataStore: DataStore<Preferences>) :
         dataStore.edit { it[Keys.USE_DYNAMIC_COLOR] = useDynamicColor }
     }
 
+    override suspend fun setShareRole(role: String) {
+        dataStore.edit { it[Keys.SHARE_ROLE] = role.trim().take(MAX_ROLE_LENGTH) }
+    }
+
     private object Keys {
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val USE_DYNAMIC_COLOR = booleanPreferencesKey("use_dynamic_color")
+        val SHARE_ROLE = stringPreferencesKey("share_role")
     }
 
     private companion object {
         const val TAG = "UserPreferences"
+        const val MAX_ROLE_LENGTH = 40
     }
 }
 
