@@ -41,6 +41,7 @@ class ColorContrastTest {
         Triple("primary on surface (section headers, focus label)", primary to surface, 4.5),
         Triple("tertiary on surface (break label)", tertiary to surface, 4.5),
         Triple("onPrimary on primary (start button)", onPrimary to primary, 4.5),
+        Triple("onSurfaceVariant on surfaceContainerHigh (navigation bar)", onSurfaceVariant to surfaceContainerHigh, 4.5),
         Triple("onSecondaryContainer on secondaryContainer (selected segment)", onSecondaryContainer to secondaryContainer, 4.5),
         Triple("primary on surfaceContainerHighest (dial arc vs track)", primary to surfaceContainerHighest, 3.0),
         Triple("tertiary on surfaceContainer (today's bar)", tertiary to surfaceContainer, 3.0),
@@ -52,6 +53,19 @@ class ColorContrastTest {
             if (ratio < minimum) "$label: ${(ratio * 100).roundToInt() / 100.0} < $minimum" else null
         }
         assertTrue(failures.isEmpty(), "$name theme:\n" + failures.joinToString("\n"))
+    }
+
+    @Test
+    fun navigationCapsuleMeetsWcag() {
+        val text = contrast(OnNavigationCapsule, NavigationCapsule)
+        assertTrue(text >= 4.5, "white on orange capsule: ${(text * 100).roundToInt() / 100.0} < 4.5")
+        listOf("Light" to LightColors, "Dark" to DarkColors).forEach { (name, scheme) ->
+            val ratio = contrast(NavigationCapsule, scheme.surfaceContainerHigh)
+            assertTrue(
+                ratio >= 3.0,
+                "$name orange capsule on navigation bar: ${(ratio * 100).roundToInt() / 100.0} < 3",
+            )
+        }
     }
 
     @Test

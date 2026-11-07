@@ -9,6 +9,10 @@ All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://
   while the app was not open: the alarm was inexact unless the user allowed "Alarms & reminders".
   FocusFlow now uses exact alarms (`USE_EXACT_ALARM`, granted at install on Android 13+).
 
+### Changed
+- On phones the bottom navigation is a segmented bar: a rounded container, with the active tab in an
+  orange capsule around its icon and label. Tablets and phones in landscape keep the side rail.
+
 ### Added
 - Share a Strava-style statistics card (today or this week) through Android's share sheet:
   a 1080×1350 image with focus time, sessions, daily average, streak and the last 7 days.

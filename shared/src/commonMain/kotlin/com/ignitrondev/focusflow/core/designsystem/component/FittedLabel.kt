@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 
@@ -32,14 +33,16 @@ import androidx.compose.ui.unit.sp
  * default font size it renders exactly like `Text`.
  */
 @Composable
-fun FittedLabel(text: String, modifier: Modifier = Modifier, textAlign: TextAlign = TextAlign.Center) {
+fun FittedLabel(text: String, modifier: Modifier = Modifier, textAlign: TextAlign = TextAlign.Center, minFontSize: TextUnit = 8.sp) {
     val style = LocalTextStyle.current
     val maxSize = if (style.fontSize.isSpecified) style.fontSize else 14.sp
+    // StepBased requires min <= max. A caller can ask for a lower floor than the current style.
+    val minSize = if (minFontSize < maxSize) minFontSize else maxSize
     BasicText(
         text = text,
         modifier = modifier,
         style = style.merge(TextStyle(color = LocalContentColor.current, textAlign = textAlign)),
         maxLines = 1,
-        autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = maxSize),
+        autoSize = TextAutoSize.StepBased(minFontSize = minSize, maxFontSize = maxSize),
     )
 }

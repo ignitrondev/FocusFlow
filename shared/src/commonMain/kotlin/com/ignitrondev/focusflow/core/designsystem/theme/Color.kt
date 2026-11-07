@@ -97,3 +97,8 @@ internal val DarkColors =
         surfaceContainerHigh = Color(0xFF292930),
         surfaceContainerHighest = Color(0xFF34343B),
     )
+
+// Segmented phone bar: the same orange capsule in light and dark. White on #C84A00 is 4.7:1, and
+// the orange is at least 3:1 against surfaceContainerHigh in both themes.
+internal val NavigationCapsule = Color(0xFFC84A00)
+internal val OnNavigationCapsule = Color(0xFFFFFFFF)
