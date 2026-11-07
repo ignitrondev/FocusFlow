@@ -6,7 +6,7 @@ FocusFlow is a minimalist, offline-first Pomodoro timer for Android, built with 
 Jetpack Compose by [IgnitronDev](https://ignitrondev.space).
 
 * **Private by design:** no account, no analytics, no ads, and no internet permission. Your
-  sessions never leave the device.
+  sessions never leave the device, unless you choose to share a statistics card.
 * **Reliable:** the timer keeps the right time when the app is closed, the screen is off, the clock
   changes or the phone restarts, and alerts you when a session ends.
 * **Open source:** Apache License 2.0, with no Google Play Services or proprietary libraries, so it
@@ -31,7 +31,8 @@ Jetpack Compose by [IgnitronDev](https://ignitrondev.space).
 | Controls | Start, pause, resume, reset, skip; optional automatic start of breaks and focus sessions |
 | Alerts | Sound and vibration when a session ends, also with the app closed; pick any alarm or notification sound; notification with the time left in large digits, Pause and Resume |
 | History | Every session by day, including the ones you stopped early |
-| Statistics | Today, this week, daily average, average session, all time, and a 7-day chart |
+| Statistics | Today, this week, daily average, average session, streak, all time, and a 7-day chart |
+| Share | A Strava-style card of your day or week (1080×1350 image) for Instagram, WhatsApp, X and any other app |
 | Everywhere | Light and dark theme, wallpaper colors, phones, foldables and tablets, large font sizes, TalkBack |
 
 ## Download

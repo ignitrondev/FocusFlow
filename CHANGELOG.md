@@ -10,6 +10,9 @@ All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://
   FocusFlow now uses exact alarms (`USE_EXACT_ALARM`, granted at install on Android 13+).
 
 ### Added
+- Share a Strava-style statistics card (today or this week) through Android's share sheet:
+  a 1080×1350 image with focus time, sessions, daily average, streak and the last 7 days.
+- Current streak: consecutive days with a completed focus session.
 
 - Pick the alert sound with Android's sound picker (Settings → Notifications → Alert sound),
   including silent and any alarm or notification sound.

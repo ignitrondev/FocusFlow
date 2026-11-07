@@ -105,6 +105,46 @@ class FocusStatisticsCalculatorTest {
     }
 
     @Test
+    fun streakCountsConsecutiveDaysUpToToday() {
+        val stats = calculate(
+            listOf(
+                session(today, 25),
+                session(today.minusDays(1), 25),
+                session(today.minusDays(2), 25),
+                session(today.minusDays(4), 25), // gap on day 3 ends the streak
+            ),
+        )
+
+        assertEquals(3, stats.currentStreakDays)
+    }
+
+    @Test
+    fun streakFromYesterdayIsStillAliveToday() {
+        val stats = calculate(listOf(session(today.minusDays(1), 25), session(today.minusDays(2), 25)))
+
+        assertEquals(2, stats.currentStreakDays)
+    }
+
+    @Test
+    fun streakIsBrokenByAMissedDayAndIgnoresBreaksAndStoppedSessions() {
+        val stats = calculate(
+            listOf(
+                session(today.minusDays(2), 25),
+                session(today, 5, type = SessionType.ShortBreak),
+                session(today.minusDays(1), 10, completed = false),
+            ),
+        )
+
+        assertEquals(0, stats.currentStreakDays)
+    }
+
+    @Test
+    fun weekStartFollowsTheLocale() {
+        assertEquals(today.minusDays(5), calculate(emptyList(), DayOfWeek.MONDAY).weekStart)
+        assertEquals(today.minusDays(6), calculate(emptyList(), DayOfWeek.SUNDAY).weekStart)
+    }
+
+    @Test
     fun averageAndTotalsCoverAllTime() {
         val stats = calculate(listOf(session(today, 25), session(today.minusDays(30), 45)))
 

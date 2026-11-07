@@ -29,21 +29,28 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Insights
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -63,6 +70,7 @@ import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.core.ui.durationText
 import com.ignitrondev.focusflow.domain.statistics.DayFocus
 import com.ignitrondev.focusflow.domain.statistics.FocusStatistics
+import com.ignitrondev.focusflow.feature.statistics.share.ShareStatisticsSheet
 import java.time.LocalDate
 import java.time.format.TextStyle
 import kotlinx.serialization.Serializable
@@ -81,10 +89,26 @@ fun NavGraphBuilder.statisticsScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(uiState: StatisticsUiState, modifier: Modifier = Modifier) {
+    var sharing by rememberSaveable { mutableStateOf(false) }
+    val statistics = (uiState as? StatisticsUiState.Success)?.statistics?.takeUnless { it.isEmpty }
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.statistics_title)) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.statistics_title)) },
+                actions = {
+                    if (statistics != null) {
+                        IconButton(onClick = { sharing = true }, modifier = Modifier.testTag("shareStatistics")) {
+                            Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.statistics_share))
+                        }
+                    }
+                },
+            )
+        },
     ) { innerPadding ->
+        if (sharing && statistics != null) {
+            ShareStatisticsSheet(statistics, onDismiss = { sharing = false })
+        }
         when {
             uiState is StatisticsUiState.Success && !uiState.statistics.isEmpty -> StatisticsContent(
                 statistics = uiState.statistics,
@@ -140,12 +164,19 @@ private fun StatisticsContent(statistics: FocusStatistics, modifier: Modifier = 
                     modifier = Modifier.weight(1f),
                 )
             }
-            StatCard(
-                title = stringResource(R.string.statistics_all_time),
-                value = durationText(statistics.totalFocusMillis),
-                detail = sessionsText(statistics.totalSessions),
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                StatCard(
+                    title = stringResource(R.string.statistics_streak),
+                    value = pluralStringResource(R.plurals.streak_days, statistics.currentStreakDays, statistics.currentStreakDays),
+                    modifier = Modifier.weight(1f),
+                )
+                StatCard(
+                    title = stringResource(R.string.statistics_all_time),
+                    value = durationText(statistics.totalFocusMillis),
+                    detail = sessionsText(statistics.totalSessions),
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }

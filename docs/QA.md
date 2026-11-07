@@ -43,6 +43,8 @@ use the rail instead of a bottom bar.
 - [ ] Settings → Alert sound: pick a sound, then silent; the next alert uses it. Vibration setting
       survives the change.
 - [ ] TalkBack: navigate the timer, history and statistics screens.
+- [ ] Statistics → Share: the card looks right in Instagram (feed and story), WhatsApp and X;
+      Today and This week.
 - [ ] Dark theme and wallpaper colors (Android 12+).
 
 ## Known gaps

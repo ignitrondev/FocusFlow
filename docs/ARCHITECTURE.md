@@ -40,4 +40,6 @@ navigation/     Top-level destinations and the adaptive NavigationSuiteScaffold
 
 * Room: timer state and session history ([DATABASE.md](DATABASE.md)).
 * DataStore Preferences: appearance and timer settings.
-* Nothing leaves the device; the app has no network permission.
+* Nothing leaves the device; the app has no network permission. Sharing a statistics card writes a
+  PNG to the app cache and hands it, through `FileProvider` and Android's share sheet, to the app
+  the user picks; only that app gets read access to that one file.

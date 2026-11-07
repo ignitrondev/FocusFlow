@@ -38,6 +38,13 @@ data class FocusStatistics(
     val totalFocusMillis: Long,
     /** Seven entries, oldest first, ending today. */
     val lastSevenDays: List<DayFocus>,
+    /** First day of the current week, per the user's locale. */
+    val weekStart: LocalDate = today.date,
+    /**
+     * Consecutive days with at least one completed focus session, up to today. A streak that
+     * reached yesterday is still alive today until the day ends.
+     */
+    val currentStreakDays: Int = 0,
 ) {
     val isEmpty: Boolean get() = totalSessions == 0
 }
@@ -71,6 +78,18 @@ object FocusStatisticsCalculator {
             totalSessions = focus.size,
             totalFocusMillis = totalFocus,
             lastSevenDays = (6L downTo 0L).map { day(today.minusDays(it)) },
+            weekStart = weekStart,
+            currentStreakDays = streak(byDay.keys, today),
         )
+    }
+
+    private fun streak(activeDays: Set<LocalDate>, today: LocalDate): Int {
+        var day = if (today in activeDays) today else today.minusDays(1)
+        var count = 0
+        while (day in activeDays) {
+            count++
+            day = day.minusDays(1)
+        }
+        return count
     }
 }

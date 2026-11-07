@@ -51,6 +51,18 @@
             </intent-filter>
         </activity>
 
+        <!-- Hands a statistics image to the app the user picks in the share sheet. Not exported:
+             access is granted per share, read-only, to that app only. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_paths" />
+        </provider>
+
         <!-- Deadline alarm and notification buttons; only FocusFlow itself can send these. -->
         <receiver
             android:name=".platform.TimerActionReceiver"

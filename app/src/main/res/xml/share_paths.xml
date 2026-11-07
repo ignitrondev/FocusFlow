@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 IgnitronDev
+  SPDX-License-Identifier: Apache-2.0
+  -->
+<!-- Only the folder for images the user chooses to share is exposed to other apps. -->
+<paths>
+    <cache-path name="shared" path="shared/" />
+</paths>
