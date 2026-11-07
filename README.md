@@ -41,9 +41,19 @@ Jetpack Compose and Compose Multiplatform by **Bima Adam Nugraha**, AI-native en
 Get the APK from the [Releases](https://github.com/ignitrondev/FocusFlow/releases) page
 (Android 8.0 or newer). An F-Droid submission is planned.
 
-**iPhone and iPad (iOS 15 or newer, beta):** there is no App Store version yet. Each CI run
-builds an unsigned `FocusFlow-ios-unsigned.ipa`, which you install with AltStore or SideStore and
-your own Apple ID; see the [install guide (Bahasa Indonesia)](docs/IOS_INSTALL.md).
+**iPhone and iPad (iOS 15 or newer, beta):** there is no App Store version. Install the unsigned
+build with [AltStore](https://altstore.io) or [SideStore](https://sidestore.io) and your own Apple
+ID. In the app, open **Sources → +** and paste:
+
+```
+https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/altstore/source.json
+```
+
+On an iPhone that already has AltStore, [this link](altstore://source?url=https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/altstore/source.json)
+opens the add-source screen. SideStore uses the
+[same link](sidestore://source?url=https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/altstore/source.json).
+FocusFlow then shows up in **Browse**. A free Apple ID has to refresh the app every 7 days.
+Step by step, in Bahasa Indonesia: [docs/IOS_INSTALL.md](docs/IOS_INSTALL.md).
 
 To check that an APK was signed by IgnitronDev, compare its certificate
 (`apksigner verify --print-certs FocusFlow-*.apk`) with this SHA-256 fingerprint:

@@ -9,7 +9,6 @@ atau **SideStore**. Ini cara resmi yang dipakai banyak aplikasi open-source, buk
 - iPhone atau iPad dengan iOS 15 atau lebih baru.
 - Apple ID (boleh akun biasa, tidak perlu bayar). Sebaiknya pakai Apple ID cadangan.
 - Komputer Windows atau Mac, sekali di awal (dan untuk AltStore juga setiap perpanjangan).
-- File `FocusFlow-ios-unsigned.ipa` (dikirim lewat WhatsApp, Drive, atau unduh dari GitHub).
 
 **Batasan Apple ID gratis**
 
@@ -25,20 +24,32 @@ atau **SideStore**. Ini cara resmi yang dipakai banyak aplikasi open-source, buk
 3. Klik ikon AltServer → **Install AltStore** → pilih perangkatmu → masukkan Apple ID.
 4. Di HP: **Settings → General → VPN & Device Management** → ketuk Apple ID kamu → **Trust**.
 5. **iOS 16 ke atas:** nyalakan **Settings → Privacy & Security → Developer Mode**, lalu restart.
-6. Kirim file `.ipa` ke HP (WhatsApp/Files). Buka AltStore → tab **My Apps** → tombol **+** →
-   pilih `FocusFlow-ios-unsigned.ipa`. Tunggu sampai FocusFlow muncul di layar utama.
-7. Untuk refresh tiap minggu: HP dan komputer (AltServer menyala) di Wi-Fi yang sama, lalu buka
+6. Di AltStore, buka tab **Sources** → tombol **+**, lalu tempel:
+
+   ```
+   https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/altstore/source.json
+   ```
+
+   Dari iPhone, link ini langsung membuka halaman tambah source:
+   [altstore://source?url=https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/altstore/source.json](altstore://source?url=https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/altstore/source.json)
+7. Buka tab **Browse**, ketuk FocusFlow, lalu pasang. Tunggu sampai ikonnya muncul di layar utama.
+8. Untuk refresh tiap minggu: HP dan komputer (AltServer menyala) di Wi-Fi yang sama, lalu buka
    AltStore → **Refresh All**.
 
-> File dari WhatsApp: buka chat → ketuk file → ikon bagikan → **Save to Files**. Setelah itu file
-> bisa dipilih dari AltStore.
+Tab **Sources** ada di AltStore 2.0 ke atas. Kalau tidak ada, perbarui AltStore dulu. Kalau tetap
+ingin memasang dari file, unduh `FocusFlow-ios-unsigned.ipa` dari
+[halaman rilis](https://github.com/ignitrondev/FocusFlow/releases/tag/v1.0.0-beta.1), simpan ke
+Files, lalu AltStore → **My Apps** → **+**. File dari WhatsApp: buka chat → ketuk file → ikon
+bagikan → **Save to Files**.
 
 ## Pilihan B: SideStore (komputer cuma sekali, refresh langsung dari HP)
 
 SideStore butuh iOS 14 ke atas dan sedikit lebih ribet di awal, tapi setelah itu refresh bisa
 dilakukan dari HP saja. Ikuti panduan resmi di [sidestore.io](https://sidestore.io) (butuh
 komputer sekali untuk membuat *pairing file* dan aplikasi VPN lokal yang disebut di panduan itu).
-Setelah SideStore terpasang, langkah memasang FocusFlow sama: **My Apps → + → pilih file `.ipa`**.
+Setelah SideStore terpasang, buka tab **Sources** → **+** dan tempel URL yang sama, atau buka
+[sidestore://source?url=https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/altstore/source.json](sidestore://source?url=https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/altstore/source.json).
+FocusFlow muncul di **Browse**.
 
 ## Setelah terpasang
 
