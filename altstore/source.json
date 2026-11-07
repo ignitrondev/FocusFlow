@@ -1,0 +1,82 @@
+{
+  "name": "IgnitronDev",
+  "subtitle": "Offline apps from IgnitronDev.",
+  "description": "Welcome to the IgnitronDev source. FocusFlow is a private Pomodoro timer for iPhone and iPad. This source is for AltStore Classic. The build is not notarized, so it does not install with AltStore PAL.",
+  "iconURL": "https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+  "website": "https://ignitrondev.space",
+  "tintColor": "#4A55C8",
+  "nsfw": false,
+  "featuredApps": [
+    "com.ignitrondev.focusflow"
+  ],
+  "apps": [
+    {
+      "name": "FocusFlow",
+      "bundleIdentifier": "com.ignitrondev.focusflow",
+      "developerName": "Bima Adam Nugraha",
+      "subtitle": "A private, offline Pomodoro timer.",
+      "localizedDescription": "FocusFlow is a minimalist Pomodoro timer for focused work and regular breaks.\n\nA cycle is 25 minutes of focus, a 5 minute break, and a 15 minute break after every 4 focus sessions. Start, pause, resume, reset, or skip. Durations, the length of the cycle, and automatic start are adjustable.\n\nThe timer keeps the correct time when you leave the app or turn the screen off. A notification tells you when a session ends, including while FocusFlow is closed. On iPhone and iPad the alert sound is the one you set in Settings.\n\nHistory lists every session by day, including ones you stopped early. Statistics show today, this week, your daily average, your streak, and the last 7 days. You can share a card of your day or week, with your role and an optional photo.\n\nNo account, no ads, and no analytics. Sessions stay on your device.\n\nOpen source under the Apache License 2.0, made by Bima Adam Nugraha at IgnitronDev. Requires iOS 15 or newer.",
+      "iconURL": "https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+      "tintColor": "#4A55C8",
+      "category": "utilities",
+      "screenshots": [
+        {
+          "imageURL": "https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/docs/screenshots/timer_light.png",
+          "width": 1233,
+          "height": 2673
+        },
+        {
+          "imageURL": "https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/docs/screenshots/statistics_light.png",
+          "width": 1233,
+          "height": 2673
+        },
+        {
+          "imageURL": "https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/docs/screenshots/history_light.png",
+          "width": 1233,
+          "height": 2673
+        },
+        {
+          "imageURL": "https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/docs/screenshots/settings_light.png",
+          "width": 1233,
+          "height": 2673
+        },
+        {
+          "imageURL": "https://raw.githubusercontent.com/ignitrondev/FocusFlow/main/docs/screenshots/app_dark.png",
+          "width": 1233,
+          "height": 2673
+        }
+      ],
+      "versions": [
+        {
+          "version": "1.0.0",
+          "buildVersion": "3",
+          "marketingVersion": "1.0.0-beta.1",
+          "date": "2026-11-07",
+          "localizedDescription": "First iOS beta.\n\n• Pomodoro cycle with adjustable focus and break lengths\n• A notification when a session ends, including while the app is closed\n• History by day, and statistics for today, this week, and the last 7 days\n• A shareable statistics card\n• Light and dark theme",
+          "downloadURL": "https://github.com/ignitrondev/FocusFlow/releases/download/v1.0.0-beta.1/FocusFlow-ios-unsigned.ipa",
+          "size": 15568090,
+          "minOSVersion": "15.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSCameraUsageDescription": "FocusFlow uses the camera only when you take a photo for your shared statistics card.",
+          "NSPhotoLibraryAddUsageDescription": "FocusFlow saves your statistics card to Photos when you choose Save Image."
+        }
+      }
+    }
+  ],
+  "news": [
+    {
+      "title": "FocusFlow for iPhone and iPad",
+      "identifier": "focusflow-ios-beta-1",
+      "caption": "The first iOS beta can be installed with AltStore Classic.",
+      "date": "2026-11-07",
+      "tintColor": "#4A55C8",
+      "notify": false,
+      "url": "https://github.com/ignitrondev/FocusFlow",
+      "appID": "com.ignitrondev.focusflow"
+    }
+  ]
+}
