@@ -1,7 +1,6 @@
 #####
-# FocusFlow keeps its own catalog. Unlike the upstream samples it is NOT synced from a global
-# catalog, and it only uses stable artifacts (stable Compose BOM, no alpha/beta/rc).
-# Versions are aligned with the samples in this repository unless noted otherwise.
+# FocusFlow's version catalog. It started from the android/compose-samples catalog, is NOT
+# synced from it, and only uses stable artifacts (stable Compose BOM, no alpha/beta/rc).
 #####
 [versions]
 androidGradlePlugin = "9.3.1"

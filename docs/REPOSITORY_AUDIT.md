@@ -1,5 +1,11 @@
 # Repository Audit — FocusFlow
 
+> **Historical document.** This audit was written while FocusFlow lived in the `FocusFlow/`
+> folder of IgnitronDev's fork of `android/compose-samples`. On 2026-11-07 FocusFlow moved to its
+> own repository, [`ignitrondev/FocusFlow`](https://github.com/ignitrondev/FocusFlow), keeping its
+> commit history; the fork is kept unchanged as `ignitrondev/compose-samples`. Paths and repository
+> notes below describe the fork. The phase plan (section 8) and the risks (section 7) still apply.
+
 Audit date: 2026-11-07 · Branch audited: `main` @ `25631e8f` (in sync with `android/compose-samples` `main`).
 
 ## 1. Repository structure

@@ -5,12 +5,12 @@
 * **JDK 21** (CI uses Zulu 21). The app targets Java 17 bytecode, but Robolectric needs Java 21
   to run the Android SDK 36 sandbox used by the UI tests.
 * Android SDK with platform `android-37` (compileSdk 37). Android Studio installs it; on the
-  command line, point `sdk.dir` in `FocusFlow/local.properties` at your SDK (not committed).
+  command line, point `sdk.dir` in `local.properties` at your SDK (not committed).
 * No emulator is needed for the default test suite: UI tests run on the JVM with Robolectric.
 
 ## Common commands
 
-Run everything from the `FocusFlow/` directory with the bundled wrapper.
+Run everything from the repository root with the bundled wrapper.
 
 | Task | Command |
 |---|---|
@@ -34,7 +34,7 @@ build.
 Signing material is **never committed**. The release build is signed when either of these is
 present, and is produced as `app-release-unsigned.apk` otherwise:
 
-* `FocusFlow/keystore.properties` (git-ignored), with `storeFile` (absolute path, keep the
+* `keystore.properties` in the repository root (git-ignored), with `storeFile` (absolute path, keep the
   keystore outside the repository), `storePassword`, `keyAlias` and `keyPassword`.
 * Environment variables `FOCUSFLOW_KEYSTORE_FILE`, `FOCUSFLOW_KEYSTORE_PASSWORD`,
   `FOCUSFLOW_KEY_ALIAS` and `FOCUSFLOW_KEY_PASSWORD` (used by CI in Phase 7).
@@ -52,7 +52,7 @@ Official release signing certificate (SHA-256), to verify downloaded APKs with
 ## Conventions
 
 * New files start with the Apache-2.0 header for `IgnitronDev` (`spotless/copyright.kt`);
-  `spotlessApply` adds it. Files adapted from an upstream sample keep their original header.
+  `spotlessApply` adds it. Files adapted from `android/compose-samples` keep their original header.
 * All user-facing text lives in `res/values/strings.xml`.
 * Screens are split into a stateless `XxxScreen(uiState, callbacks)` composable (previewable,
   testable) and a small route function in the same feature package that wires the ViewModel.
@@ -69,4 +69,4 @@ Official release signing certificate (SHA-256), to verify downloaded APKs with
 * Lint ignores test sources (`lint { ignoreTestSources = true }`): with AGP 9.3, analysing the
   Hilt test classes can race with KSP and crash lint.
 * Lint currently reports only "newer version available" warnings. FocusFlow's versions are kept
-  aligned with the upstream samples and are bumped together, deliberately.
+  aligned with `android/compose-samples` and are bumped together, deliberately.

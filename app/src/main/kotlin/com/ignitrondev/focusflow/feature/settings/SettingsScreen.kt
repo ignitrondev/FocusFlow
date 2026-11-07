@@ -65,7 +65,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object SettingsRoute
 
-private const val SOURCE_CODE_URL = "https://github.com/ignitrondev/FocusFlow/tree/main/FocusFlow"
+private const val SOURCE_CODE_URL = "https://github.com/ignitrondev/FocusFlow"
 
 fun NavGraphBuilder.settingsScreen() {
     composable<SettingsRoute> {

@@ -3,10 +3,6 @@
 Thanks for helping make FocusFlow better! Bug reports, ideas, translations and code are all
 welcome.
 
-> FocusFlow lives in the `FocusFlow/` folder of IgnitronDev's fork of `android/compose-samples`.
-> This guide covers FocusFlow only. The repository-root `CONTRIBUTING.md` belongs to the upstream
-> samples (and their Google CLA) and does **not** apply to FocusFlow.
-
 ## Ground rules
 
 * Be kind. Everyone taking part must follow the [Code of Conduct](CODE_OF_CONDUCT.md).
@@ -22,14 +18,14 @@ is required.
 
 ## Making a change
 
-1. Fork the repository and create a branch from `main`, e.g. `focusflow/fix-timer-reset`.
+1. Fork the repository and create a branch from `main`, e.g. `fix/timer-reset`.
 2. Keep the change focused. For larger features, open a discussion or issue first.
 3. Follow the conventions in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md):
    * Kotlin and Jetpack Compose only for new code.
    * Business logic stays outside composables; `domain/` has no Android imports.
    * All user-facing text goes in `strings.xml`.
    * Add or update tests for behavior you change.
-4. Run the same checks as CI from the `FocusFlow/` folder:
+4. Run the same checks as CI from the repository root:
 
    ```bash
    ./gradlew spotlessApply

@@ -17,7 +17,7 @@
 import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-// Release signing is read from FocusFlow/keystore.properties (git-ignored) or, on CI, from
+// Release signing is read from keystore.properties in the project root (git-ignored) or, on CI, from
 // environment variables. Without either, the release build is produced unsigned.
 val releaseSigning: Map<String, String>? = run {
     val file = rootProject.file("keystore.properties")
