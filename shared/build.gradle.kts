@@ -22,6 +22,9 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.compose)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -30,6 +33,8 @@ kotlin {
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
         withHostTestBuilder {}
+        // Packages the Compose Multiplatform resources (strings) into the Android library.
+        androidResources { enable = true }
     }
     iosArm64()
     iosSimulatorArm64()
@@ -47,6 +52,26 @@ kotlin {
             api(libs.kotlinx.datetime)
             api(libs.androidx.room.runtime)
             api(libs.androidx.datastore.preferences.core)
+
+            // The UI, shared by Android and iOS.
+            api(libs.cmp.runtime)
+            api(libs.cmp.foundation)
+            api(libs.cmp.ui)
+            api(libs.cmp.material3)
+            implementation(libs.cmp.material3.navigationSuite)
+            implementation(libs.cmp.material3.adaptive)
+            implementation(libs.cmp.material.iconsExtended)
+            api(libs.cmp.components.resources)
+            implementation(libs.cmp.ui.tooling.preview)
+            implementation(libs.jetbrains.navigation.compose)
+            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
+            implementation(libs.jetbrains.lifecycle.runtime.compose)
+            implementation(libs.jetbrains.window.core)
+            implementation(libs.kotlinx.serialization.json)
+        }
+        androidMain.dependencies {
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.core.ktx)
         }
         iosMain.dependencies {
             // Android uses the platform's SQLite; iOS ships SQLite with the app.
@@ -67,4 +92,10 @@ room {
 dependencies {
     // Room generates the DAO and database code for every target.
     listOf("kspAndroid", "kspIosArm64", "kspIosSimulatorArm64").forEach { add(it, libs.androidx.room.compiler) }
+}
+
+compose.resources {
+    // The Android app's tests read the shared strings too.
+    publicResClass = true
+    packageOfResClass = "com.ignitrondev.focusflow.resources"
 }

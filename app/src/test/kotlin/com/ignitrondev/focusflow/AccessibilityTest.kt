@@ -29,12 +29,19 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ignitrondev.focusflow.domain.timer.TimerRepository
+import com.ignitrondev.focusflow.resources.Res
+import com.ignitrondev.focusflow.resources.history_today
+import com.ignitrondev.focusflow.resources.settings_section_timer
+import com.ignitrondev.focusflow.resources.settings_source_code
+import com.ignitrondev.focusflow.resources.statistics_last_seven_days
 import com.ignitrondev.focusflow.testing.FakeTimeSource
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -123,16 +130,19 @@ class AccessibilityTest {
 
     private fun string(id: Int) = composeRule.activity.getString(id)
 
+    /** A string of the shared (multiplatform) UI. */
+    private fun string(res: StringResource) = runBlocking { getString(res) }
+
     @Test
     fun timerScreen() = checkScreen(null, null)
 
     @Test
-    fun statisticsScreen() = checkScreen("nav_Statistics", string(R.string.statistics_last_seven_days))
+    fun statisticsScreen() = checkScreen("nav_Statistics", string(Res.string.statistics_last_seven_days))
 
     @Test
-    fun historyScreen() = checkScreen("nav_History", string(R.string.history_today))
+    fun historyScreen() = checkScreen("nav_History", string(Res.string.history_today))
 
     @Test
     fun settingsScreen() =
-        checkScreen("nav_Settings", string(R.string.settings_section_timer), scrollTo = string(R.string.settings_source_code))
+        checkScreen("nav_Settings", string(Res.string.settings_section_timer), scrollTo = string(Res.string.settings_source_code))
 }
