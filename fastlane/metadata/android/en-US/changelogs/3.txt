@@ -1,0 +1,6 @@
+First beta.
+• Pomodoro timer with focus, short and long breaks, and the 4-session cycle
+• Alerts with sound and vibration when a session ends, also with the app closed
+• History by day and statistics (today, this week, last 7 days)
+• Adjustable durations and automatic start
+• Light and dark theme, wallpaper colors, phones, foldables and tablets

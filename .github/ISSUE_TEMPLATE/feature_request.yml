@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest an idea for FocusFlow.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        FocusFlow stays offline-first and private: ideas that need an account, analytics or network access will not be accepted.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the situation, not only the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered

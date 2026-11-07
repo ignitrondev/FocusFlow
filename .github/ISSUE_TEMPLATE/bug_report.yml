@@ -1,0 +1,63 @@
+name: Bug report
+description: Something in FocusFlow does not work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a problem. **Security issues:** please do not open a public issue, see [SECURITY.md](https://github.com/ignitrondev/FocusFlow/blob/main/SECURITY.md).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start a focus session
+        2. Lock the phone
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: FocusFlow version
+      description: Settings → About → Version
+      placeholder: 1.0.0-beta.1
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: Pixel 8, Android 15
+    validations:
+      required: true
+  - type: dropdown
+    id: permissions
+    attributes:
+      label: Alert permissions
+      description: Settings → Notifications in FocusFlow shows both.
+      multiple: true
+      options:
+        - Session alerts on
+        - Session alerts off
+        - Precise alerts on
+        - Precise alerts off
+        - Not sure
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots, screen recordings or logs
+      description: Anything else that helps. Please remove personal information.

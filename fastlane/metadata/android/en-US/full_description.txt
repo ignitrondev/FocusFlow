@@ -1,0 +1,20 @@
+FocusFlow is a minimalist Pomodoro timer that helps you work in focused sessions with regular breaks.
+
+<b>How it works</b>
+<ul>
+<li>25 minutes of focus, then a 5 minute break. After every 4 focus sessions, a longer 15 minute break.</li>
+<li>Start, pause, resume, reset or skip at any time.</li>
+<li>An alert with sound and vibration tells you when a session ends, even when the app is closed.</li>
+<li>Durations, sessions per cycle and automatic start are all adjustable.</li>
+</ul>
+
+<b>Reliable timing</b>
+The timer keeps the right time when you leave the app, turn off the screen, change the clock or restart the phone. It needs no always-running background service.
+
+<b>See your progress</b>
+History lists every session by day. Statistics show today, this week, your daily average and the last 7 days at a glance.
+
+<b>Private by design</b>
+No account, no ads, no analytics and no internet permission. Everything stays on your device.
+
+FocusFlow is open source under the Apache License 2.0, made by IgnitronDev.

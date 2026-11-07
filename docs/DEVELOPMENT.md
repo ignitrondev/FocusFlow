@@ -39,6 +39,19 @@ present, and is produced as `app-release-unsigned.apk` otherwise:
 * Environment variables `FOCUSFLOW_KEYSTORE_FILE`, `FOCUSFLOW_KEYSTORE_PASSWORD`,
   `FOCUSFLOW_KEY_ALIAS` and `FOCUSFLOW_KEY_PASSWORD` (used by CI in Phase 7).
 
+### Publishing a release
+
+1. Bump `versionCode` and `versionName` in `app/build.gradle.kts`, update `CHANGELOG.md` and
+   `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`.
+2. Merge to `main`, then tag: `git tag v1.2.3 && git push origin v1.2.3`.
+3. `.github/workflows/release.yml` tests, builds the APK and AAB, and attaches them with
+   `SHA256SUMS` to the GitHub release (as a draft if it does not exist yet), **if** these
+   repository secrets are set: `FOCUSFLOW_KEYSTORE_BASE64` (`base64 -w0 focusflow-release.jks`),
+   `FOCUSFLOW_KEYSTORE_PASSWORD`, `FOCUSFLOW_KEY_ALIAS`, `FOCUSFLOW_KEY_PASSWORD`. Without them it
+   only builds unsigned artifacts for the run, and the release is built and uploaded locally.
+
+Pre-releases use a suffix (`1.0.0-beta.1`) and are marked as pre-release on GitHub.
+
 Only the maintainers hold the release key. Contributors build debug, or sign release builds with
 their own key (they cannot be installed over the official release).
 

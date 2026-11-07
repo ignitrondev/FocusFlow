@@ -1,0 +1,1 @@
+Offline Pomodoro timer with focus history and statistics. No ads, no tracking.
