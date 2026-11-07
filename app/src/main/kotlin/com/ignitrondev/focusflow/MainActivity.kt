@@ -27,15 +27,17 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.model.UserPreferences
-import com.ignitrondev.focusflow.navigation.FocusFlowApp
+import com.ignitrondev.focusflow.navigation.FocusFlowRoot
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
+
+    @Inject lateinit var dependencies: AndroidAppDependencies
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -63,9 +65,7 @@ class MainActivity : ComponentActivity() {
                 onDispose {}
             }
 
-            FocusFlowTheme(darkTheme = darkTheme, dynamicColor = preferences.useDynamicColor) {
-                FocusFlowApp()
-            }
+            FocusFlowRoot(dependencies = dependencies, preferences = preferences, darkTheme = darkTheme)
         }
     }
 }

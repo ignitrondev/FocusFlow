@@ -17,6 +17,7 @@ package com.ignitrondev.focusflow.core.time
 
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import kotlinx.datetime.toKotlinTimeZone
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -30,7 +31,7 @@ class DayBoundsTest {
 
     @Test
     fun boundsAreLocalMidnights() {
-        val (start, end) = dayBounds(millis("2026-11-07T23:30", jakarta), jakarta)
+        val (start, end) = dayBounds(millis("2026-11-07T23:30", jakarta), jakarta.toKotlinTimeZone())
 
         assertEquals(millis("2026-11-07T00:00", jakarta), start)
         assertEquals(millis("2026-11-08T00:00", jakarta), end)
@@ -40,7 +41,7 @@ class DayBoundsTest {
     fun dayWithADaylightSavingChangeIsNot24Hours() {
         val berlin = ZoneId.of("Europe/Berlin")
 
-        val (start, end) = dayBounds(millis("2026-10-25T12:00", berlin), berlin)
+        val (start, end) = dayBounds(millis("2026-10-25T12:00", berlin), berlin.toKotlinTimeZone())
 
         assertEquals(25 * 60 * 60 * 1000L, end - start)
     }

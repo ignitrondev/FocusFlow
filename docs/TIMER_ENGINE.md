@@ -90,18 +90,24 @@ deadline is stored, and Android wakes the app when it is reached.
 | `TimerActionReceiver` | Receives the alarm and the notification buttons (Pause, Resume, Reset). Not exported. |
 | `TimerRestoreReceiver` | `BOOT_COMPLETED`, `MY_PACKAGE_REPLACED` and the exact-alarm permission change: alarms are cleared by a reboot, so the timer is settled and the alarm set again. |
 | `TimerSystemIntegration` | Started with the process. Watches the stored state and re-applies the alarm and the ongoing notification; idempotent. |
-| `TimerNotifier` | Ongoing **silent** notification with a system chronometer counting down (it ticks without our process), and the **alert** notification (sound + vibration) when a session ends. |
+| `TimerNotifier` | Ongoing **silent** notification showing the time left in large digits: a custom layout around a system `Chronometer` counting down (it ticks without our process), fixed text while paused. And the **alert** notification (sound + vibration) when a session ends. |
+| `AlertChannels` | The alert's channel. Android lets only the user change a channel's sound, so a sound picked in FocusFlow (Android's own ringtone picker) creates the next channel version with that sound, copies importance and vibration, and deletes the old one. The current sound is always read back from the system. |
 | `SessionEndAlert` | Called by the repository once per newly recorded completion, whoever noticed it (screen or alarm), so there is never a double alert. |
 
 ### Platform limits (be honest with users)
 
-* **Exact timing needs a permission.** Since Android 12 exact alarms require "Alarms & reminders"
-  (`SCHEDULE_EXACT_ALARM`), which Android 14+ does not grant by default. Without it FocusFlow uses
-  an inexact alarm: on time while the phone is in use, but up to several minutes late in deep idle.
-  Settings shows the status and links to the permission. `USE_EXACT_ALARM` is not requested.
+* **The alarm must be exact.** An inexact alarm may be deferred by up to 75 % of the time until
+  it is due, even while the phone is in use: a 25-minute focus session could end (and an
+  automatic break start) up to ~18 minutes late. This was the first beta bug report (Pixel 6a,
+  Android 14+, where "Alarms & reminders" is off by default).
+  FocusFlow therefore requests `USE_EXACT_ALARM`, which Android 13+ grants at install and Google
+  Play allows for timer apps (a Play Console declaration is needed when publishing there). On
+  Android 12/12L it uses `SCHEDULE_EXACT_ALARM`, on by default but revocable; Settings shows the
+  status only there, and an inexact alarm is the fallback.
 * **Notifications need a permission on Android 13+.** It is asked the first time a session is
   started. Without it the timer still works and records sessions, but cannot alert.
 * Some manufacturers kill apps or delay alarms aggressively (battery optimisation). This is outside
   the app's control; see <https://dontkillmyapp.com>.
-* Users choose the alert sound and vibration per channel in Android settings (linked from
-  FocusFlow's Settings), as Android recommends.
+* The alert sound is picked in FocusFlow's Settings with Android's sound picker (default,
+  silent, any alarm or notification sound). Vibration and other options stay in Android's
+  channel settings, linked from the same screen.

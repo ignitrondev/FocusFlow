@@ -114,12 +114,14 @@ class TimerSystemIntegrationTest {
         app.sendBroadcast(deadline)
         app.sendBroadcast(deadline) // a late duplicate delivery must not record twice
 
-        eventually { runBlocking { sessions.getAll().isNotEmpty() } && notificationsOn(TimerNotifier.CHANNEL_SESSION_END).isNotEmpty() }
+        eventually {
+            runBlocking { sessions.getAll().isNotEmpty() } && notificationsOn(AlertChannels.sessionEndChannelId(app)).isNotEmpty()
+        }
         eventually { notificationsOn(TimerNotifier.CHANNEL_TIMER).isEmpty() }
         Thread.sleep(200)
 
         assertEquals(1, runBlocking { sessions.getAll() }.size)
-        assertEquals(1, notificationsOn(TimerNotifier.CHANNEL_SESSION_END).size)
+        assertEquals(1, notificationsOn(AlertChannels.sessionEndChannelId(app)).size)
         assertNull("next session waits for the user", nextAlarm())
         val state = runBlocking { repository.state.first() }
         assertEquals(SessionType.ShortBreak, state.sessionType)

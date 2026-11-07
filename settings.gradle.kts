@@ -30,3 +30,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "FocusFlow"
 include(":app")
+include(":shared")

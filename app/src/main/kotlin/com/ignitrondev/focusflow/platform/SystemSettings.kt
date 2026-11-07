@@ -32,8 +32,13 @@ import androidx.core.net.toUri
 /** What Android currently allows FocusFlow to do for its alerts. */
 data class AlertCapabilities(
     val notificationsAllowed: Boolean,
-    /** Null where the platform has no such permission (before Android 12): always exact. */
+    /**
+     * Null where the user cannot turn exact alarms off: before Android 12 (no permission) and from
+     * Android 13 (USE_EXACT_ALARM, granted at install). Only Android 12/12L have a user setting.
+     */
     val exactAlarmsAllowed: Boolean?,
+    /** Name of the sound played when a session ends ("Silent", a ringtone title, ...). */
+    val alertSoundTitle: String = "",
 )
 
 fun Context.notificationsAllowed(): Boolean = NotificationManagerCompat.from(this).areNotificationsEnabled() &&
@@ -47,7 +52,8 @@ fun Context.exactAlarmsAllowed(): Boolean =
 
 fun Context.alertCapabilities() = AlertCapabilities(
     notificationsAllowed = notificationsAllowed(),
-    exactAlarmsAllowed = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) exactAlarmsAllowed() else null,
+    exactAlarmsAllowed = if (Build.VERSION.SDK_INT in Build.VERSION_CODES.S..Build.VERSION_CODES.S_V2) exactAlarmsAllowed() else null,
+    alertSoundTitle = AlertChannels.soundTitle(this, AlertChannels.sound(this)),
 )
 
 fun Context.openNotificationSettings() = startSettings(
@@ -57,7 +63,7 @@ fun Context.openNotificationSettings() = startSettings(
 fun Context.openAlertSoundSettings() = startSettings(
     Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
         .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-        .putExtra(Settings.EXTRA_CHANNEL_ID, TimerNotifier.CHANNEL_SESSION_END),
+        .putExtra(Settings.EXTRA_CHANNEL_ID, AlertChannels.sessionEndChannelId(this)),
 )
 
 fun Context.openExactAlarmSettings() {

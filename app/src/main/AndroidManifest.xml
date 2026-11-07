@@ -10,9 +10,15 @@
 
     <!-- Session alerts (runtime permission on Android 13+; the timer works without it). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Alerts exactly at the deadline when the user allows it (Android 12+). Without it FocusFlow
-         falls back to an inexact alarm. USE_EXACT_ALARM is deliberately not requested. -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- The session-end alarm must be exact: an inexact alarm may be deferred by up to 75 % of the
+         time until it is due (18 minutes for a 25 minute session), even while the phone is in use.
+         FocusFlow is a timer, which Google Play's policy allows to use USE_EXACT_ALARM; it is
+         granted at install on Android 13+. Android 12/12L use SCHEDULE_EXACT_ALARM, granted by
+         default there but revocable by the user (FocusFlow then falls back to an inexact alarm). -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
     <!-- Restores the deadline alarm after a reboot. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -44,6 +50,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Hands a statistics image to the app the user picks in the share sheet. Not exported:
+             access is granted per share, read-only, to that app only. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_paths" />
+        </provider>
 
         <!-- Deadline alarm and notification buttons; only FocusFlow itself can send these. -->
         <receiver

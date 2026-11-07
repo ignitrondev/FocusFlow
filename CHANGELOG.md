@@ -2,6 +2,29 @@
 
 All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+### Fixed
+- The end of a session, and an automatic break, could be up to ~18 minutes late on Android 14+
+  while the app was not open: the alarm was inexact unless the user allowed "Alarms & reminders".
+  FocusFlow now uses exact alarms (`USE_EXACT_ALARM`, granted at install on Android 13+).
+
+### Added
+- Share a Strava-style statistics card (today or this week) through Android's share sheet:
+  a 1080×1350 image with focus time, sessions, daily average, streak and the last 7 days.
+- The card shows your role (e.g. "Software Engineer", asked once and remembered) and can use a
+  photo of where you are working as its background, taken with the camera app or picked with
+  Android's photo picker. No camera or storage permission is needed.
+- Two card formats: feed post (4:5, 1080×1350) and story (9:16, 1080×1920), whose content stays
+  clear of the areas Instagram covers with the account name, music and reply bar.
+- Current streak: consecutive days with a completed focus session.
+- Settings → About credits the author.
+
+- Pick the alert sound with Android's sound picker (Settings → Notifications → Alert sound),
+  including silent and any alarm or notification sound.
+- The timer notification shows the time left in large digits, in both the collapsed and the
+  expanded notification.
+
 ## 1.0.0-beta.1 — 2026-11-07
 
 First public beta.

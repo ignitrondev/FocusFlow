@@ -15,6 +15,7 @@
  */
 package com.ignitrondev.focusflow
 
+import android.media.RingtoneManager
 import android.os.Looper
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -30,10 +31,19 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.timer.TimerRepository
+import com.ignitrondev.focusflow.resources.Res
+import com.ignitrondev.focusflow.resources.history_empty_title
+import com.ignitrondev.focusflow.resources.history_today
+import com.ignitrondev.focusflow.resources.settings_section_appearance
+import com.ignitrondev.focusflow.resources.settings_theme_dark
+import com.ignitrondev.focusflow.resources.statistics_empty_title
+import com.ignitrondev.focusflow.resources.statistics_last_seven_days
+import com.ignitrondev.focusflow.resources.timer_action_start
 import com.ignitrondev.focusflow.testing.FakeTimeSource
 import com.ignitrondev.focusflow.testing.FakeTimerConfigRepository
 import com.ignitrondev.focusflow.testing.FakeUserPreferencesRepository
@@ -43,6 +53,8 @@ import dagger.hilt.android.testing.HiltTestApplication
 import java.time.Duration
 import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -78,10 +90,16 @@ class FocusFlowAppTest {
 
     private fun string(id: Int) = composeRule.activity.getString(id)
 
+    /** A string of the shared (multiplatform) UI. */
+    private fun string(res: StringResource) = runBlocking { getString(res) }
+
     // Timer actions are written to Room on a background thread; wait for the UI to reflect them.
     private fun waitForText(text: String) = composeRule.waitUntilAtLeastOneExists(hasText(text), TIMEOUT_MILLIS)
 
     private fun waitForButton(labelId: Int) = composeRule.waitUntilAtLeastOneExists(hasContentDescription(string(labelId)), TIMEOUT_MILLIS)
+
+    private fun waitForButton(label: StringResource) =
+        composeRule.waitUntilAtLeastOneExists(hasContentDescription(string(label)), TIMEOUT_MILLIS)
 
     @Before
     fun setUp() {
@@ -92,7 +110,9 @@ class FocusFlowAppTest {
     fun startsOnTimerWithDefaultFocusSession() {
         composeRule.onNodeWithTag("nav_Timer").assertIsSelected()
         composeRule.onNodeWithText("25:00").assertExists()
-        composeRule.onNodeWithContentDescription(string(R.string.timer_action_start)).assertExists()
+        // Plural placeholders are filled in (not shown as "%d").
+        composeRule.onNodeWithText("Today: 0 minutes · 0 sessions").assertExists()
+        composeRule.onNodeWithContentDescription(string(Res.string.timer_action_start)).assertExists()
     }
 
     @Test
@@ -103,7 +123,7 @@ class FocusFlowAppTest {
 
     @Test
     fun startPauseResumeAndReset() {
-        composeRule.onNodeWithContentDescription(string(R.string.timer_action_start)).performClick()
+        composeRule.onNodeWithContentDescription(string(Res.string.timer_action_start)).performClick()
         waitForButton(R.string.timer_action_pause)
 
         composeRule.onNodeWithContentDescription(string(R.string.timer_action_pause)).performClick()
@@ -113,13 +133,13 @@ class FocusFlowAppTest {
         waitForButton(R.string.timer_action_pause)
 
         composeRule.onNodeWithContentDescription(string(R.string.timer_action_reset)).performClick()
-        waitForButton(R.string.timer_action_start)
+        waitForButton(Res.string.timer_action_start)
         waitForText("25:00")
     }
 
     @Test
     fun countdownFollowsTheClock() {
-        composeRule.onNodeWithContentDescription(string(R.string.timer_action_start)).performClick()
+        composeRule.onNodeWithContentDescription(string(Res.string.timer_action_start)).performClick()
         waitForButton(R.string.timer_action_pause)
 
         clock.advanceBy(10 * 60_000L)
@@ -134,7 +154,7 @@ class FocusFlowAppTest {
         val shortBreak = composeRule.onNodeWithText(string(R.string.timer_mode_short_break))
         shortBreak.assertIsEnabled()
 
-        composeRule.onNodeWithContentDescription(string(R.string.timer_action_start)).performClick()
+        composeRule.onNodeWithContentDescription(string(Res.string.timer_action_start)).performClick()
         waitForButton(R.string.timer_action_pause)
 
         shortBreak.assertIsNotEnabled()
@@ -143,13 +163,13 @@ class FocusFlowAppTest {
     @Test
     fun navigatesBetweenTopLevelDestinations() {
         composeRule.onNodeWithTag("nav_Statistics").performClick()
-        composeRule.onNodeWithText(string(R.string.statistics_empty_title)).assertExists()
+        composeRule.onNodeWithText(string(Res.string.statistics_empty_title)).assertExists()
 
         composeRule.onNodeWithTag("nav_History").performClick()
-        composeRule.onNodeWithText(string(R.string.history_empty_title)).assertExists()
+        composeRule.onNodeWithText(string(Res.string.history_empty_title)).assertExists()
 
         composeRule.onNodeWithTag("nav_Settings").performClick()
-        composeRule.onNodeWithText(string(R.string.settings_section_appearance)).assertExists()
+        composeRule.onNodeWithText(string(Res.string.settings_section_appearance)).assertExists()
 
         composeRule.onNodeWithTag("nav_Timer").performClick()
         composeRule.onNodeWithTag("timerDial").assertExists()
@@ -158,11 +178,11 @@ class FocusFlowAppTest {
     @Test
     fun choosingDarkThemeInSettingsPersistsIt() {
         composeRule.onNodeWithTag("nav_Settings").performClick()
-        composeRule.onNodeWithText(string(R.string.settings_theme_dark)).performClick()
+        composeRule.onNodeWithText(string(Res.string.settings_theme_dark)).performClick()
         composeRule.waitForIdle()
 
         assertEquals(ThemeMode.Dark, preferences.userPreferences.value.themeMode)
-        composeRule.onNodeWithText(string(R.string.settings_theme_dark)).assertIsSelected()
+        composeRule.onNodeWithText(string(Res.string.settings_theme_dark)).assertIsSelected()
     }
 
     @Test
@@ -174,12 +194,12 @@ class FocusFlowAppTest {
         }
 
         composeRule.onNodeWithTag("nav_History").performClick()
-        waitForText(string(R.string.history_today))
+        waitForText(string(Res.string.history_today))
         // Rows expose one combined description to TalkBack, so their texts are in the unmerged tree.
         composeRule.onNodeWithText("25 min", useUnmergedTree = true).assertExists()
 
         composeRule.onNodeWithTag("nav_Statistics").performClick()
-        waitForText(string(R.string.statistics_last_seven_days))
+        waitForText(string(Res.string.statistics_last_seven_days))
         composeRule.onAllNodesWithText("25 min").onFirst().assertExists()
     }
 
@@ -191,6 +211,22 @@ class FocusFlowAppTest {
 
         composeRule.onNodeWithTag("nav_Timer").performClick()
         waitForText("30:00")
+    }
+
+    @Test
+    fun alertSoundOpensAndroidsSoundPicker() {
+        composeRule.onNodeWithTag("nav_Settings").performClick()
+        composeRule.onNodeWithTag("setting_alert_sound").performScrollTo().performClick()
+        composeRule.waitForIdle()
+
+        val started = shadowOf(composeRule.activity).nextStartedActivityForResult
+        assertEquals(RingtoneManager.ACTION_RINGTONE_PICKER, started.intent.action)
+    }
+
+    @Test
+    fun aboutCreditsTheAuthor() {
+        composeRule.onNodeWithTag("nav_Settings").performClick()
+        composeRule.onNodeWithText("Bima Adam Nugraha · IgnitronDev").performScrollTo().assertExists()
     }
 
     private companion object {

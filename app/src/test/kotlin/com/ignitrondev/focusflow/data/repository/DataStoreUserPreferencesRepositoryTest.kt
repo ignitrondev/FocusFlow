@@ -67,6 +67,13 @@ class DataStoreUserPreferencesRepositoryTest {
     }
 
     @Test
+    fun shareRoleIsTrimmedAndPersisted() = runTest(UnconfinedTestDispatcher()) {
+        val (repository, _) = createRepository()
+        repository.setShareRole("  Software Engineer ")
+        assertEquals("Software Engineer", repository.userPreferences.first().shareRole)
+    }
+
+    @Test
     fun unknownThemeValueFallsBackToSystem() = runTest(UnconfinedTestDispatcher()) {
         val (repository, dataStore) = createRepository()
         dataStore.edit { it[stringPreferencesKey("theme_mode")] = "Sepia" }

@@ -15,27 +15,51 @@
  */
 package com.ignitrondev.focusflow.data.timer
 
+import com.ignitrondev.focusflow.data.database.FocusFlowDatabase
+import com.ignitrondev.focusflow.data.database.FocusSessionDao
+import com.ignitrondev.focusflow.data.database.TimerStateDao
 import com.ignitrondev.focusflow.domain.timer.FocusSessionRepository
+import com.ignitrondev.focusflow.domain.timer.SessionCompletionListener
+import com.ignitrondev.focusflow.domain.timer.TimeSource
+import com.ignitrondev.focusflow.domain.timer.TimerConfigRepository
 import com.ignitrondev.focusflow.domain.timer.TimerEngine
 import com.ignitrondev.focusflow.domain.timer.TimerRepository
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import java.util.UUID
+import javax.inject.Singleton
 
+/** Wires the shared (multiplatform) timer repositories into Hilt for the Android app. */
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class TimerModule {
-    @Binds
-    abstract fun bindsTimerRepository(repository: RoomTimerRepository): TimerRepository
+object TimerModule {
+    @Provides
+    @Singleton
+    fun providesTimerRepository(
+        database: FocusFlowDatabase,
+        timerStateDao: TimerStateDao,
+        focusSessionDao: FocusSessionDao,
+        configRepository: TimerConfigRepository,
+        timeSource: TimeSource,
+        engine: TimerEngine,
+        completionListener: SessionCompletionListener,
+    ): TimerRepository = RoomTimerRepository(
+        database = database,
+        timerStateDao = timerStateDao,
+        focusSessionDao = focusSessionDao,
+        configRepository = configRepository,
+        timeSource = timeSource,
+        engine = engine,
+        completionListener = completionListener,
+    )
 
-    @Binds
-    abstract fun bindsFocusSessionRepository(repository: RoomFocusSessionRepository): FocusSessionRepository
+    @Provides
+    @Singleton
+    fun providesFocusSessionRepository(focusSessionDao: FocusSessionDao): FocusSessionRepository =
+        RoomFocusSessionRepository(focusSessionDao)
 
-    companion object {
-        @Provides
-        fun providesTimerEngine(): TimerEngine = TimerEngine(newRunId = { UUID.randomUUID().toString() })
-    }
+    @Provides
+    fun providesTimerEngine(): TimerEngine = TimerEngine(newRunId = { UUID.randomUUID().toString() })
 }

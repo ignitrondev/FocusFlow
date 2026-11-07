@@ -32,11 +32,22 @@ use the rail instead of a bottom bar.
 - [ ] Fresh install: notification permission is asked on the first Start, not at launch.
 - [ ] Start a 1-minute short break, lock the phone: the alert sounds on time.
 - [ ] Same with the app swiped away from Recents.
-- [ ] "Precise alerts" off (Android 14+ default): note how late the alert is when idle.
+- [ ] Automatic break on, app in the background and screen off: the break starts and the alert
+      sounds at the end of the focus session (regression: up to ~18 minutes late in beta 1).
+- [ ] Android 12/12L only: "Precise alerts" off → note how late the alert is when idle.
 - [ ] Start a session, reboot the phone: the countdown notification and alarm come back.
 - [ ] Change the system time while running: the countdown does not jump.
 - [ ] Notification buttons: Pause, Resume, Reset.
+- [ ] Timer notification: large digits count down in the collapsed and expanded view, light and
+      dark system theme; fixed digits while paused.
+- [ ] Settings → Alert sound: pick a sound, then silent; the next alert uses it. Vibration setting
+      survives the change.
 - [ ] TalkBack: navigate the timer, history and statistics screens.
+- [ ] Statistics → Share: the card looks right in Instagram (feed and story), WhatsApp and X;
+      Today and This week.
+- [ ] Share with a photo: taken with the camera (portrait and landscape, upright on the card) and
+      picked from the gallery; text readable on a bright photo; Share stays disabled until the
+      role is filled in, and the role is remembered next time.
 - [ ] Dark theme and wallpaper colors (Android 12+).
 
 ## Known gaps

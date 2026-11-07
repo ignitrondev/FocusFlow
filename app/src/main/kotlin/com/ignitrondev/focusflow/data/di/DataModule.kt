@@ -15,24 +15,28 @@
  */
 package com.ignitrondev.focusflow.data.di
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import com.ignitrondev.focusflow.data.repository.DataStoreTimerConfigRepository
 import com.ignitrondev.focusflow.data.repository.DataStoreUserPreferencesRepository
 import com.ignitrondev.focusflow.domain.repository.UserPreferencesRepository
 import com.ignitrondev.focusflow.domain.timer.TimerConfigRepository
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Wires the shared (multiplatform) settings repositories into Hilt for the Android app. */
 @Module
 @InstallIn(SingletonComponent::class)
-interface DataModule {
-    @Binds
+object DataModule {
+    @Provides
     @Singleton
-    fun bindsUserPreferencesRepository(impl: DataStoreUserPreferencesRepository): UserPreferencesRepository
+    fun providesUserPreferencesRepository(dataStore: DataStore<Preferences>): UserPreferencesRepository =
+        DataStoreUserPreferencesRepository(dataStore)
 
-    @Binds
+    @Provides
     @Singleton
-    fun bindsTimerConfigRepository(impl: DataStoreTimerConfigRepository): TimerConfigRepository
+    fun providesTimerConfigRepository(dataStore: DataStore<Preferences>): TimerConfigRepository = DataStoreTimerConfigRepository(dataStore)
 }

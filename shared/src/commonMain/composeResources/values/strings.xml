@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 IgnitronDev
+  SPDX-License-Identifier: Apache-2.0
+  -->
+<resources>
+    <string name="app_name" translatable="false">FocusFlow</string>
+
+    <!-- Navigation -->
+    <string name="nav_timer">Timer</string>
+    <string name="nav_statistics">Statistics</string>
+    <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Timer -->
+    <string name="timer_mode_focus">Focus</string>
+    <string name="timer_mode_short_break">Short break</string>
+    <string name="timer_mode_long_break">Long break</string>
+    <string name="timer_action_start">Start</string>
+    <string name="timer_action_pause">Pause</string>
+    <string name="timer_action_resume">Resume</string>
+    <string name="timer_action_reset">Reset</string>
+    <string name="timer_action_skip">Skip to next session</string>
+    <!-- e.g. "Session 2 of 4" before the next long break -->
+    <string name="timer_cycle_position">Session %1$d of %2$d</string>
+    <!-- Accessibility description of the countdown dial, e.g. "Focus, 24:59 remaining" -->
+    <string name="timer_dial_description">%1$s, %2$s remaining</string>
+    <!-- e.g. "Today: 50 minutes · 2 sessions" -->
+    <string name="timer_today_summary">Today: %1$s · %2$s</string>
+
+    <plurals name="duration_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <plurals name="completed_sessions">
+        <item quantity="one">%1$d session</item>
+        <item quantity="other">%1$d sessions</item>
+    </plurals>
+
+    <!-- Statistics -->
+    <string name="statistics_title">Statistics</string>
+    <string name="statistics_empty_title">No focus time yet</string>
+    <string name="statistics_empty_body">Complete a focus session and your daily and weekly progress will show up here.</string>
+
+    <!-- History -->
+    <string name="history_title">History</string>
+    <string name="history_empty_title">No sessions yet</string>
+    <string name="history_empty_body">Every focus session you complete is saved on this device and listed here.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Wallpaper colors</string>
+    <string name="settings_dynamic_color_summary">Use colors from your wallpaper instead of the FocusFlow palette</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_source_code">Source code</string>
+    <string name="settings_source_code_summary">FocusFlow is open source. View it on GitHub.</string>
+    <string name="settings_made_by">Made by</string>
+    <string name="settings_made_by_summary" translatable="false">Bima Adam Nugraha · IgnitronDev</string>
+    <string name="settings_license">License</string>
+    <string name="settings_license_summary" translatable="false">Apache License 2.0</string>
+
+    <!-- Settings: notifications -->
+    <string name="settings_section_notifications">Notifications</string>
+    <string name="settings_notifications">Session alerts</string>
+    <string name="settings_notifications_on">On. You are alerted when a session ends.</string>
+    <string name="settings_notifications_off">Off. FocusFlow cannot tell you when a session ends.</string>
+    <string name="settings_alert_sound">Alert sound</string>
+    <string name="settings_alert_more">Vibration and other alert options</string>
+    <string name="settings_alert_more_summary">Open the alert settings in Android</string>
+    <string name="settings_exact_alarms">Precise alerts</string>
+    <string name="settings_exact_alarms_on">On. Alerts arrive right on time.</string>
+    <string name="settings_exact_alarms_off">Off. When the phone is idle, an alert can be a few minutes late. Tap to allow alarms and reminders.</string>
+
+    <!-- Settings: timer -->
+    <string name="settings_section_timer">Timer</string>
+    <string name="settings_focus_duration">Focus</string>
+    <string name="settings_short_break_duration">Short break</string>
+    <string name="settings_long_break_duration">Long break</string>
+    <string name="settings_long_break_interval">Long break after</string>
+    <string name="settings_auto_start_breaks">Start breaks automatically</string>
+    <string name="settings_auto_start_focus">Start focus sessions automatically</string>
+    <string name="settings_timer_note">Changes apply from the next session.</string>
+    <plurals name="focus_sessions_count">
+        <item quantity="one">%1$d focus session</item>
+        <item quantity="other">%1$d focus sessions</item>
+    </plurals>
+
+    <!-- History -->
+    <string name="history_today">Today</string>
+    <string name="history_yesterday">Yesterday</string>
+    <string name="history_time_range">%1$s – %2$s</string>
+    <string name="history_interrupted">Stopped early</string>
+    <string name="history_day_total">%1$s focused</string>
+    <string name="history_item_description">%1$s, %2$s, %3$s</string>
+
+    <!-- Statistics -->
+    <string name="statistics_today">Today</string>
+    <string name="statistics_this_week">This week</string>
+    <string name="statistics_daily_average">Daily average this week</string>
+    <string name="statistics_average_session">Average focus session</string>
+    <string name="statistics_all_time">All time</string>
+    <string name="statistics_last_seven_days">Last 7 days</string>
+    <string name="statistics_chart_description">Focus time over the last 7 days: %1$s</string>
+    <string name="duration_hours">%1$d h</string>
+    <string name="duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="duration_minutes_short">%1$d min</string>
+
+    <!-- Statistics: streak and sharing -->
+    <string name="statistics_streak">Current streak</string>
+    <plurals name="streak_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <string name="statistics_share">Share statistics</string>
+    <string name="share_title">Share your focus</string>
+    <string name="share_period_today">Today</string>
+    <string name="share_period_week">This week</string>
+    <string name="share_button">Share</string>
+    <string name="share_chooser_title">Share your focus statistics</string>
+    <string name="share_card_focus_time">Focus time</string>
+    <string name="share_card_sessions">Sessions</string>
+    <string name="share_card_daily_average">Daily avg</string>
+    <string name="share_card_streak">Streak</string>
+    <string name="share_card_footer">Focus better. Work smarter.</string>
+    <string name="share_card_week_range">%1$s – %2$s</string>
+    <string name="share_text_today">I focused %1$s today with FocusFlow.</string>
+    <string name="share_text_week">I focused %1$s this week with FocusFlow.</string>
+    <string name="share_card_description">FocusFlow statistics card: %1$s, focus time %2$s, %3$s</string>
+    <string name="share_failed">Could not create the image</string>
+    <string name="share_format_post">Feed post</string>
+    <string name="share_format_story">Story</string>
+    <string name="share_role_label">Your role</string>
+    <string name="share_role_placeholder">e.g. Software Engineer</string>
+    <string name="share_role_required">Add your role to share your card</string>
+    <string name="share_take_photo">Take photo</string>
+    <string name="share_choose_photo">Choose photo</string>
+    <string name="share_remove_photo">Remove photo</string>
+    <string name="share_photo_failed">Could not load the photo</string>
+
+    <!-- Session alerts (iOS notifications; Android keeps its own copies in app resources) -->
+    <string name="notification_focus_done">Focus session complete</string>
+    <string name="notification_break_done">Break is over</string>
+    <string name="notification_next_short_break">Time for a %1$s.</string>
+    <string name="notification_next_long_break">Well done, time for a %1$s.</string>
+    <string name="notification_next_focus">Ready for the next focus session?</string>
+    <string name="notification_next_started">%1$s started.</string>
+</resources>

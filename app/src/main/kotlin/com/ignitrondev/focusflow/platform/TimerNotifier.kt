@@ -19,6 +19,9 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.SystemClock
+import android.view.View
+import android.widget.RemoteViews
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -51,13 +54,10 @@ class TimerNotifier @Inject constructor(@ApplicationContext private val context:
                     .setDescription(context.getString(R.string.notification_channel_timer_description))
                     .setShowBadge(false)
                     .build(),
-                NotificationChannelCompat.Builder(CHANNEL_SESSION_END, NotificationManagerCompat.IMPORTANCE_HIGH)
-                    .setName(context.getString(R.string.notification_channel_session_end))
-                    .setDescription(context.getString(R.string.notification_channel_session_end_description))
-                    .setVibrationEnabled(true)
-                    .build(),
             ),
         )
+        // Created once; later replaced only when the user picks another sound (AlertChannels).
+        AlertChannels.sessionEndChannelId(context)
     }
 
     /** Shows, updates or removes the ongoing notification to match [state]. */
@@ -81,7 +81,7 @@ class TimerNotifier @Inject constructor(@ApplicationContext private val context:
             },
             context.getString(next.sessionType.labelRes()),
         )
-        val notification = NotificationCompat.Builder(context, CHANNEL_SESSION_END)
+        val notification = NotificationCompat.Builder(context, AlertChannels.sessionEndChannelId(context))
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(text)
@@ -96,6 +96,11 @@ class TimerNotifier @Inject constructor(@ApplicationContext private val context:
     fun canPostNotifications(): Boolean = context.notificationsAllowed()
 
     private fun timerNotification(state: TimerState, remainingMillis: Long) = NotificationCompat.Builder(context, CHANNEL_TIMER)
+        // Large digits in both sizes; the standard fields below stay for the lock screen,
+        // watches and accessibility services.
+        .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+        .setCustomContentView(timerViews(R.layout.notification_timer_collapsed, state, remainingMillis))
+        .setCustomBigContentView(timerViews(R.layout.notification_timer_expanded, state, remainingMillis))
         .setSmallIcon(R.drawable.ic_notification)
         .setContentTitle(context.getString(state.sessionType.labelRes()))
         .setOngoing(true)
@@ -120,6 +125,29 @@ class TimerNotifier @Inject constructor(@ApplicationContext private val context:
         }
         .build()
 
+    /**
+     * The time left, in large digits. While running it is a system Chronometer counting down to
+     * the deadline, so it keeps ticking without FocusFlow's process; while paused, fixed text.
+     */
+    private fun timerViews(layout: Int, state: TimerState, remainingMillis: Long): RemoteViews {
+        val type = context.getString(state.sessionType.labelRes())
+        return RemoteViews(context.packageName, layout).apply {
+            if (state.status == TimerStatus.Running) {
+                setChronometer(R.id.timer_chronometer, SystemClock.elapsedRealtime() + remainingMillis, null, true)
+                setChronometerCountDown(R.id.timer_chronometer, true)
+                setViewVisibility(R.id.timer_chronometer, View.VISIBLE)
+                setViewVisibility(R.id.timer_static, View.GONE)
+                setTextViewText(R.id.timer_label, type)
+            } else {
+                setChronometer(R.id.timer_chronometer, SystemClock.elapsedRealtime(), null, false)
+                setViewVisibility(R.id.timer_chronometer, View.GONE)
+                setViewVisibility(R.id.timer_static, View.VISIBLE)
+                setTextViewText(R.id.timer_static, formatMinutesSeconds((remainingMillis + 999) / 1000))
+                setTextViewText(R.id.timer_label, context.getString(R.string.notification_paused_label, type))
+            }
+        }
+    }
+
     // The permission is checked right before posting; without it the timer works silently.
     @SuppressLint("MissingPermission")
     private fun notify(id: Int, notification: android.app.Notification) {
@@ -143,7 +171,6 @@ class TimerNotifier @Inject constructor(@ApplicationContext private val context:
 
     companion object {
         const val CHANNEL_TIMER = "timer"
-        const val CHANNEL_SESSION_END = "session_end"
         private const val ID_TIMER = 1
         private const val ID_SESSION_END = 2
     }

@@ -40,7 +40,8 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class DatabaseSchemaTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val schemaDir = File("schemas/${FocusFlowDatabase::class.java.name}")
+    // The database lives in the shared (multiplatform) module, with its exported schemas.
+    private val schemaDir = File("../shared/schemas/${FocusFlowDatabase::class.java.name}")
 
     private fun createFromSchema(version: Int, name: String) {
         val json = JSONObject(File(schemaDir, "$version.json").readText()).getJSONObject("database")
