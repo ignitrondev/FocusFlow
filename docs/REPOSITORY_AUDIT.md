@@ -123,7 +123,7 @@ Minimal edits to upstream infrastructure, needed so the fork's CI behaves:
 * `default-check.yml`: add `FocusFlow/**` to `paths-ignore`, like the other projects.
 * Root `README.md` (approved 2026-11-07, after the repository was renamed to
   `ignitrondev/FocusFlow`): now describes FocusFlow. The upstream README is kept unmodified as
-  `UPSTREAM_README.md` (moved with `git mv`, history preserved).
+  `UPSTREAM_README.md` (byte-identical copy).
 * **Not changed (yet):** `Release.yml` triggers on any `v*` tag and builds the upstream samples
   with keystore secrets that the fork does not have. FocusFlow releases will use
   `focusflow-v*` tags and their own workflow (Phase 7).
