@@ -2,8 +2,8 @@
 
 **Focus better. Work smarter.**
 
-FocusFlow is a minimalist, offline-first Pomodoro timer for Android, built with Kotlin and
-Jetpack Compose by **Bima Adam Nugraha**, AI-native engineer at
+FocusFlow is a minimalist, offline-first Pomodoro timer for Android and iOS, built with Kotlin,
+Jetpack Compose and Compose Multiplatform by **Bima Adam Nugraha**, AI-native engineer at
 [IgnitronDev](https://ignitrondev.space).
 
 * **Private by design:** no account, no analytics, no ads, and no internet permission. Your
@@ -40,6 +40,10 @@ Jetpack Compose by **Bima Adam Nugraha**, AI-native engineer at
 
 Get the APK from the [Releases](https://github.com/ignitrondev/FocusFlow/releases) page
 (Android 8.0 or newer). An F-Droid submission is planned.
+
+**iPhone and iPad (iOS 15 or newer, beta):** there is no App Store version yet. Each CI run
+builds an unsigned `FocusFlow-ios-unsigned.ipa`, which you install with AltStore or SideStore and
+your own Apple ID; see the [install guide (Bahasa Indonesia)](docs/IOS_INSTALL.md).
 
 To check that an APK was signed by IgnitronDev, compare its certificate
 (`apksigner verify --print-certs FocusFlow-*.apk`) with this SHA-256 fingerprint:

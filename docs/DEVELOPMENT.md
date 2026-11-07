@@ -21,6 +21,21 @@ Run everything from the repository root with the bundled wrapper.
 | Format (ktlint + license headers) | `./gradlew spotlessApply` |
 | Same checks as CI | `./gradlew spotlessCheck lintDebug assembleDebug testDebugUnitTest -PwarningsAsErrors=true` |
 
+### iOS
+
+Kotlin/Native compiles the iOS code on Linux too (`./gradlew :shared:compileKotlinIosArm64`), but
+running iOS tests and building the app needs a Mac with Xcode:
+
+| Task | Command |
+|---|---|
+| Shared tests on the iOS simulator | `./gradlew :shared:iosSimulatorArm64Test` |
+| Xcode project | `brew install xcodegen && (cd iosApp && xcodegen generate)`, then open `iosApp/FocusFlow.xcodeproj` |
+
+Without a Mac, the `ios-app` CI job does it all: it builds the app, launches it on iPhone and iPad
+simulators (screenshots in the `focusflow-ios-screenshots` artifact) and uploads an unsigned
+`.ipa` (`focusflow-ios-unsigned-ipa`) for AltStore/SideStore; see [IOS_INSTALL.md](IOS_INSTALL.md).
+Version numbers for iOS are in `iosApp/project.yml`; keep them in line with `app/build.gradle.kts`.
+
 The debug build installs as `com.ignitrondev.focusflow.debug`, so it can live next to a release
 build.
 
