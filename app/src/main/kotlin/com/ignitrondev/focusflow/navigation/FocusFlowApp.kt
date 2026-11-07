@@ -40,6 +40,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.window.core.layout.WindowSizeClass
+import com.ignitrondev.focusflow.core.designsystem.component.FittedLabel
 import com.ignitrondev.focusflow.feature.history.historyScreen
 import com.ignitrondev.focusflow.feature.settings.settingsScreen
 import com.ignitrondev.focusflow.feature.statistics.statisticsScreen
@@ -51,7 +53,18 @@ import com.ignitrondev.focusflow.feature.timer.timerScreen
 fun FocusFlowApp(navController: NavHostController = rememberNavController()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
-    val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfoV2())
+    val adaptiveInfo = currentWindowAdaptiveInfoV2()
+    val sizeClass = adaptiveInfo.windowSizeClass
+    // A phone in landscape is wide but short: a bottom bar would take a fifth of the height, so
+    // use the rail there too.
+    val layoutType = if (
+        !sizeClass.isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND) &&
+        sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+    ) {
+        NavigationSuiteType.NavigationRail
+    } else {
+        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+    }
 
     NavigationSuiteScaffold(
         layoutType = layoutType,
@@ -67,7 +80,7 @@ fun FocusFlowApp(navController: NavHostController = rememberNavController()) {
                             contentDescription = null,
                         )
                     },
-                    label = { Text(stringResource(destination.labelRes)) },
+                    label = { FittedLabel(stringResource(destination.labelRes)) },
                     modifier = Modifier.testTag("nav_${destination.name}"),
                 )
             }

@@ -54,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -61,11 +62,13 @@ import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import com.ignitrondev.focusflow.R
+import com.ignitrondev.focusflow.core.designsystem.component.FittedLabel
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.core.designsystem.theme.TimerTextStyle
 import com.ignitrondev.focusflow.core.time.formatMinutesSeconds
@@ -158,7 +161,7 @@ private fun ModeSelector(selected: SessionType, enabled: Boolean, onSelect: (Ses
                 enabled = enabled,
                 shape = SegmentedButtonDefaults.itemShape(index, modes.size),
                 icon = {},
-                label = { Text(stringResource(mode.labelRes()), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                label = { FittedLabel(stringResource(mode.labelRes())) },
             )
         }
     }
@@ -173,7 +176,7 @@ private fun TimerDial(uiState: TimerUiState, modifier: Modifier = Modifier) {
     val modeLabel = stringResource(uiState.mode.labelRes())
     val dialDescription = stringResource(R.string.timer_dial_description, modeLabel, remaining)
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .aspectRatio(1f)
             .testTag("timerDial")
@@ -207,10 +210,14 @@ private fun TimerDial(uiState: TimerUiState, modifier: Modifier = Modifier) {
                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
             )
         }
+        // The digits follow the dial, so they fill it on a tablet as they do on a phone. Derived
+        // from the dial width rather than the font scale: they are already display-sized.
+        val digitsSize = with(LocalDensity.current) { (maxWidth * 0.21f).coerceIn(48.dp, 180.dp).toSp() }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = remaining,
-                style = TimerTextStyle,
+                style = TimerTextStyle.copy(fontSize = digitsSize, lineHeight = digitsSize * 1.1f),
+                maxLines = 1,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(Modifier.height(4.dp))
