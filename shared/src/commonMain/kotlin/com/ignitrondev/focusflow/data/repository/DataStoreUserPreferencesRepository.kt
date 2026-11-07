@@ -15,7 +15,6 @@
  */
 package com.ignitrondev.focusflow.data.repository
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -25,23 +24,18 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.model.UserPreferences
 import com.ignitrondev.focusflow.domain.repository.UserPreferencesRepository
-import java.io.IOException
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import okio.IOException
 
-class DataStoreUserPreferencesRepository
-@Inject
-constructor(private val dataStore: DataStore<Preferences>) :
-    UserPreferencesRepository {
+class DataStoreUserPreferencesRepository(private val dataStore: DataStore<Preferences>) : UserPreferencesRepository {
     override val userPreferences: Flow<UserPreferences> =
         dataStore.data
             .catch { error ->
                 // A corrupt or unreadable file must not crash the app: fall back to defaults.
                 if (error is IOException) {
-                    Log.w(TAG, "Could not read user preferences, using defaults", error)
                     emit(emptyPreferences())
                 } else {
                     throw error
@@ -73,7 +67,6 @@ constructor(private val dataStore: DataStore<Preferences>) :
     }
 
     private companion object {
-        const val TAG = "UserPreferences"
         const val MAX_ROLE_LENGTH = 40
     }
 }

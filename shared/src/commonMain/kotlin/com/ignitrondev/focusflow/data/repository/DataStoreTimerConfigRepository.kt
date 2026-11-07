@@ -15,7 +15,6 @@
  */
 package com.ignitrondev.focusflow.data.repository
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
@@ -26,23 +25,21 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import com.ignitrondev.focusflow.domain.timer.TimerConfig
 import com.ignitrondev.focusflow.domain.timer.TimerConfig.Companion.MINUTE
 import com.ignitrondev.focusflow.domain.timer.TimerConfigRepository
-import java.io.IOException
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import okio.IOException
 
 /**
  * Timer settings, stored in the same preferences file as the appearance settings. Durations are
  * stored in whole minutes; values outside the allowed ranges (an old or edited file) are clamped.
  */
-class DataStoreTimerConfigRepository @Inject constructor(private val dataStore: DataStore<Preferences>) : TimerConfigRepository {
+class DataStoreTimerConfigRepository(private val dataStore: DataStore<Preferences>) : TimerConfigRepository {
 
     override val config: Flow<TimerConfig> = dataStore.data
         .catch { error ->
             if (error is IOException) {
-                Log.w(TAG, "Could not read timer settings, using defaults", error)
                 emit(emptyPreferences())
             } else {
                 throw error
@@ -98,9 +95,5 @@ class DataStoreTimerConfigRepository @Inject constructor(private val dataStore: 
         val INTERVAL = intPreferencesKey("long_break_interval")
         val AUTO_START_BREAKS = booleanPreferencesKey("auto_start_breaks")
         val AUTO_START_FOCUS = booleanPreferencesKey("auto_start_focus")
-    }
-
-    private companion object {
-        const val TAG = "TimerSettings"
     }
 }

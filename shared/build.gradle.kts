@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-// Code shared by the Android and iOS apps. Stage 1: the domain layer (timer engine, statistics,
-// models and repository interfaces). It must not depend on Android or the JVM.
+// Code shared by the Android and iOS apps: the domain layer (timer engine, statistics, models,
+// repository interfaces) and the data layer (Room database, DataStore settings, repositories).
+// It must not depend on Android or the JVM.
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -34,15 +37,34 @@ kotlin {
     compilerOptions {
         // CI sets -PwarningsAsErrors=true (see .github/ci-gradle.properties).
         allWarningsAsErrors.set(providers.gradleProperty("warningsAsErrors").map(String::toBoolean).orElse(false))
+        // Room generates an `actual object` per platform for the database constructor.
+        freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 
     sourceSets {
         commonMain.dependencies {
             api(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.datetime)
+            api(libs.androidx.room.runtime)
+            api(libs.androidx.datastore.preferences.core)
+        }
+        iosMain.dependencies {
+            // Android uses the platform's SQLite; iOS ships SQLite with the app.
+            implementation(libs.androidx.sqlite.bundled)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
+}
+
+room {
+    // Exported schemas are committed: they are the source of truth for migrations and tests.
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    // Room generates the DAO and database code for every target.
+    listOf("kspAndroid", "kspIosArm64", "kspIosSimulatorArm64").forEach { add(it, libs.androidx.room.compiler) }
 }

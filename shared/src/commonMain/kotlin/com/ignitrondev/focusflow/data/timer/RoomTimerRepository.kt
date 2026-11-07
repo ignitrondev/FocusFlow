@@ -15,7 +15,8 @@
  */
 package com.ignitrondev.focusflow.data.timer
 
-import androidx.room.withTransaction
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import com.ignitrondev.focusflow.data.database.FocusFlowDatabase
 import com.ignitrondev.focusflow.data.database.FocusSessionDao
 import com.ignitrondev.focusflow.data.database.TimerStateDao
@@ -30,15 +31,13 @@ import com.ignitrondev.focusflow.domain.timer.TimerInstant
 import com.ignitrondev.focusflow.domain.timer.TimerRepository
 import com.ignitrondev.focusflow.domain.timer.TimerState
 import com.ignitrondev.focusflow.domain.timer.TimerUpdate
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-@Singleton
-class RoomTimerRepository @Inject constructor(
+/** Keep one instance per database: it is the only writer of the timer state. */
+class RoomTimerRepository(
     private val database: FocusFlowDatabase,
     private val timerStateDao: TimerStateDao,
     private val focusSessionDao: FocusSessionDao,
@@ -67,25 +66,28 @@ class RoomTimerRepository @Inject constructor(
     override suspend fun select(type: SessionType) = update { state, _, config -> engine.select(state, type, config) }
 
     /**
-     * Reads, settles, applies [action] and writes back in one transaction. Room runs write
-     * transactions one at a time, so a second caller always sees the first caller's result: a
-     * completed session is written once, and the state it leaves behind is no longer due.
+     * Reads, settles, applies [action] and writes back in one transaction. An immediate
+     * transaction takes the write lock before reading, and Room runs write transactions one at a
+     * time, so a second caller always sees the first caller's result: a completed session is
+     * written once, and the state it leaves behind is no longer due.
      */
     private suspend fun update(action: (TimerState, TimerInstant, TimerConfig) -> TimerUpdate) {
         val config = configRepository.config.first()
-        val (completed, next) = database.withTransaction {
-            val now = timeSource.now()
-            val stored = timerStateDao.get()?.toDomainOrNull()
-            val current = stored ?: engine.initial(config)
-            val settled = engine.settle(current, now, config)
-            val result = action(settled.state, now, config)
-            val recorded = mutableListOf<FinishedSession>()
-            (settled.finishedSessions + result.finishedSessions).forEach { session ->
-                // -1: a row with this run id exists already, so this session was handled before.
-                if (focusSessionDao.insert(session.toEntity()) != -1L) recorded += session
+        val (completed, next) = database.useWriterConnection { connection ->
+            connection.immediateTransaction {
+                val now = timeSource.now()
+                val stored = timerStateDao.get()?.toDomainOrNull()
+                val current = stored ?: engine.initial(config)
+                val settled = engine.settle(current, now, config)
+                val result = action(settled.state, now, config)
+                val recorded = mutableListOf<FinishedSession>()
+                (settled.finishedSessions + result.finishedSessions).forEach { session ->
+                    // -1: a row with this run id exists already, so this session was handled before.
+                    if (focusSessionDao.insert(session.toEntity()) != -1L) recorded += session
+                }
+                if (result.state != stored) timerStateDao.upsert(result.state.toEntity(now.epochMillis))
+                recorded.filter(FinishedSession::completed) to result.state
             }
-            if (result.state != stored) timerStateDao.upsert(result.state.toEntity(now.epochMillis))
-            recorded.filter(FinishedSession::completed) to result.state
         }
         if (completed.isNotEmpty()) completionListener.onSessionsCompleted(completed, next)
     }

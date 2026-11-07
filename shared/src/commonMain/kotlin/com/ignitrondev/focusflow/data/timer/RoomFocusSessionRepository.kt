@@ -20,11 +20,10 @@ import com.ignitrondev.focusflow.domain.timer.FinishedSession
 import com.ignitrondev.focusflow.domain.timer.FocusSessionRepository
 import com.ignitrondev.focusflow.domain.timer.FocusSummary
 import com.ignitrondev.focusflow.domain.timer.SessionType
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class RoomFocusSessionRepository @Inject constructor(private val focusSessionDao: FocusSessionDao) : FocusSessionRepository {
+class RoomFocusSessionRepository(private val focusSessionDao: FocusSessionDao) : FocusSessionRepository {
     override fun observeSessions(): Flow<List<FinishedSession>> =
         focusSessionDao.observeAll().map { rows -> rows.mapNotNull { it.toDomainOrNull() } }
 

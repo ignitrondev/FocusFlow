@@ -43,7 +43,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.room)
 }
 
 android {
@@ -117,11 +116,6 @@ android {
         includeInBundle = false
     }
 
-    room {
-        // Exported schemas are committed: they are the source of truth for migrations and tests.
-        schemaDirectory("$projectDir/schemas")
-    }
-
     lint {
         // Test code is not shipped. Analysing it also races with KSP generating Hilt test sources
         // (lint 9.3 crashes on the half-written files), so only production sources are linted.
@@ -172,10 +166,6 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
 
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     ksp(libs.hilt.compiler)
@@ -188,7 +178,6 @@ dependencies {
     testImplementation(composeBom)
     testImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(libs.hilt.android.testing)
-    testImplementation(libs.androidx.room.testing)
     kspTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
