@@ -14,7 +14,28 @@
  * limitations under the License.
  */
 
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+// Release signing is read from FocusFlow/keystore.properties (git-ignored) or, on CI, from
+// environment variables. Without either, the release build is produced unsigned.
+val releaseSigning: Map<String, String>? = run {
+    val file = rootProject.file("keystore.properties")
+    val values = if (file.isFile) {
+        Properties().apply { file.inputStream().use(::load) }.let { props ->
+            listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+                .associateWith { props.getProperty(it).orEmpty() }
+        }
+    } else {
+        mapOf(
+            "storeFile" to System.getenv("FOCUSFLOW_KEYSTORE_FILE").orEmpty(),
+            "storePassword" to System.getenv("FOCUSFLOW_KEYSTORE_PASSWORD").orEmpty(),
+            "keyAlias" to System.getenv("FOCUSFLOW_KEY_ALIAS").orEmpty(),
+            "keyPassword" to System.getenv("FOCUSFLOW_KEY_PASSWORD").orEmpty(),
+        )
+    }
+    values.takeIf { it.values.all(String::isNotBlank) }
+}
 
 plugins {
     alias(libs.plugins.android.application)
@@ -37,6 +58,17 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (releaseSigning != null) {
+            create("release") {
+                storeFile = rootProject.file(releaseSigning.getValue("storeFile"))
+                storePassword = releaseSigning.getValue("storePassword")
+                keyAlias = releaseSigning.getValue("keyAlias")
+                keyPassword = releaseSigning.getValue("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             // Lets a debug build live next to a release build on the same device.
@@ -44,7 +76,8 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
-            // Release signing is configured in Phase 7 from CI secrets; it is never committed.
+            // Signing material is never committed; see releaseSigning above.
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

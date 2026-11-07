@@ -24,6 +24,31 @@ Run everything from the `FocusFlow/` directory with the bundled wrapper.
 The debug build installs as `com.ignitrondev.focusflow.debug`, so it can live next to a release
 build.
 
+## Release builds
+
+| Task | Command |
+|---|---|
+| Release APK (R8 minified) | `./gradlew assembleRelease` → `app/build/outputs/apk/release/` |
+| Release bundle (AAB) | `./gradlew bundleRelease` → `app/build/outputs/bundle/release/` |
+
+Signing material is **never committed**. The release build is signed when either of these is
+present, and is produced as `app-release-unsigned.apk` otherwise:
+
+* `FocusFlow/keystore.properties` (git-ignored), with `storeFile` (absolute path, keep the
+  keystore outside the repository), `storePassword`, `keyAlias` and `keyPassword`.
+* Environment variables `FOCUSFLOW_KEYSTORE_FILE`, `FOCUSFLOW_KEYSTORE_PASSWORD`,
+  `FOCUSFLOW_KEY_ALIAS` and `FOCUSFLOW_KEY_PASSWORD` (used by CI in Phase 7).
+
+Only the maintainers hold the release key. Contributors build debug, or sign release builds with
+their own key (they cannot be installed over the official release).
+
+Official release signing certificate (SHA-256), to verify downloaded APKs with
+`apksigner verify --print-certs`:
+
+```
+5a:ad:b1:31:3d:4a:ad:9a:c1:d0:2a:df:ef:5d:03:e6:79:de:57:aa:62:66:93:70:db:06:b0:83:aa:94:b1:ee
+```
+
 ## Conventions
 
 * New files start with the Apache-2.0 header for `IgnitronDev` (`spotless/copyright.kt`);
