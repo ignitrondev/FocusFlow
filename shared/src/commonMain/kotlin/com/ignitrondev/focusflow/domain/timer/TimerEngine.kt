@@ -52,6 +52,32 @@ class TimerEngine(private val newRunId: () -> String) {
         return TimerUpdate(current, finished)
     }
 
+    /**
+     * The session ends that will happen if nobody touches the timer: the current session's and,
+     * with auto-start, the following ones (at most one full cycle, like [settle]). Platforms that
+     * cannot wake the app at a deadline (iOS) schedule an alert for each of them up front.
+     */
+    fun upcomingSessionEnds(state: TimerState, now: TimerInstant, config: TimerConfig): List<UpcomingSessionEnd> {
+        val ends = mutableListOf<UpcomingSessionEnd>()
+        var current = reanchorAfterReboot(state, now)
+        var at = now
+        while (current.status == TimerStatus.Running && ends.size < config.longBreakInterval * 2) {
+            val remaining = current.remainingAt(at).coerceAtLeast(0)
+            val end = TimerInstant(at.elapsedRealtimeMillis + remaining, at.epochMillis + remaining, at.bootCount)
+            val allowAutoStart = ends.size + 1 < config.longBreakInterval * 2
+            val (next, _) = complete(current, end, config, allowAutoStart)
+            ends += UpcomingSessionEnd(
+                sessionType = current.sessionType,
+                atEpochMillis = end.epochMillis,
+                nextSessionType = next.sessionType,
+                nextStartsAutomatically = next.status == TimerStatus.Running,
+            )
+            current = next
+            at = end
+        }
+        return ends
+    }
+
     /** Starts an idle session or resumes a paused one. */
     fun start(state: TimerState, now: TimerInstant): TimerUpdate = when (state.status) {
         TimerStatus.Running -> TimerUpdate(state)

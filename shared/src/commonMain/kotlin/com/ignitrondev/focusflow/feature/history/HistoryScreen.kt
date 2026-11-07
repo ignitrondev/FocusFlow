@@ -59,6 +59,7 @@ import com.ignitrondev.focusflow.app.LocalAppDependencies
 import com.ignitrondev.focusflow.core.designsystem.component.EmptyState
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.core.ui.durationText
+import com.ignitrondev.focusflow.core.ui.labelRes
 import com.ignitrondev.focusflow.domain.timer.SessionType
 import com.ignitrondev.focusflow.platform.DateFormats
 import com.ignitrondev.focusflow.platform.PreviewDateFormats
@@ -187,12 +188,6 @@ private fun SessionRow(item: HistoryItem, dates: DateFormats) {
         supportingContent = { Text(if (status != null) "$range · $status" else range) },
         trailingContent = { Text(duration, style = MaterialTheme.typography.labelLarge) },
     )
-}
-
-private fun SessionType.labelRes(): StringResource = when (this) {
-    SessionType.Focus -> Res.string.timer_mode_focus
-    SessionType.ShortBreak -> Res.string.timer_mode_short_break
-    SessionType.LongBreak -> Res.string.timer_mode_long_break
 }
 
 @Preview

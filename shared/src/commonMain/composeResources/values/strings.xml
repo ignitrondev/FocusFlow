@@ -141,4 +141,12 @@
     <string name="share_choose_photo">Choose photo</string>
     <string name="share_remove_photo">Remove photo</string>
     <string name="share_photo_failed">Could not load the photo</string>
+
+    <!-- Session alerts (iOS notifications; Android keeps its own copies in app resources) -->
+    <string name="notification_focus_done">Focus session complete</string>
+    <string name="notification_break_done">Break is over</string>
+    <string name="notification_next_short_break">Time for a %1$s.</string>
+    <string name="notification_next_long_break">Well done, time for a %1$s.</string>
+    <string name="notification_next_focus">Ready for the next focus session?</string>
+    <string name="notification_next_started">%1$s started.</string>
 </resources>

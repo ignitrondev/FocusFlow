@@ -34,3 +34,11 @@ data class FinishedSession(
 
 /** Result of a timer transition: the new state and any sessions that ended on the way. */
 data class TimerUpdate(val state: TimerState, val finishedSessions: List<FinishedSession> = emptyList())
+
+/** A session end that will happen at [atEpochMillis] if the timer is left running. */
+data class UpcomingSessionEnd(
+    val sessionType: SessionType,
+    val atEpochMillis: Long,
+    val nextSessionType: SessionType,
+    val nextStartsAutomatically: Boolean,
+)

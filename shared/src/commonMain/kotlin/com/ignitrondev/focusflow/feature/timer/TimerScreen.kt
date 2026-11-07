@@ -69,6 +69,7 @@ import com.ignitrondev.focusflow.core.designsystem.component.FittedLabel
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.core.designsystem.theme.TimerTextStyle
 import com.ignitrondev.focusflow.core.time.formatMinutesSeconds
+import com.ignitrondev.focusflow.core.ui.labelRes
 import com.ignitrondev.focusflow.domain.timer.SessionType
 import com.ignitrondev.focusflow.resources.Res
 import com.ignitrondev.focusflow.resources.app_name
@@ -306,12 +307,6 @@ private fun TodaySummary(uiState: TimerUiState) {
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-}
-
-private fun SessionType.labelRes(): StringResource = when (this) {
-    SessionType.Focus -> Res.string.timer_mode_focus
-    SessionType.ShortBreak -> Res.string.timer_mode_short_break
-    SessionType.LongBreak -> Res.string.timer_mode_long_break
 }
 
 @Composable

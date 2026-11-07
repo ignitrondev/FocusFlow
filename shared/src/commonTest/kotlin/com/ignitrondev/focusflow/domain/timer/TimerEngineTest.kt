@@ -367,6 +367,55 @@ class TimerEngineTest {
         assertSame(paused, engine.settle(paused, clock.now(), longerFocus).state)
     }
 
+    // Upcoming session ends (scheduled up front on iOS)
+
+    @Test
+    fun noUpcomingEndsUnlessRunning() {
+        assertTrue(engine.upcomingSessionEnds(engine.initial(config), clock.now(), config).isEmpty())
+        val paused = engine.pause(startedFocus(), clock.now()).state
+        assertTrue(engine.upcomingSessionEnds(paused, clock.now(), config).isEmpty())
+    }
+
+    @Test
+    fun withoutAutoStartOnlyTheCurrentSessionEndIsUpcoming() {
+        val focus = startedFocus()
+        clock.advanceBy(10 * minute)
+
+        val ends = engine.upcomingSessionEnds(focus, clock.now(), config)
+
+        val end = ends.single()
+        assertEquals(SessionType.Focus, end.sessionType)
+        assertEquals(FakeTimeSource.START_EPOCH_MILLIS + 25 * minute, end.atEpochMillis)
+        assertEquals(SessionType.ShortBreak, end.nextSessionType)
+        assertFalse(end.nextStartsAutomatically)
+    }
+
+    @Test
+    fun withAutoStartTheFollowingSessionEndsAreUpcomingForOneCycle() {
+        val auto = config.copy(autoStartBreaks = true, autoStartFocus = true)
+        val focus = engine.start(engine.initial(auto), clock.now()).state
+
+        val ends = engine.upcomingSessionEnds(focus, clock.now(), auto)
+
+        assertEquals(auto.longBreakInterval * 2, ends.size)
+        val start = FakeTimeSource.START_EPOCH_MILLIS
+        assertEquals(listOf(25L, 30L, 55L, 60L), ends.take(4).map { (it.atEpochMillis - start) / minute })
+        assertEquals(SessionType.LongBreak, ends[6].nextSessionType)
+        assertFalse(ends.last().nextStartsAutomatically, "the chain stops after one cycle, as in settle()")
+    }
+
+    @Test
+    fun upcomingEndsMatchWhatSettleRecords() {
+        val auto = config.copy(autoStartBreaks = true)
+        val focus = engine.start(engine.initial(auto), clock.now()).state
+        val ends = engine.upcomingSessionEnds(focus, clock.now(), auto)
+
+        clock.advanceBy(40 * minute)
+        val recorded = engine.settle(focus, clock.now(), auto).finishedSessions
+
+        assertEquals(recorded.map { it.endedAtEpochMillis }, ends.map { it.atEpochMillis }.filter { it <= clock.now().epochMillis })
+    }
+
     // Auto-start
 
     @Test

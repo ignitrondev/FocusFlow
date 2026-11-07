@@ -36,8 +36,13 @@ kotlin {
         // Packages the Compose Multiplatform resources (strings) into the Android library.
         androidResources { enable = true }
     }
-    iosArm64()
-    iosSimulatorArm64()
+    // The iOS app (iosApp/) links this module as a static framework named "Shared".
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
+            baseName = "Shared"
+            isStatic = true
+        }
+    }
 
     compilerOptions {
         // CI sets -PwarningsAsErrors=true (see .github/ci-gradle.properties).
