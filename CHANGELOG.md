@@ -2,6 +2,13 @@
 
 All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+- Pick the alert sound with Android's sound picker (Settings → Notifications → Alert sound),
+  including silent and any alarm or notification sound.
+- The timer notification shows the time left in large digits, in both the collapsed and the
+  expanded notification.
+
 ## 1.0.0-beta.1 — 2026-11-07
 
 First public beta.

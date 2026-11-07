@@ -19,8 +19,15 @@ import android.Manifest
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
+import android.os.SystemClock
+import android.view.View
+import android.widget.Chronometer
+import android.widget.FrameLayout
+import android.widget.RemoteViews
+import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ignitrondev.focusflow.R
 import com.ignitrondev.focusflow.domain.timer.FinishedSession
 import com.ignitrondev.focusflow.domain.timer.SessionType
 import com.ignitrondev.focusflow.domain.timer.TimerConfig
@@ -55,7 +62,7 @@ class TimerNotifierTest {
         assertEquals(NotificationManager.IMPORTANCE_LOW, notificationManager.getNotificationChannel(TimerNotifier.CHANNEL_TIMER).importance)
         assertEquals(
             NotificationManager.IMPORTANCE_HIGH,
-            notificationManager.getNotificationChannel(TimerNotifier.CHANNEL_SESSION_END).importance,
+            notificationManager.getNotificationChannel(AlertChannels.sessionEndChannelId(app)).importance,
         )
     }
 
@@ -71,6 +78,60 @@ class TimerNotifierTest {
         assertTrue(notification.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER))
         assertTrue(notification.extras.getBoolean(Notification.EXTRA_CHRONOMETER_COUNT_DOWN))
         assertEquals("Pause", notification.actions.single().title)
+    }
+
+    // The deprecated fields are still where a built notification keeps its custom views.
+    @Suppress("DEPRECATION")
+    private fun Notification.collapsedView(): RemoteViews = contentView
+
+    @Suppress("DEPRECATION")
+    private fun Notification.expandedView(): RemoteViews = bigContentView
+
+    /** Inflates a notification's custom view as SystemUI would. */
+    private fun inflate(views: RemoteViews): View = views.apply(app, FrameLayout(app))
+
+    @Test
+    fun runningTimerShowsTheTimeInLargeDigitsCountingDown() {
+        val running = engine.start(engine.initial(config), clock.now()).state
+
+        notifier.showTimer(running, remainingMillis = 10 * 60_000L)
+
+        val notification = posted().single()
+        for (views in listOf(notification.collapsedView(), notification.expandedView())) {
+            val root = inflate(views)
+            val chronometer = root.findViewById<Chronometer>(R.id.timer_chronometer)
+            assertEquals(View.VISIBLE, chronometer.visibility)
+            assertTrue(chronometer.isCountDown)
+            // Counts down to the deadline on the system clock, without the app running.
+            assertEquals(SystemClock.elapsedRealtime() + 10 * 60_000L, chronometer.base)
+            assertEquals(View.GONE, root.findViewById<TextView>(R.id.timer_static).visibility)
+            assertEquals("Focus", root.findViewById<TextView>(R.id.timer_label).text.toString())
+        }
+        val expandedDigits = inflate(notification.expandedView()).findViewById<Chronometer>(R.id.timer_chronometer).textSize
+        val collapsedDigits = inflate(notification.collapsedView()).findViewById<Chronometer>(R.id.timer_chronometer).textSize
+        assertTrue("expanded digits are bigger", expandedDigits > collapsedDigits)
+    }
+
+    @Test
+    fun pausedTimerShowsFixedLargeDigits() {
+        val paused = engine.pause(engine.start(engine.initial(config), clock.now()).state, clock.now()).state
+
+        notifier.showTimer(paused, remainingMillis = 12 * 60_000L + 30_000L)
+
+        val root = inflate(posted().single().expandedView())
+        assertEquals(View.GONE, root.findViewById<Chronometer>(R.id.timer_chronometer).visibility)
+        assertEquals("12:30", root.findViewById<TextView>(R.id.timer_static).text.toString())
+        assertEquals("Focus · Paused", root.findViewById<TextView>(R.id.timer_label).text.toString())
+    }
+
+    @Test
+    fun alertUsesThePickedSoundsChannel() {
+        AlertChannels.setSound(app, null)
+        val next = engine.select(engine.initial(config), SessionType.ShortBreak, config).state
+
+        notifier.showSessionEnded(focusSession(), next)
+
+        assertEquals("session_end_v2", posted().single().channelId)
     }
 
     @Test
@@ -93,7 +154,7 @@ class TimerNotifierTest {
         notifier.showSessionEnded(focusSession(), next)
 
         val notification = posted().single()
-        assertEquals(TimerNotifier.CHANNEL_SESSION_END, notification.channelId)
+        assertEquals(AlertChannels.sessionEndChannelId(app), notification.channelId)
         assertEquals("Focus session complete", notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString())
         assertEquals("Time for a Short break.", notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString())
     }

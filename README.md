@@ -29,7 +29,7 @@ Jetpack Compose by [IgnitronDev](https://ignitrondev.space).
 |---|---|
 | Pomodoro cycle | 25 minutes of focus, 5 minute breaks, a 15 minute break after every 4 sessions; all adjustable |
 | Controls | Start, pause, resume, reset, skip; optional automatic start of breaks and focus sessions |
-| Alerts | Sound and vibration when a session ends, also with the app closed; countdown notification with Pause and Resume |
+| Alerts | Sound and vibration when a session ends, also with the app closed; pick any alarm or notification sound; notification with the time left in large digits, Pause and Resume |
 | History | Every session by day, including the ones you stopped early |
 | Statistics | Today, this week, daily average, average session, all time, and a 7-day chart |
 | Everywhere | Light and dark theme, wallpaper colors, phones, foldables and tablets, large font sizes, TalkBack |

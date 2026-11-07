@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 IgnitronDev
+  SPDX-License-Identifier: Apache-2.0
+  -->
+<!-- Collapsed timer notification: the time left in large digits, next to the session type.
+     Text appearances come from androidx.core, so colors follow the system notification theme. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <Chronometer
+        android:id="@+id/timer_chronometer"
+        style="@style/TextAppearance.Compat.Notification.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFeatureSettings="tnum"
+        android:includeFontPadding="false"
+        android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/timer_static"
+        style="@style/TextAppearance.Compat.Notification.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFeatureSettings="tnum"
+        android:includeFontPadding="false"
+        android:textSize="30sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/timer_label"
+        style="@style/TextAppearance.Compat.Notification.Info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textSize="14sp" />
+</LinearLayout>

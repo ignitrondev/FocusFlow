@@ -36,6 +36,10 @@ use the rail instead of a bottom bar.
 - [ ] Start a session, reboot the phone: the countdown notification and alarm come back.
 - [ ] Change the system time while running: the countdown does not jump.
 - [ ] Notification buttons: Pause, Resume, Reset.
+- [ ] Timer notification: large digits count down in the collapsed and expanded view, light and
+      dark system theme; fixed digits while paused.
+- [ ] Settings → Alert sound: pick a sound, then silent; the next alert uses it. Vibration setting
+      survives the change.
 - [ ] TalkBack: navigate the timer, history and statistics screens.
 - [ ] Dark theme and wallpaper colors (Android 12+).
 

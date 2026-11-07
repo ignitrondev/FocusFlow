@@ -15,6 +15,9 @@
  */
 package com.ignitrondev.focusflow.feature.settings
 
+import android.content.ActivityNotFoundException
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -76,6 +79,9 @@ import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.model.UserPreferences
 import com.ignitrondev.focusflow.domain.timer.TimerConfig
 import com.ignitrondev.focusflow.platform.AlertCapabilities
+import com.ignitrondev.focusflow.platform.AlertChannels
+import com.ignitrondev.focusflow.platform.AlertSoundPick
+import com.ignitrondev.focusflow.platform.PickAlertSound
 import com.ignitrondev.focusflow.platform.alertCapabilities
 import com.ignitrondev.focusflow.platform.openAlertSoundSettings
 import com.ignitrondev.focusflow.platform.openExactAlarmSettings
@@ -99,12 +105,27 @@ fun NavGraphBuilder.settingsScreen() {
             alerts = context.alertCapabilities()
             onPauseOrDispose {}
         }
+        val pickSound = rememberLauncherForActivityResult(PickAlertSound(stringResource(R.string.settings_alert_sound))) { pick ->
+            if (pick is AlertSoundPick.Picked) {
+                AlertChannels.setSound(context, pick.sound)
+                alerts = context.alertCapabilities()
+            }
+        }
         SettingsScreen(
             uiState = uiState,
             alerts = alerts,
             onThemeModeChange = viewModel::setThemeMode,
             onDynamicColorChange = viewModel::setUseDynamicColor,
             onTimerConfigChange = viewModel::updateTimerConfig,
+            onPickAlertSound = {
+                try {
+                    pickSound.launch(AlertChannels.sound(context))
+                } catch (e: ActivityNotFoundException) {
+                    // No sound picker on this device: Android's channel settings have one.
+                    Log.w("Settings", "No ringtone picker available", e)
+                    context.openAlertSoundSettings()
+                }
+            },
             onOpenNotificationSettings = context::openNotificationSettings,
             onOpenAlertSoundSettings = context::openAlertSoundSettings,
             onOpenExactAlarmSettings = context::openExactAlarmSettings,
@@ -120,6 +141,7 @@ fun SettingsScreen(
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
     onTimerConfigChange: ((TimerConfig) -> TimerConfig) -> Unit,
+    onPickAlertSound: () -> Unit,
     onOpenNotificationSettings: () -> Unit,
     onOpenAlertSoundSettings: () -> Unit,
     onOpenExactAlarmSettings: () -> Unit,
@@ -153,7 +175,13 @@ fun SettingsScreen(
                     }
                 }
                 HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                NotificationsSection(alerts, onOpenNotificationSettings, onOpenAlertSoundSettings, onOpenExactAlarmSettings)
+                NotificationsSection(
+                    alerts = alerts,
+                    onPickAlertSound = onPickAlertSound,
+                    onOpenNotificationSettings = onOpenNotificationSettings,
+                    onOpenAlertSoundSettings = onOpenAlertSoundSettings,
+                    onOpenExactAlarmSettings = onOpenExactAlarmSettings,
+                )
                 HorizontalDivider(Modifier.padding(vertical = 8.dp))
                 AboutSection()
             }
@@ -310,6 +338,7 @@ private fun AppearanceSection(
 @Composable
 private fun NotificationsSection(
     alerts: AlertCapabilities,
+    onPickAlertSound: () -> Unit,
     onOpenNotificationSettings: () -> Unit,
     onOpenAlertSoundSettings: () -> Unit,
     onOpenExactAlarmSettings: () -> Unit,
@@ -322,10 +351,16 @@ private fun NotificationsSection(
         ),
         onClick = onOpenNotificationSettings,
     )
+    ClickableItem(
+        title = stringResource(R.string.settings_alert_sound),
+        summary = alerts.alertSoundTitle,
+        onClick = onPickAlertSound,
+        modifier = Modifier.testTag("setting_alert_sound"),
+    )
     if (alerts.notificationsAllowed) {
         ClickableItem(
-            title = stringResource(R.string.settings_alert_sound),
-            summary = stringResource(R.string.settings_alert_sound_summary),
+            title = stringResource(R.string.settings_alert_more),
+            summary = stringResource(R.string.settings_alert_more_summary),
             onClick = onOpenAlertSoundSettings,
         )
     }
@@ -339,11 +374,11 @@ private fun NotificationsSection(
 }
 
 @Composable
-private fun ClickableItem(title: String, summary: String, onClick: () -> Unit) {
+private fun ClickableItem(title: String, summary: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = { Text(summary) },
-        modifier = Modifier.clickable(onClick = onClick, role = Role.Button),
+        modifier = modifier.clickable(onClick = onClick, role = Role.Button),
     )
 }
 
@@ -390,10 +425,11 @@ private fun SettingsScreenPreview() {
     FocusFlowTheme {
         SettingsScreen(
             uiState = SettingsUiState.Success(UserPreferences()),
-            alerts = AlertCapabilities(notificationsAllowed = true, exactAlarmsAllowed = false),
+            alerts = AlertCapabilities(notificationsAllowed = true, exactAlarmsAllowed = false, alertSoundTitle = "Default (Chime)"),
             onThemeModeChange = {},
             onDynamicColorChange = {},
             onTimerConfigChange = {},
+            onPickAlertSound = {},
             onOpenNotificationSettings = {},
             onOpenAlertSoundSettings = {},
             onOpenExactAlarmSettings = {},

@@ -34,6 +34,8 @@ data class AlertCapabilities(
     val notificationsAllowed: Boolean,
     /** Null where the platform has no such permission (before Android 12): always exact. */
     val exactAlarmsAllowed: Boolean?,
+    /** Name of the sound played when a session ends ("Silent", a ringtone title, ...). */
+    val alertSoundTitle: String = "",
 )
 
 fun Context.notificationsAllowed(): Boolean = NotificationManagerCompat.from(this).areNotificationsEnabled() &&
@@ -48,6 +50,7 @@ fun Context.exactAlarmsAllowed(): Boolean =
 fun Context.alertCapabilities() = AlertCapabilities(
     notificationsAllowed = notificationsAllowed(),
     exactAlarmsAllowed = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) exactAlarmsAllowed() else null,
+    alertSoundTitle = AlertChannels.soundTitle(this, AlertChannels.sound(this)),
 )
 
 fun Context.openNotificationSettings() = startSettings(
@@ -57,7 +60,7 @@ fun Context.openNotificationSettings() = startSettings(
 fun Context.openAlertSoundSettings() = startSettings(
     Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
         .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-        .putExtra(Settings.EXTRA_CHANNEL_ID, TimerNotifier.CHANNEL_SESSION_END),
+        .putExtra(Settings.EXTRA_CHANNEL_ID, AlertChannels.sessionEndChannelId(this)),
 )
 
 fun Context.openExactAlarmSettings() {

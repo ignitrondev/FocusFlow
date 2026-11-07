@@ -15,6 +15,7 @@
  */
 package com.ignitrondev.focusflow
 
+import android.media.RingtoneManager
 import android.os.Looper
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -30,6 +31,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ignitrondev.focusflow.domain.model.ThemeMode
@@ -191,6 +193,16 @@ class FocusFlowAppTest {
 
         composeRule.onNodeWithTag("nav_Timer").performClick()
         waitForText("30:00")
+    }
+
+    @Test
+    fun alertSoundOpensAndroidsSoundPicker() {
+        composeRule.onNodeWithTag("nav_Settings").performClick()
+        composeRule.onNodeWithTag("setting_alert_sound").performScrollTo().performClick()
+        composeRule.waitForIdle()
+
+        val started = shadowOf(composeRule.activity).nextStartedActivityForResult
+        assertEquals(RingtoneManager.ACTION_RINGTONE_PICKER, started.intent.action)
     }
 
     private companion object {
