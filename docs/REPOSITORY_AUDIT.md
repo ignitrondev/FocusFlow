@@ -4,7 +4,8 @@ Audit date: 2026-11-07 · Branch audited: `main` @ `25631e8f` (in sync with `and
 
 ## 1. Repository structure
 
-`ignitrondev/compose-samples` is a GitHub **fork** of `android/compose-samples`. It is not a
+`ignitrondev/FocusFlow` (renamed from `ignitrondev/compose-samples` on 2026-11-07) is a GitHub
+**fork** of `android/compose-samples`. It is not a
 single Gradle build: every sample is an **independent Gradle project** with its own wrapper,
 `settings.gradle.kts`, version catalog, Spotless config and debug keystore.
 
