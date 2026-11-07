@@ -25,6 +25,12 @@ All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://
 - The timer notification shows the time left in large digits, in both the collapsed and the
   expanded notification.
 
+## 1.0.0-beta.2 — 2026-11-07
+
+### Changed
+- On phones the navigation bar is a floating glass pill with rounded corners. Tablets and phones
+  in landscape keep the side rail.
+
 ## 1.0.0-beta.1 — 2026-11-07
 
 First public beta.

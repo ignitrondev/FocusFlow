@@ -13,7 +13,7 @@ Jetpack Compose and Compose Multiplatform by **Bima Adam Nugraha**, AI-native en
 * **Open source:** Apache License 2.0, with no Google Play Services or proprietary libraries, so it
   can be published on F-Droid.
 
-> **Status: beta (1.0.0-beta.1).** All core features are in. Please
+> **Status: beta (1.0.0-beta.2).** All core features are in. Please
 > [report problems](https://github.com/ignitrondev/FocusFlow/issues/new/choose), especially about
 > alerts on your device.
 
