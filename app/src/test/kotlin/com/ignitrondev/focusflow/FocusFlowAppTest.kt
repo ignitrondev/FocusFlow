@@ -15,7 +15,13 @@
  */
 package com.ignitrondev.focusflow
 
+import android.os.Looper
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -23,21 +29,27 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ignitrondev.focusflow.domain.model.ThemeMode
+import com.ignitrondev.focusflow.testing.FakeTimeSource
 import com.ignitrondev.focusflow.testing.FakeUserPreferencesRepository
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
+import java.time.Duration
 import javax.inject.Inject
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
+@OptIn(ExperimentalTestApi::class)
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
-@Config(application = HiltTestApplication::class)
+// A typical phone screen. Robolectric's default (320x470 dp) is so small that the timer controls
+// sit below the fold, where clicks land outside the window.
+@Config(application = HiltTestApplication::class, qualifiers = "w411dp-h891dp-xxhdpi")
 class FocusFlowAppTest {
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
@@ -48,7 +60,15 @@ class FocusFlowAppTest {
     @Inject
     lateinit var preferences: FakeUserPreferencesRepository
 
+    @Inject
+    lateinit var clock: FakeTimeSource
+
     private fun string(id: Int) = composeRule.activity.getString(id)
+
+    // Timer actions are written to Room on a background thread; wait for the UI to reflect them.
+    private fun waitForText(text: String) = composeRule.waitUntilAtLeastOneExists(hasText(text), TIMEOUT_MILLIS)
+
+    private fun waitForButton(labelId: Int) = composeRule.waitUntilAtLeastOneExists(hasContentDescription(string(labelId)), TIMEOUT_MILLIS)
 
     @Before
     fun setUp() {
@@ -65,7 +85,46 @@ class FocusFlowAppTest {
     @Test
     fun selectingShortBreakShowsItsDuration() {
         composeRule.onNodeWithText(string(R.string.timer_mode_short_break)).performClick()
-        composeRule.onNodeWithText("05:00").assertExists()
+        waitForText("05:00")
+    }
+
+    @Test
+    fun startPauseResumeAndReset() {
+        composeRule.onNodeWithContentDescription(string(R.string.timer_action_start)).performClick()
+        waitForButton(R.string.timer_action_pause)
+
+        composeRule.onNodeWithContentDescription(string(R.string.timer_action_pause)).performClick()
+        waitForButton(R.string.timer_action_resume)
+
+        composeRule.onNodeWithContentDescription(string(R.string.timer_action_resume)).performClick()
+        waitForButton(R.string.timer_action_pause)
+
+        composeRule.onNodeWithContentDescription(string(R.string.timer_action_reset)).performClick()
+        waitForButton(R.string.timer_action_start)
+        waitForText("25:00")
+    }
+
+    @Test
+    fun countdownFollowsTheClock() {
+        composeRule.onNodeWithContentDescription(string(R.string.timer_action_start)).performClick()
+        waitForButton(R.string.timer_action_pause)
+
+        clock.advanceBy(10 * 60_000L)
+        // Let the screen's once-per-second refresh run.
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(1))
+
+        waitForText("15:00")
+    }
+
+    @Test
+    fun sessionTypeIsLockedWhileASessionIsInProgress() {
+        val shortBreak = composeRule.onNodeWithText(string(R.string.timer_mode_short_break))
+        shortBreak.assertIsEnabled()
+
+        composeRule.onNodeWithContentDescription(string(R.string.timer_action_start)).performClick()
+        waitForButton(R.string.timer_action_pause)
+
+        shortBreak.assertIsNotEnabled()
     }
 
     @Test
@@ -91,5 +150,9 @@ class FocusFlowAppTest {
 
         assertEquals(ThemeMode.Dark, preferences.userPreferences.value.themeMode)
         composeRule.onNodeWithText(string(R.string.settings_theme_dark)).assertIsSelected()
+    }
+
+    private companion object {
+        const val TIMEOUT_MILLIS = 5_000L
     }
 }

@@ -16,19 +16,18 @@
 package com.ignitrondev.focusflow.feature.timer
 
 import androidx.compose.runtime.Immutable
+import com.ignitrondev.focusflow.domain.timer.SessionType
 
-enum class TimerMode { Focus, ShortBreak, LongBreak }
-
-/**
- * Everything the timer screen renders. Phase 1 only shows the idle state; the Phase 2 timer
- * engine produces this from the persisted, deadline-based timer state.
- */
 @Immutable
 data class TimerUiState(
-    val mode: TimerMode = TimerMode.Focus,
+    val mode: SessionType = SessionType.Focus,
     val remainingSeconds: Long = 25 * 60L,
     val totalSeconds: Long = 25 * 60L,
     val isRunning: Boolean = false,
+    /** A started session that is not running. The main button then resumes instead of starting. */
+    val isPaused: Boolean = false,
+    /** The session type can only be changed before the session starts. */
+    val canSelectMode: Boolean = true,
     /** 1-based position in the current long-break cycle, e.g. "2 of 4". */
     val cyclePosition: Int = 1,
     val cycleLength: Int = 4,
@@ -41,7 +40,7 @@ data class TimerUiState(
 }
 
 sealed interface TimerAction {
-    data class SelectMode(val mode: TimerMode) : TimerAction
+    data class SelectMode(val mode: SessionType) : TimerAction
 
     data object StartOrPause : TimerAction
 

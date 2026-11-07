@@ -57,6 +57,9 @@ Official release signing certificate (SHA-256), to verify downloaded APKs with
 * Screens are split into a stateless `XxxScreen(uiState, callbacks)` composable (previewable,
   testable) and a small route function in the same feature package that wires the ViewModel.
 * `domain/` must not import Android or framework classes.
+* Room schema changes: bump the version, add a migration and its test, and commit the new file
+  in `app/schemas/`. See [DATABASE.md](DATABASE.md).
+* Time-dependent code takes a `TimeSource`; tests use `FakeTimeSource` instead of waiting.
 * Inject dispatchers with `@Dispatcher(FocusFlowDispatcher.IO)`; never hard-code
   `Dispatchers.IO` in classes that need tests.
 

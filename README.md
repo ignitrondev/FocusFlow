@@ -12,9 +12,10 @@ Jetpack Compose by [IgnitronDev](https://ignitrondev.space).
 * **Made for every screen:** Material 3, light/dark theme, optional dynamic color, adaptive
   navigation for phones, foldables and tablets.
 
-> **Status: early development.** The app foundation is done (design system, navigation,
-> settings). The timer engine, notifications, history and statistics are in progress, so
-> the timer controls do not run a countdown yet. See the [roadmap](docs/REPOSITORY_AUDIT.md#8-phase-plan).
+> **Status: early development.** The Pomodoro timer works: start, pause, resume, reset and
+> skip, with the long-break cycle, and it keeps correct time across app restarts and reboots.
+> Notifications when the app is closed, history and statistics are next. See the
+> [roadmap](docs/REPOSITORY_AUDIT.md#8-phase-plan) and [how the timer works](docs/TIMER_ENGINE.md).
 
 <p>
   <img src="docs/screenshots/timer_light.png" width="240" alt="Timer screen, light theme">

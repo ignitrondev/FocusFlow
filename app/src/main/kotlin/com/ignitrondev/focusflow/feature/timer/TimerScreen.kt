@@ -69,6 +69,7 @@ import com.ignitrondev.focusflow.R
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.core.designsystem.theme.TimerTextStyle
 import com.ignitrondev.focusflow.core.time.formatMinutesSeconds
+import com.ignitrondev.focusflow.domain.timer.SessionType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,8 +114,8 @@ fun TimerScreen(uiState: TimerUiState, onAction: (TimerAction) -> Unit, modifier
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(32.dp),
                     ) {
-                        ModeSelector(uiState.mode, onSelect = { onAction(TimerAction.SelectMode(it)) })
-                        TimerControls(uiState.isRunning, onAction)
+                        ModeSelector(uiState.mode, uiState.canSelectMode, onSelect = { onAction(TimerAction.SelectMode(it)) })
+                        TimerControls(uiState.isRunning, uiState.isPaused, onAction)
                         TodaySummary(uiState)
                     }
                 }
@@ -126,7 +127,7 @@ fun TimerScreen(uiState: TimerUiState, onAction: (TimerAction) -> Unit, modifier
                         .padding(horizontal = 24.dp, vertical = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    ModeSelector(uiState.mode, onSelect = { onAction(TimerAction.SelectMode(it)) })
+                    ModeSelector(uiState.mode, uiState.canSelectMode, onSelect = { onAction(TimerAction.SelectMode(it)) })
                     Spacer(Modifier.height(40.dp))
                     TimerDial(
                         uiState = uiState,
@@ -135,7 +136,7 @@ fun TimerScreen(uiState: TimerUiState, onAction: (TimerAction) -> Unit, modifier
                             .widthIn(max = 360.dp),
                     )
                     Spacer(Modifier.height(48.dp))
-                    TimerControls(uiState.isRunning, onAction)
+                    TimerControls(uiState.isRunning, uiState.isPaused, onAction)
                     Spacer(Modifier.weight(1f, fill = true))
                     Spacer(Modifier.height(32.dp))
                     TodaySummary(uiState)
@@ -147,13 +148,14 @@ fun TimerScreen(uiState: TimerUiState, onAction: (TimerAction) -> Unit, modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ModeSelector(selected: TimerMode, onSelect: (TimerMode) -> Unit) {
-    val modes = TimerMode.entries
+private fun ModeSelector(selected: SessionType, enabled: Boolean, onSelect: (SessionType) -> Unit) {
+    val modes = SessionType.entries
     SingleChoiceSegmentedButtonRow(modifier = Modifier.widthIn(max = 420.dp).fillMaxWidth()) {
         modes.forEachIndexed { index, mode ->
             SegmentedButton(
                 selected = mode == selected,
                 onClick = { onSelect(mode) },
+                enabled = enabled,
                 shape = SegmentedButtonDefaults.itemShape(index, modes.size),
                 icon = {},
                 label = { Text(stringResource(mode.labelRes()), maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -228,7 +230,7 @@ private fun TimerDial(uiState: TimerUiState, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun TimerControls(isRunning: Boolean, onAction: (TimerAction) -> Unit) {
+private fun TimerControls(isRunning: Boolean, isPaused: Boolean, onAction: (TimerAction) -> Unit) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(28.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -246,7 +248,13 @@ private fun TimerControls(isRunning: Boolean, onAction: (TimerAction) -> Unit) {
         ) {
             Icon(
                 imageVector = if (isRunning) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                contentDescription = stringResource(if (isRunning) R.string.timer_action_pause else R.string.timer_action_start),
+                contentDescription = stringResource(
+                    when {
+                        isRunning -> R.string.timer_action_pause
+                        isPaused -> R.string.timer_action_resume
+                        else -> R.string.timer_action_start
+                    },
+                ),
                 modifier = Modifier.size(36.dp),
             )
         }
@@ -278,16 +286,16 @@ private fun TodaySummary(uiState: TimerUiState) {
     )
 }
 
-private fun TimerMode.labelRes(): Int = when (this) {
-    TimerMode.Focus -> R.string.timer_mode_focus
-    TimerMode.ShortBreak -> R.string.timer_mode_short_break
-    TimerMode.LongBreak -> R.string.timer_mode_long_break
+private fun SessionType.labelRes(): Int = when (this) {
+    SessionType.Focus -> R.string.timer_mode_focus
+    SessionType.ShortBreak -> R.string.timer_mode_short_break
+    SessionType.LongBreak -> R.string.timer_mode_long_break
 }
 
 @Composable
-private fun TimerMode.accentColor() = when (this) {
-    TimerMode.Focus -> MaterialTheme.colorScheme.primary
-    TimerMode.ShortBreak, TimerMode.LongBreak -> MaterialTheme.colorScheme.tertiary
+private fun SessionType.accentColor() = when (this) {
+    SessionType.Focus -> MaterialTheme.colorScheme.primary
+    SessionType.ShortBreak, SessionType.LongBreak -> MaterialTheme.colorScheme.tertiary
 }
 
 @PreviewScreenSizes
@@ -295,7 +303,7 @@ private fun TimerMode.accentColor() = when (this) {
 private fun TimerScreenPreview() {
     FocusFlowTheme {
         TimerScreen(
-            uiState = TimerUiState(remainingSeconds = 17 * 60L + 42, isRunning = true, cyclePosition = 2),
+            uiState = TimerUiState(remainingSeconds = 17 * 60L + 42, isRunning = true, canSelectMode = false, cyclePosition = 2),
             onAction = {},
         )
     }
@@ -305,6 +313,6 @@ private fun TimerScreenPreview() {
 @Composable
 private fun TimerScreenDarkPreview() {
     FocusFlowTheme(darkTheme = true) {
-        TimerScreen(uiState = TimerUiState(mode = TimerMode.ShortBreak, totalSeconds = 300, remainingSeconds = 120), onAction = {})
+        TimerScreen(uiState = TimerUiState(mode = SessionType.ShortBreak, totalSeconds = 300, remainingSeconds = 120), onAction = {})
     }
 }
