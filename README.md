@@ -51,7 +51,7 @@ To check that an APK was signed by IgnitronDev, compare its certificate
 | Permission | Why |
 |---|---|
 | Notifications | To alert you when a session ends. Asked the first time you start a session; the timer works without it. |
-| Alarms & reminders (optional) | So the alert arrives exactly on time. Without it, Android may delay it by a few minutes while the phone is idle. |
+| Exact alarms | So the alert, and an automatic break, start exactly when the session ends. Granted automatically on Android 13+ (timer apps may use it); on Android 12 it can be turned off in Settings → Notifications. |
 | Run at startup | To restore a running timer after the phone restarts. |
 
 FocusFlow does **not** request internet access.

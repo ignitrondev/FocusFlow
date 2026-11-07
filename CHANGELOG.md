@@ -4,6 +4,13 @@ All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://
 
 ## Unreleased
 
+### Fixed
+- The end of a session, and an automatic break, could be up to ~18 minutes late on Android 14+
+  while the app was not open: the alarm was inexact unless the user allowed "Alarms & reminders".
+  FocusFlow now uses exact alarms (`USE_EXACT_ALARM`, granted at install on Android 13+).
+
+### Added
+
 - Pick the alert sound with Android's sound picker (Settings → Notifications → Alert sound),
   including silent and any alarm or notification sound.
 - The timer notification shows the time left in large digits, in both the collapsed and the

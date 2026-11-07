@@ -15,8 +15,10 @@
  */
 package com.ignitrondev.focusflow.platform
 
+import android.Manifest
 import android.app.AlarmManager
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
@@ -55,6 +57,19 @@ class TimerAlarmSchedulerTest {
 
         assertFalse(scheduler.canScheduleExact())
         assertEquals(1_500_000L, shadowOf(alarmManager).peekNextScheduledAlarm()!!.triggerAtMs)
+    }
+
+    @Test
+    fun exactAlarmsArePermittedWithoutAskingTheUserOnAndroid13AndLater() {
+        val info = context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
+        val requested = info.requestedPermissions.orEmpty().toList()
+
+        // Granted at install for timer apps on Android 13+, so alerts are not deferred by the
+        // inexact-alarm window (up to 75 % of the time until the alarm).
+        assertTrue(Manifest.permission.USE_EXACT_ALARM in requested)
+        // Only requested up to Android 12L (maxSdkVersion 32); there is no user toggle to ask for here.
+        assertFalse(Manifest.permission.SCHEDULE_EXACT_ALARM in requested)
+        assertNull("no Precise alerts setting to show on Android 13+", context.alertCapabilities().exactAlarmsAllowed)
     }
 
     @Test

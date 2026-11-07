@@ -32,7 +32,9 @@ use the rail instead of a bottom bar.
 - [ ] Fresh install: notification permission is asked on the first Start, not at launch.
 - [ ] Start a 1-minute short break, lock the phone: the alert sounds on time.
 - [ ] Same with the app swiped away from Recents.
-- [ ] "Precise alerts" off (Android 14+ default): note how late the alert is when idle.
+- [ ] Automatic break on, app in the background and screen off: the break starts and the alert
+      sounds at the end of the focus session (regression: up to ~18 minutes late in beta 1).
+- [ ] Android 12/12L only: "Precise alerts" off → note how late the alert is when idle.
 - [ ] Start a session, reboot the phone: the countdown notification and alarm come back.
 - [ ] Change the system time while running: the countdown does not jump.
 - [ ] Notification buttons: Pause, Resume, Reset.

@@ -96,10 +96,14 @@ deadline is stored, and Android wakes the app when it is reached.
 
 ### Platform limits (be honest with users)
 
-* **Exact timing needs a permission.** Since Android 12 exact alarms require "Alarms & reminders"
-  (`SCHEDULE_EXACT_ALARM`), which Android 14+ does not grant by default. Without it FocusFlow uses
-  an inexact alarm: on time while the phone is in use, but up to several minutes late in deep idle.
-  Settings shows the status and links to the permission. `USE_EXACT_ALARM` is not requested.
+* **The alarm must be exact.** An inexact alarm may be deferred by up to 75 % of the time until
+  it is due, even while the phone is in use: a 25-minute focus session could end (and an
+  automatic break start) up to ~18 minutes late. This was the first beta bug report (Pixel 6a,
+  Android 14+, where "Alarms & reminders" is off by default).
+  FocusFlow therefore requests `USE_EXACT_ALARM`, which Android 13+ grants at install and Google
+  Play allows for timer apps (a Play Console declaration is needed when publishing there). On
+  Android 12/12L it uses `SCHEDULE_EXACT_ALARM`, on by default but revocable; Settings shows the
+  status only there, and an inexact alarm is the fallback.
 * **Notifications need a permission on Android 13+.** It is asked the first time a session is
   started. Without it the timer still works and records sessions, but cannot alert.
 * Some manufacturers kill apps or delay alarms aggressively (battery optimisation). This is outside
