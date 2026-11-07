@@ -20,28 +20,33 @@ import androidx.lifecycle.viewModelScope
 import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.model.UserPreferences
 import com.ignitrondev.focusflow.domain.repository.UserPreferencesRepository
+import com.ignitrondev.focusflow.domain.timer.TimerConfig
+import com.ignitrondev.focusflow.domain.timer.TimerConfigRepository
+import com.ignitrondev.focusflow.domain.timer.TimerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 sealed interface SettingsUiState {
     data object Loading : SettingsUiState
 
-    data class Success(val preferences: UserPreferences) : SettingsUiState
+    data class Success(val preferences: UserPreferences, val timerConfig: TimerConfig = TimerConfig()) : SettingsUiState
 }
 
 @HiltViewModel
-class SettingsViewModel
-@Inject
-constructor(private val userPreferencesRepository: UserPreferencesRepository) : ViewModel() {
+class SettingsViewModel @Inject constructor(
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val timerConfigRepository: TimerConfigRepository,
+    private val timerRepository: TimerRepository,
+) : ViewModel() {
     val uiState: StateFlow<SettingsUiState> =
-        userPreferencesRepository.userPreferences
-            .map<UserPreferences, SettingsUiState> { SettingsUiState.Success(it) }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState.Loading)
+        combine(userPreferencesRepository.userPreferences, timerConfigRepository.config) { preferences, config ->
+            SettingsUiState.Success(preferences, config)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState.Loading)
 
     fun setThemeMode(themeMode: ThemeMode) {
         viewModelScope.launch { userPreferencesRepository.setThemeMode(themeMode) }
@@ -49,5 +54,13 @@ constructor(private val userPreferencesRepository: UserPreferencesRepository) : 
 
     fun setUseDynamicColor(useDynamicColor: Boolean) {
         viewModelScope.launch { userPreferencesRepository.setUseDynamicColor(useDynamicColor) }
+    }
+
+    fun updateTimerConfig(transform: (TimerConfig) -> TimerConfig) {
+        viewModelScope.launch {
+            timerConfigRepository.update(transform)
+            // Shows the new duration right away if the current session has not started.
+            timerRepository.refresh()
+        }
     }
 }

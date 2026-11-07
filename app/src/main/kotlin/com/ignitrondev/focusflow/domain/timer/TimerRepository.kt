@@ -47,7 +47,9 @@ fun interface SessionCompletionListener {
     fun onSessionsCompleted(sessions: List<FinishedSession>, next: TimerState)
 }
 
-/** Source of the timer configuration. Phase 2 uses the defaults; settings arrive in Phase 5. */
+/** The user's timer settings. A change applies to sessions that have not started yet. */
 interface TimerConfigRepository {
     val config: Flow<TimerConfig>
+
+    suspend fun update(transform: (TimerConfig) -> TimerConfig)
 }

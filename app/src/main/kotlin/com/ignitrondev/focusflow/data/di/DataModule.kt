@@ -15,8 +15,10 @@
  */
 package com.ignitrondev.focusflow.data.di
 
+import com.ignitrondev.focusflow.data.repository.DataStoreTimerConfigRepository
 import com.ignitrondev.focusflow.data.repository.DataStoreUserPreferencesRepository
 import com.ignitrondev.focusflow.domain.repository.UserPreferencesRepository
+import com.ignitrondev.focusflow.domain.timer.TimerConfigRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -29,4 +31,8 @@ interface DataModule {
     @Binds
     @Singleton
     fun bindsUserPreferencesRepository(impl: DataStoreUserPreferencesRepository): UserPreferencesRepository
+
+    @Binds
+    @Singleton
+    fun bindsTimerConfigRepository(impl: DataStoreTimerConfigRepository): TimerConfigRepository
 }

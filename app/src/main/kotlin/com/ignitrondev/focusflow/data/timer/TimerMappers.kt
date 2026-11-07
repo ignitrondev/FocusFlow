@@ -74,4 +74,18 @@ internal fun FinishedSession.toEntity() = FocusSessionEntity(
     completed = completed,
 )
 
+/** Null for a row with an unknown session type (e.g. written by a newer version). */
+internal fun FocusSessionEntity.toDomainOrNull(): FinishedSession? {
+    val type = SessionType.entries.firstOrNull { it.name == sessionType } ?: return null
+    return FinishedSession(
+        id = id,
+        sessionType = type,
+        startedAtEpochMillis = startedAt,
+        endedAtEpochMillis = endedAt,
+        plannedDurationMillis = plannedDurationSeconds * 1000,
+        actualDurationMillis = actualDurationSeconds * 1000,
+        completed = completed,
+    )
+}
+
 private fun Long.toRoundedSeconds(): Long = (this + 500) / 1000

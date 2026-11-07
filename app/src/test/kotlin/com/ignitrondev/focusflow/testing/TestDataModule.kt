@@ -17,6 +17,7 @@ package com.ignitrondev.focusflow.testing
 
 import com.ignitrondev.focusflow.data.di.DataModule
 import com.ignitrondev.focusflow.domain.repository.UserPreferencesRepository
+import com.ignitrondev.focusflow.domain.timer.TimerConfigRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.components.SingletonComponent
@@ -28,4 +29,7 @@ import dagger.hilt.testing.TestInstallIn
 interface TestDataModule {
     @Binds
     fun bindsUserPreferencesRepository(fake: FakeUserPreferencesRepository): UserPreferencesRepository
+
+    @Binds
+    fun bindsTimerConfigRepository(fake: FakeTimerConfigRepository): TimerConfigRepository
 }

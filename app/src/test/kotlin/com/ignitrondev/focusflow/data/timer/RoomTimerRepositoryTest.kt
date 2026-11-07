@@ -27,6 +27,7 @@ import com.ignitrondev.focusflow.domain.timer.SessionType
 import com.ignitrondev.focusflow.domain.timer.TimerEngine
 import com.ignitrondev.focusflow.domain.timer.TimerStatus
 import com.ignitrondev.focusflow.testing.FakeTimeSource
+import com.ignitrondev.focusflow.testing.FakeTimerConfigRepository
 import java.util.UUID
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -44,6 +45,7 @@ import org.junit.runner.RunWith
 class RoomTimerRepositoryTest {
     private lateinit var database: FocusFlowDatabase
     private val clock = FakeTimeSource()
+    private val config = FakeTimerConfigRepository()
     private val minute = 60_000L
 
     @Before
@@ -62,7 +64,7 @@ class RoomTimerRepositoryTest {
         database = database,
         timerStateDao = database.timerStateDao(),
         focusSessionDao = database.focusSessionDao(),
-        configRepository = DefaultTimerConfigRepository(),
+        configRepository = config,
         timeSource = clock,
         engine = TimerEngine(newRunId = { UUID.randomUUID().toString() }),
         completionListener = { sessions, _ -> synchronized(notified) { notified += sessions } },
@@ -180,6 +182,20 @@ class RoomTimerRepositoryTest {
         assertEquals(3, database.focusSessionDao().getAll().size)
         assertEquals(2, summary.completedSessions)
         assertEquals(50 * minute, summary.focusMillis)
+    }
+
+    @Test
+    fun newDurationsApplyToTheNextSessionOnly() = runTest {
+        val repository = newRepository()
+        repository.start()
+        config.update { it.copy(focusMillis = 50 * minute, shortBreakMillis = 10 * minute) }
+        repository.refresh()
+
+        assertEquals("running session keeps its length", 25 * minute, repository.state.first().plannedDurationMillis)
+
+        clock.advanceBy(25 * minute)
+        repository.refresh()
+        assertEquals(10 * minute, repository.state.first().plannedDurationMillis)
     }
 
     @Test

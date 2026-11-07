@@ -85,4 +85,38 @@
     <string name="settings_exact_alarms">Precise alerts</string>
     <string name="settings_exact_alarms_on">On. Alerts arrive right on time.</string>
     <string name="settings_exact_alarms_off">Off. When the phone is idle, an alert can be a few minutes late. Tap to allow alarms and reminders.</string>
+
+    <!-- Settings: timer -->
+    <string name="settings_section_timer">Timer</string>
+    <string name="settings_focus_duration">Focus</string>
+    <string name="settings_short_break_duration">Short break</string>
+    <string name="settings_long_break_duration">Long break</string>
+    <string name="settings_long_break_interval">Long break after</string>
+    <string name="settings_auto_start_breaks">Start breaks automatically</string>
+    <string name="settings_auto_start_focus">Start focus sessions automatically</string>
+    <string name="settings_timer_note">Changes apply from the next session.</string>
+    <plurals name="focus_sessions_count">
+        <item quantity="one">%d focus session</item>
+        <item quantity="other">%d focus sessions</item>
+    </plurals>
+
+    <!-- History -->
+    <string name="history_today">Today</string>
+    <string name="history_yesterday">Yesterday</string>
+    <string name="history_time_range">%1$s – %2$s</string>
+    <string name="history_interrupted">Stopped early</string>
+    <string name="history_day_total">%1$s focused</string>
+    <string name="history_item_description">%1$s, %2$s, %3$s</string>
+
+    <!-- Statistics -->
+    <string name="statistics_today">Today</string>
+    <string name="statistics_this_week">This week</string>
+    <string name="statistics_daily_average">Daily average this week</string>
+    <string name="statistics_average_session">Average focus session</string>
+    <string name="statistics_all_time">All time</string>
+    <string name="statistics_last_seven_days">Last 7 days</string>
+    <string name="statistics_chart_description">Focus time over the last 7 days: %1$s</string>
+    <string name="duration_hours">%1$d h</string>
+    <string name="duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="duration_minutes_short">%1$d min</string>
 </resources>

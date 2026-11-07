@@ -16,6 +16,7 @@
 package com.ignitrondev.focusflow
 
 import android.os.Looper
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -23,19 +24,25 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ignitrondev.focusflow.domain.model.ThemeMode
+import com.ignitrondev.focusflow.domain.timer.TimerRepository
 import com.ignitrondev.focusflow.testing.FakeTimeSource
+import com.ignitrondev.focusflow.testing.FakeTimerConfigRepository
 import com.ignitrondev.focusflow.testing.FakeUserPreferencesRepository
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import java.time.Duration
 import javax.inject.Inject
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -62,6 +69,12 @@ class FocusFlowAppTest {
 
     @Inject
     lateinit var clock: FakeTimeSource
+
+    @Inject
+    lateinit var timerRepository: TimerRepository
+
+    @Inject
+    lateinit var timerConfig: FakeTimerConfigRepository
 
     private fun string(id: Int) = composeRule.activity.getString(id)
 
@@ -150,6 +163,34 @@ class FocusFlowAppTest {
 
         assertEquals(ThemeMode.Dark, preferences.userPreferences.value.themeMode)
         composeRule.onNodeWithText(string(R.string.settings_theme_dark)).assertIsSelected()
+    }
+
+    @Test
+    fun completedSessionAppearsInHistoryAndStatistics() {
+        runBlocking {
+            timerRepository.start()
+            clock.advanceBy(25 * 60_000L)
+            timerRepository.refresh()
+        }
+
+        composeRule.onNodeWithTag("nav_History").performClick()
+        waitForText(string(R.string.history_today))
+        // Rows expose one combined description to TalkBack, so their texts are in the unmerged tree.
+        composeRule.onNodeWithText("25 min", useUnmergedTree = true).assertExists()
+
+        composeRule.onNodeWithTag("nav_Statistics").performClick()
+        waitForText(string(R.string.statistics_last_seven_days))
+        composeRule.onAllNodesWithText("25 min").onFirst().assertExists()
+    }
+
+    @Test
+    fun focusDurationFromSettingsIsUsedByTheTimer() {
+        composeRule.onNodeWithTag("nav_Settings").performClick()
+        composeRule.onNodeWithTag("setting_focus").performSemanticsAction(SemanticsActions.SetProgress) { it(30f) }
+        composeRule.waitUntil(TIMEOUT_MILLIS) { timerConfig.config.value.focusMillis == 30 * 60_000L }
+
+        composeRule.onNodeWithTag("nav_Timer").performClick()
+        waitForText("30:00")
     }
 
     private companion object {

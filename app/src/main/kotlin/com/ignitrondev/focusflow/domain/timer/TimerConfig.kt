@@ -41,7 +41,13 @@ data class TimerConfig(
 
     fun autoStarts(type: SessionType): Boolean = if (type == SessionType.Focus) autoStartFocus else autoStartBreaks
 
-    private companion object {
+    companion object {
         const val MINUTE = 60_000L
+
+        /** Allowed values in Settings, in minutes (sessions per cycle for the interval). */
+        val FOCUS_MINUTES = 5..90
+        val SHORT_BREAK_MINUTES = 1..30
+        val LONG_BREAK_MINUTES = 5..60
+        val LONG_BREAK_INTERVAL = 2..8
     }
 }

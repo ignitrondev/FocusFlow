@@ -8,6 +8,15 @@ they are the reference for migrations.
 * Every schema change bumps the version and ships a migration (or auto-migration) with a test.
 * **No destructive migrations**: `fallbackToDestructiveMigration` would delete the user's history.
 * Writes that must stay consistent (timer state + session history) run in one transaction.
+* `DatabaseSchemaTest` builds a database from each exported schema and opens it with Room, which
+  fails if the entities changed without a version bump. Every migration gets a test there:
+  create the old version from its JSON, migrate, and check the data survived.
+
+## Settings (DataStore, not Room)
+
+`user_preferences.preferences_pb`: theme, dynamic color, and the timer settings (`focus_minutes`,
+`short_break_minutes`, `long_break_minutes`, `long_break_interval`, `auto_start_breaks`,
+`auto_start_focus`). Out-of-range values are clamped when read.
 
 ## `timer_state`
 

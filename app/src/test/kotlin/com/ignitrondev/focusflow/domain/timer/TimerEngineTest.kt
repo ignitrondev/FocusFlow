@@ -346,6 +346,27 @@ class TimerEngineTest {
         assertEquals(25 * minute, settle(focus).state.remainingAt(clock.now()))
     }
 
+    // Settings changes
+
+    @Test
+    fun newDurationApplyToAnIdleSessionThatHasNotStarted() {
+        val longerFocus = config.copy(focusMillis = 50 * minute)
+
+        val update = engine.settle(engine.initial(config), clock.now(), longerFocus)
+
+        assertEquals(50 * minute, update.state.remainingAt(clock.now()))
+    }
+
+    @Test
+    fun newDurationDoesNotChangeAStartedSession() {
+        val running = startedFocus()
+        val paused = engine.pause(running, clock.now()).state
+        val longerFocus = config.copy(focusMillis = 50 * minute)
+
+        assertSame(running, engine.settle(running, clock.now(), longerFocus).state)
+        assertSame(paused, engine.settle(paused, clock.now(), longerFocus).state)
+    }
+
     // Auto-start
 
     @Test

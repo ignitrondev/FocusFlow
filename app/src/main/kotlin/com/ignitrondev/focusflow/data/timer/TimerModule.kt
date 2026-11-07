@@ -16,7 +16,6 @@
 package com.ignitrondev.focusflow.data.timer
 
 import com.ignitrondev.focusflow.domain.timer.FocusSessionRepository
-import com.ignitrondev.focusflow.domain.timer.TimerConfigRepository
 import com.ignitrondev.focusflow.domain.timer.TimerEngine
 import com.ignitrondev.focusflow.domain.timer.TimerRepository
 import dagger.Binds
@@ -34,9 +33,6 @@ abstract class TimerModule {
 
     @Binds
     abstract fun bindsFocusSessionRepository(repository: RoomFocusSessionRepository): FocusSessionRepository
-
-    @Binds
-    abstract fun bindsTimerConfigRepository(repository: DefaultTimerConfigRepository): TimerConfigRepository
 
     companion object {
         @Provides

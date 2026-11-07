@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ignitrondev.focusflow.data.timer
+package com.ignitrondev.focusflow.testing
 
 import com.ignitrondev.focusflow.domain.timer.TimerConfig
 import com.ignitrondev.focusflow.domain.timer.TimerConfigRepository
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import javax.inject.Singleton
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
-/** Default Pomodoro durations. Replaced by a DataStore-backed implementation in Phase 5. */
-class DefaultTimerConfigRepository @Inject constructor() : TimerConfigRepository {
-    override val config: Flow<TimerConfig> = flowOf(TimerConfig())
+@Singleton
+class FakeTimerConfigRepository @Inject constructor() : TimerConfigRepository {
+    private val state = MutableStateFlow(TimerConfig())
+    override val config: StateFlow<TimerConfig> = state
+
+    override suspend fun update(transform: (TimerConfig) -> TimerConfig) = state.update(transform)
 }

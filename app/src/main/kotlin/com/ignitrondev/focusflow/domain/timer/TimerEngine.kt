@@ -31,7 +31,8 @@ class TimerEngine(private val newRunId: () -> String) {
      * Brings a persisted state up to date with the clocks: re-anchors a running timer after a
      * reboot and completes every session whose deadline has passed. With auto-start enabled, the
      * next session starts at the previous deadline, so a timer that kept "running" while the app
-     * was closed ends up where it would have been. The chain stops after one full cycle.
+     * was closed ends up where it would have been. The chain stops after one full cycle. Finally,
+     * an idle session that has not started takes the current durations from [config].
      */
     fun settle(state: TimerState, now: TimerInstant, config: TimerConfig): TimerUpdate {
         var current = reanchorAfterReboot(state, now)
@@ -42,6 +43,11 @@ class TimerEngine(private val newRunId: () -> String) {
             val (next, session) = complete(current, now, config, allowAutoStart)
             finished += session
             current = next
+        }
+        // New durations from Settings apply to a session that has not started yet.
+        val duration = config.durationOf(current.sessionType)
+        if (!current.isStarted && current.plannedDurationMillis != duration) {
+            current = current.copy(plannedDurationMillis = duration, remainingMillis = duration)
         }
         return TimerUpdate(current, finished)
     }

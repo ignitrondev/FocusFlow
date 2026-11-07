@@ -37,22 +37,30 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -66,11 +74,13 @@ import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.core.designsystem.theme.supportsDynamicColor
 import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.model.UserPreferences
+import com.ignitrondev.focusflow.domain.timer.TimerConfig
 import com.ignitrondev.focusflow.platform.AlertCapabilities
 import com.ignitrondev.focusflow.platform.alertCapabilities
 import com.ignitrondev.focusflow.platform.openAlertSoundSettings
 import com.ignitrondev.focusflow.platform.openExactAlarmSettings
 import com.ignitrondev.focusflow.platform.openNotificationSettings
+import kotlin.math.roundToInt
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -94,6 +104,7 @@ fun NavGraphBuilder.settingsScreen() {
             alerts = alerts,
             onThemeModeChange = viewModel::setThemeMode,
             onDynamicColorChange = viewModel::setUseDynamicColor,
+            onTimerConfigChange = viewModel::updateTimerConfig,
             onOpenNotificationSettings = context::openNotificationSettings,
             onOpenAlertSoundSettings = context::openAlertSoundSettings,
             onOpenExactAlarmSettings = context::openExactAlarmSettings,
@@ -108,6 +119,7 @@ fun SettingsScreen(
     alerts: AlertCapabilities,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
+    onTimerConfigChange: ((TimerConfig) -> TimerConfig) -> Unit,
     onOpenNotificationSettings: () -> Unit,
     onOpenAlertSoundSettings: () -> Unit,
     onOpenExactAlarmSettings: () -> Unit,
@@ -129,12 +141,16 @@ fun SettingsScreen(
                 when (uiState) {
                     SettingsUiState.Loading -> Unit
 
-                    is SettingsUiState.Success -> AppearanceSection(
-                        preferences = uiState.preferences,
-                        onThemeModeChange = onThemeModeChange,
-                        onDynamicColorChange = onDynamicColorChange,
-                        showDynamicColorOption = showDynamicColorOption,
-                    )
+                    is SettingsUiState.Success -> {
+                        TimerSection(uiState.timerConfig, onTimerConfigChange)
+                        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                        AppearanceSection(
+                            preferences = uiState.preferences,
+                            onThemeModeChange = onThemeModeChange,
+                            onDynamicColorChange = onDynamicColorChange,
+                            showDynamicColorOption = showDynamicColorOption,
+                        )
+                    }
                 }
                 HorizontalDivider(Modifier.padding(vertical = 8.dp))
                 NotificationsSection(alerts, onOpenNotificationSettings, onOpenAlertSoundSettings, onOpenExactAlarmSettings)
@@ -143,6 +159,113 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+@Composable
+private fun TimerSection(config: TimerConfig, onChange: ((TimerConfig) -> TimerConfig) -> Unit) {
+    SectionHeader(stringResource(R.string.settings_section_timer))
+    val minutesLabel: @Composable (Int) -> String = { pluralStringResource(R.plurals.duration_minutes, it, it) }
+    SliderSetting(
+        title = stringResource(R.string.settings_focus_duration),
+        value = (config.focusMillis / TimerConfig.MINUTE).toInt(),
+        range = TimerConfig.FOCUS_MINUTES,
+        step = 5,
+        valueLabel = minutesLabel,
+        testTag = "setting_focus",
+        onValueChange = { minutes -> onChange { it.copy(focusMillis = minutes * TimerConfig.MINUTE) } },
+    )
+    SliderSetting(
+        title = stringResource(R.string.settings_short_break_duration),
+        value = (config.shortBreakMillis / TimerConfig.MINUTE).toInt(),
+        range = TimerConfig.SHORT_BREAK_MINUTES,
+        step = 1,
+        valueLabel = minutesLabel,
+        testTag = "setting_short_break",
+        onValueChange = { minutes -> onChange { it.copy(shortBreakMillis = minutes * TimerConfig.MINUTE) } },
+    )
+    SliderSetting(
+        title = stringResource(R.string.settings_long_break_duration),
+        value = (config.longBreakMillis / TimerConfig.MINUTE).toInt(),
+        range = TimerConfig.LONG_BREAK_MINUTES,
+        step = 5,
+        valueLabel = minutesLabel,
+        testTag = "setting_long_break",
+        onValueChange = { minutes -> onChange { it.copy(longBreakMillis = minutes * TimerConfig.MINUTE) } },
+    )
+    SliderSetting(
+        title = stringResource(R.string.settings_long_break_interval),
+        value = config.longBreakInterval,
+        range = TimerConfig.LONG_BREAK_INTERVAL,
+        step = 1,
+        valueLabel = { pluralStringResource(R.plurals.focus_sessions_count, it, it) },
+        testTag = "setting_interval",
+        onValueChange = { sessions -> onChange { it.copy(longBreakInterval = sessions) } },
+    )
+    SwitchSetting(
+        title = stringResource(R.string.settings_auto_start_breaks),
+        checked = config.autoStartBreaks,
+        onCheckedChange = { checked -> onChange { it.copy(autoStartBreaks = checked) } },
+    )
+    SwitchSetting(
+        title = stringResource(R.string.settings_auto_start_focus),
+        checked = config.autoStartFocus,
+        onCheckedChange = { checked -> onChange { it.copy(autoStartFocus = checked) } },
+    )
+    Text(
+        text = stringResource(R.string.settings_timer_note),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+    )
+}
+
+/**
+ * A setting picked on a slider. The value is only saved when the user lets go, so dragging does
+ * not write to disk on every step.
+ */
+@Composable
+private fun SliderSetting(
+    title: String,
+    value: Int,
+    range: IntRange,
+    step: Int,
+    valueLabel: @Composable (Int) -> String,
+    testTag: String,
+    onValueChange: (Int) -> Unit,
+) {
+    var dragged by remember(value) { mutableFloatStateOf(value.toFloat()) }
+    val shown = dragged.roundToInt()
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Text(valueLabel(shown), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+        }
+        val label = valueLabel(shown)
+        Slider(
+            value = dragged,
+            onValueChange = { dragged = it },
+            onValueChangeFinished = { if (dragged.roundToInt() != value) onValueChange(dragged.roundToInt()) },
+            valueRange = range.first.toFloat()..range.last.toFloat(),
+            steps = ((range.last - range.first) / step - 1).coerceAtLeast(0),
+            // Still snaps to every step, without a row of dots that would be noise at 30 steps.
+            colors = SliderDefaults.colors(activeTickColor = Color.Transparent, inactiveTickColor = Color.Transparent),
+            modifier = Modifier
+                .testTag(testTag)
+                .semantics {
+                    contentDescription = title
+                    stateDescription = label
+                },
+        )
+    }
+}
+
+@Composable
+private fun SwitchSetting(title: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    ListItem(
+        headlineContent = { Text(title) },
+        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
+        modifier = Modifier.toggleable(value = checked, onValueChange = onCheckedChange, role = Role.Switch),
+    )
 }
 
 @Composable
@@ -270,6 +393,7 @@ private fun SettingsScreenPreview() {
             alerts = AlertCapabilities(notificationsAllowed = true, exactAlarmsAllowed = false),
             onThemeModeChange = {},
             onDynamicColorChange = {},
+            onTimerConfigChange = {},
             onOpenNotificationSettings = {},
             onOpenAlertSoundSettings = {},
             onOpenExactAlarmSettings = {},

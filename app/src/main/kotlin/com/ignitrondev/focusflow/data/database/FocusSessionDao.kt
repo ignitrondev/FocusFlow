@@ -36,6 +36,9 @@ interface FocusSessionDao {
     @Query("SELECT * FROM focus_sessions ORDER BY ended_at DESC")
     suspend fun getAll(): List<FocusSessionEntity>
 
+    @Query("SELECT * FROM focus_sessions ORDER BY ended_at DESC")
+    fun observeAll(): Flow<List<FocusSessionEntity>>
+
     @Query(
         """
         SELECT COUNT(*) AS session_count, COALESCE(SUM(actual_duration_seconds), 0) AS total_seconds

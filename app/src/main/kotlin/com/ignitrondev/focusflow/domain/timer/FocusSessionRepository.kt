@@ -21,6 +21,9 @@ import kotlinx.coroutines.flow.Flow
 data class FocusSummary(val completedSessions: Int, val focusMillis: Long)
 
 interface FocusSessionRepository {
+    /** Every finished session, newest first. */
+    fun observeSessions(): Flow<List<FinishedSession>>
+
     /** Completed focus sessions that ended in [fromEpochMillis, toEpochMillis). */
     fun observeFocusSummary(fromEpochMillis: Long, toEpochMillis: Long): Flow<FocusSummary>
 }
