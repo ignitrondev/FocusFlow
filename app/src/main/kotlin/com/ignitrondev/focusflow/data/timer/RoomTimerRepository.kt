@@ -19,6 +19,8 @@ import androidx.room.withTransaction
 import com.ignitrondev.focusflow.data.database.FocusFlowDatabase
 import com.ignitrondev.focusflow.data.database.FocusSessionDao
 import com.ignitrondev.focusflow.data.database.TimerStateDao
+import com.ignitrondev.focusflow.domain.timer.FinishedSession
+import com.ignitrondev.focusflow.domain.timer.SessionCompletionListener
 import com.ignitrondev.focusflow.domain.timer.SessionType
 import com.ignitrondev.focusflow.domain.timer.TimeSource
 import com.ignitrondev.focusflow.domain.timer.TimerConfig
@@ -43,6 +45,7 @@ class RoomTimerRepository @Inject constructor(
     private val configRepository: TimerConfigRepository,
     private val timeSource: TimeSource,
     private val engine: TimerEngine,
+    private val completionListener: SessionCompletionListener,
 ) : TimerRepository {
 
     // Before the first write there is no row; until then the UI shows a fresh timer. Its run id is
@@ -70,14 +73,20 @@ class RoomTimerRepository @Inject constructor(
      */
     private suspend fun update(action: (TimerState, TimerInstant, TimerConfig) -> TimerUpdate) {
         val config = configRepository.config.first()
-        database.withTransaction {
+        val (completed, next) = database.withTransaction {
             val now = timeSource.now()
             val stored = timerStateDao.get()?.toDomainOrNull()
             val current = stored ?: engine.initial(config)
             val settled = engine.settle(current, now, config)
             val result = action(settled.state, now, config)
-            (settled.finishedSessions + result.finishedSessions).forEach { focusSessionDao.insert(it.toEntity()) }
+            val recorded = mutableListOf<FinishedSession>()
+            (settled.finishedSessions + result.finishedSessions).forEach { session ->
+                // -1: a row with this run id exists already, so this session was handled before.
+                if (focusSessionDao.insert(session.toEntity()) != -1L) recorded += session
+            }
             if (result.state != stored) timerStateDao.upsert(result.state.toEntity(now.epochMillis))
+            recorded.filter(FinishedSession::completed) to result.state
         }
+        if (completed.isNotEmpty()) completionListener.onSessionsCompleted(completed, next)
     }
 }

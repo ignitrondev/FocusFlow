@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ignitrondev.focusflow.core.time.dayBounds
 import com.ignitrondev.focusflow.data.database.FocusFlowDatabase
 import com.ignitrondev.focusflow.data.database.TimerStateEntity
+import com.ignitrondev.focusflow.domain.timer.FinishedSession
 import com.ignitrondev.focusflow.domain.timer.SessionType
 import com.ignitrondev.focusflow.domain.timer.TimerEngine
 import com.ignitrondev.focusflow.domain.timer.TimerStatus
@@ -64,7 +65,10 @@ class RoomTimerRepositoryTest {
         configRepository = DefaultTimerConfigRepository(),
         timeSource = clock,
         engine = TimerEngine(newRunId = { UUID.randomUUID().toString() }),
+        completionListener = { sessions, _ -> synchronized(notified) { notified += sessions } },
     )
+
+    private val notified = mutableListOf<FinishedSession>()
 
     @Test
     fun freshInstallShowsAnIdleFocusSession() = runTest {
@@ -128,6 +132,18 @@ class RoomTimerRepositoryTest {
 
         assertEquals(1, database.focusSessionDao().getAll().size)
         assertEquals(1, newRepository().state.first().completedFocusInCycle)
+        assertEquals("the user is alerted once", 1, notified.size)
+    }
+
+    @Test
+    fun interruptedSessionsDoNotTriggerTheCompletionAlert() = runTest {
+        val repository = newRepository()
+        repository.start()
+        clock.advanceBy(10 * minute)
+        repository.skip()
+
+        assertEquals(1, database.focusSessionDao().getAll().size)
+        assertTrue(notified.isEmpty())
     }
 
     @Test

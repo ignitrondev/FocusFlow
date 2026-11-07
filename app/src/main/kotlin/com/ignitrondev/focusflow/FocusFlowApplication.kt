@@ -16,7 +16,18 @@
 package com.ignitrondev.focusflow
 
 import android.app.Application
+import com.ignitrondev.focusflow.platform.TimerSystemIntegration
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 @HiltAndroidApp
-class FocusFlowApplication : Application()
+class FocusFlowApplication : Application() {
+    @Inject lateinit var timerSystemIntegration: TimerSystemIntegration
+
+    override fun onCreate() {
+        super.onCreate()
+        // Recovers the timer and keeps its alarm and notification in sync, also when the process
+        // was started in the background by the deadline alarm or after a reboot.
+        timerSystemIntegration.start()
+    }
+}

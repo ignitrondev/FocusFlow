@@ -8,6 +8,14 @@
 
     <!-- FocusFlow is offline-first: no INTERNET permission. -->
 
+    <!-- Session alerts (runtime permission on Android 13+; the timer works without it). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Alerts exactly at the deadline when the user allows it (Android 12+). Without it FocusFlow
+         falls back to an inexact alarm. USE_EXACT_ALARM is deliberately not requested. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Restores the deadline alarm after a reboot. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <application
         android:name=".FocusFlowApplication"
         android:allowBackup="true"
@@ -36,6 +44,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Deadline alarm and notification buttons; only FocusFlow itself can send these. -->
+        <receiver
+            android:name=".platform.TimerActionReceiver"
+            android:exported="false" />
+
+        <!-- Protected system broadcasts only (boot, app update, exact-alarm permission change). -->
+        <receiver
+            android:name=".platform.TimerRestoreReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

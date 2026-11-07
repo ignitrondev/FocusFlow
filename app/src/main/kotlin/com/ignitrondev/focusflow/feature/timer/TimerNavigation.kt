@@ -15,11 +15,21 @@
  */
 package com.ignitrondev.focusflow.feature.timer
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.ignitrondev.focusflow.platform.notificationsAllowed
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -29,6 +39,32 @@ fun NavGraphBuilder.timerScreen() {
     composable<TimerRoute> {
         val viewModel: TimerViewModel = hiltViewModel()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-        TimerScreen(uiState = uiState, onAction = viewModel::onAction)
+        val requestNotificationPermission = rememberNotificationPermissionRequest()
+        TimerScreen(
+            uiState = uiState,
+            onAction = { action ->
+                // Asked in context: the first time the user starts a session, so they know why.
+                if (action == TimerAction.StartOrPause && !uiState.isRunning) requestNotificationPermission()
+                viewModel.onAction(action)
+            },
+        )
+    }
+}
+
+/**
+ * Asks once per screen visit for the notification permission (Android 13+). Android itself stops
+ * showing the dialog after the user declined twice; the timer works either way.
+ */
+@Composable
+private fun rememberNotificationPermissionRequest(): () -> Unit {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return {}
+    val context = LocalContext.current
+    var asked by rememberSaveable { mutableStateOf(false) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    return {
+        if (!asked && !context.notificationsAllowed()) {
+            asked = true
+            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 }

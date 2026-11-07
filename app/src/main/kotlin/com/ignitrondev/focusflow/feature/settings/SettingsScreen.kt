@@ -15,6 +15,7 @@
  */
 package com.ignitrondev.focusflow.feature.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,8 +42,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -51,6 +56,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -60,6 +66,11 @@ import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.core.designsystem.theme.supportsDynamicColor
 import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.model.UserPreferences
+import com.ignitrondev.focusflow.platform.AlertCapabilities
+import com.ignitrondev.focusflow.platform.alertCapabilities
+import com.ignitrondev.focusflow.platform.openAlertSoundSettings
+import com.ignitrondev.focusflow.platform.openExactAlarmSettings
+import com.ignitrondev.focusflow.platform.openNotificationSettings
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -71,10 +82,21 @@ fun NavGraphBuilder.settingsScreen() {
     composable<SettingsRoute> {
         val viewModel: SettingsViewModel = hiltViewModel()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val context = LocalContext.current
+        // Permissions change in Android settings, outside the app: re-read them on every return.
+        var alerts by remember { mutableStateOf(context.alertCapabilities()) }
+        LifecycleResumeEffect(Unit) {
+            alerts = context.alertCapabilities()
+            onPauseOrDispose {}
+        }
         SettingsScreen(
             uiState = uiState,
+            alerts = alerts,
             onThemeModeChange = viewModel::setThemeMode,
             onDynamicColorChange = viewModel::setUseDynamicColor,
+            onOpenNotificationSettings = context::openNotificationSettings,
+            onOpenAlertSoundSettings = context::openAlertSoundSettings,
+            onOpenExactAlarmSettings = context::openExactAlarmSettings,
         )
     }
 }
@@ -83,8 +105,12 @@ fun NavGraphBuilder.settingsScreen() {
 @Composable
 fun SettingsScreen(
     uiState: SettingsUiState,
+    alerts: AlertCapabilities,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
+    onOpenNotificationSettings: () -> Unit,
+    onOpenAlertSoundSettings: () -> Unit,
+    onOpenExactAlarmSettings: () -> Unit,
     modifier: Modifier = Modifier,
     showDynamicColorOption: Boolean = supportsDynamicColor(),
 ) {
@@ -110,6 +136,8 @@ fun SettingsScreen(
                         showDynamicColorOption = showDynamicColorOption,
                     )
                 }
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                NotificationsSection(alerts, onOpenNotificationSettings, onOpenAlertSoundSettings, onOpenExactAlarmSettings)
                 HorizontalDivider(Modifier.padding(vertical = 8.dp))
                 AboutSection()
             }
@@ -157,6 +185,46 @@ private fun AppearanceSection(
 }
 
 @Composable
+private fun NotificationsSection(
+    alerts: AlertCapabilities,
+    onOpenNotificationSettings: () -> Unit,
+    onOpenAlertSoundSettings: () -> Unit,
+    onOpenExactAlarmSettings: () -> Unit,
+) {
+    SectionHeader(stringResource(R.string.settings_section_notifications))
+    ClickableItem(
+        title = stringResource(R.string.settings_notifications),
+        summary = stringResource(
+            if (alerts.notificationsAllowed) R.string.settings_notifications_on else R.string.settings_notifications_off,
+        ),
+        onClick = onOpenNotificationSettings,
+    )
+    if (alerts.notificationsAllowed) {
+        ClickableItem(
+            title = stringResource(R.string.settings_alert_sound),
+            summary = stringResource(R.string.settings_alert_sound_summary),
+            onClick = onOpenAlertSoundSettings,
+        )
+    }
+    alerts.exactAlarmsAllowed?.let { allowed ->
+        ClickableItem(
+            title = stringResource(R.string.settings_exact_alarms),
+            summary = stringResource(if (allowed) R.string.settings_exact_alarms_on else R.string.settings_exact_alarms_off),
+            onClick = onOpenExactAlarmSettings,
+        )
+    }
+}
+
+@Composable
+private fun ClickableItem(title: String, summary: String, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = { Text(summary) },
+        modifier = Modifier.clickable(onClick = onClick, role = Role.Button),
+    )
+}
+
+@Composable
 private fun AboutSection() {
     val uriHandler = LocalUriHandler.current
     SectionHeader(stringResource(R.string.settings_section_about))
@@ -199,8 +267,12 @@ private fun SettingsScreenPreview() {
     FocusFlowTheme {
         SettingsScreen(
             uiState = SettingsUiState.Success(UserPreferences()),
+            alerts = AlertCapabilities(notificationsAllowed = true, exactAlarmsAllowed = false),
             onThemeModeChange = {},
             onDynamicColorChange = {},
+            onOpenNotificationSettings = {},
+            onOpenAlertSoundSettings = {},
+            onOpenExactAlarmSettings = {},
             showDynamicColorOption = true,
         )
     }

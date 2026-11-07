@@ -61,4 +61,28 @@
     <string name="settings_source_code_summary">FocusFlow is open source. View it on GitHub.</string>
     <string name="settings_license">License</string>
     <string name="settings_license_summary" translatable="false">Apache License 2.0</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_timer">Running timer</string>
+    <string name="notification_channel_timer_description">Silent notification showing the time left in the current session</string>
+    <string name="notification_channel_session_end">Session finished</string>
+    <string name="notification_channel_session_end_description">Alerts you with sound and vibration when a session ends</string>
+    <string name="notification_paused">Paused · %1$s left</string>
+    <string name="notification_focus_done">Focus session complete</string>
+    <string name="notification_break_done">Break is over</string>
+    <string name="notification_next_short_break">Time for a %1$s.</string>
+    <string name="notification_next_long_break">Well done, time for a %1$s.</string>
+    <string name="notification_next_focus">Ready for the next focus session?</string>
+    <string name="notification_next_started">%1$s started.</string>
+
+    <!-- Settings: notifications -->
+    <string name="settings_section_notifications">Notifications</string>
+    <string name="settings_notifications">Session alerts</string>
+    <string name="settings_notifications_on">On. You are alerted when a session ends.</string>
+    <string name="settings_notifications_off">Off. FocusFlow cannot tell you when a session ends.</string>
+    <string name="settings_alert_sound">Sound and vibration</string>
+    <string name="settings_alert_sound_summary">Choose the alert sound in Android settings</string>
+    <string name="settings_exact_alarms">Precise alerts</string>
+    <string name="settings_exact_alarms_on">On. Alerts arrive right on time.</string>
+    <string name="settings_exact_alarms_off">Off. When the phone is idle, an alert can be a few minutes late. Tap to allow alarms and reminders.</string>
 </resources>

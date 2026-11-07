@@ -39,6 +39,14 @@ interface TimerRepository {
     suspend fun select(type: SessionType)
 }
 
+/**
+ * Told about sessions at the moment they are recorded as completed. Called once per session, after
+ * the database transaction committed, whichever caller (screen, alarm) noticed the deadline.
+ */
+fun interface SessionCompletionListener {
+    fun onSessionsCompleted(sessions: List<FinishedSession>, next: TimerState)
+}
+
 /** Source of the timer configuration. Phase 2 uses the defaults; settings arrive in Phase 5. */
 interface TimerConfigRepository {
     val config: Flow<TimerConfig>
