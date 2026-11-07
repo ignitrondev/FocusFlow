@@ -59,6 +59,8 @@
     <string name="settings_version">Version</string>
     <string name="settings_source_code">Source code</string>
     <string name="settings_source_code_summary">FocusFlow is open source. View it on GitHub.</string>
+    <string name="settings_made_by">Made by</string>
+    <string name="settings_made_by_summary" translatable="false">Bima Adam Nugraha · IgnitronDev</string>
     <string name="settings_license">License</string>
     <string name="settings_license_summary" translatable="false">Apache License 2.0</string>
 
@@ -147,6 +149,8 @@
     <string name="share_text_week">I focused %1$s this week with FocusFlow.</string>
     <string name="share_card_description">FocusFlow statistics card: %1$s, focus time %2$s, %3$s</string>
     <string name="share_failed">Could not create the image</string>
+    <string name="share_format_post">Feed post</string>
+    <string name="share_format_story">Story</string>
     <string name="share_role_label">Your role</string>
     <string name="share_role_placeholder">e.g. Software Engineer</string>
     <string name="share_role_required">Add your role to share your card</string>

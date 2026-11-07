@@ -110,6 +110,7 @@ fun ShareStatisticsSheet(statistics: FocusStatistics, savedRole: String, onSaveR
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var period by rememberSaveable { mutableStateOf(SharePeriod.Week) }
+    var format by rememberSaveable { mutableStateOf(ShareFormat.Post) }
     var role by rememberSaveable(savedRole) { mutableStateOf(savedRole) }
     var photoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var pendingCameraUri by rememberSaveable { mutableStateOf<Uri?>(null) }
@@ -217,12 +218,31 @@ fun ShareStatisticsSheet(statistics: FocusStatistics, savedRole: String, onSaveR
                     )
                 }
             }
+            SingleChoiceSegmentedButtonRow(controls) {
+                ShareFormat.entries.forEachIndexed { index, option ->
+                    SegmentedButton(
+                        selected = format == option,
+                        onClick = { format = option },
+                        shape = SegmentedButtonDefaults.itemShape(index, ShareFormat.entries.size),
+                        icon = {},
+                        label = {
+                            val label = if (option == ShareFormat.Post) R.string.share_format_post else R.string.share_format_story
+                            FittedLabel(stringResource(label))
+                        },
+                        modifier = Modifier.testTag("shareFormat${option.name}"),
+                    )
+                }
+            }
             FocusShareCard(
                 statistics = statistics,
                 period = period,
                 role = role,
                 photo = photo,
-                modifier = controls
+                format = format,
+                // A story preview is tall: keep it narrower so the whole card fits on screen.
+                modifier = Modifier
+                    .widthIn(max = if (format == ShareFormat.Story) 280.dp else 360.dp)
+                    .fillMaxWidth()
                     .testTag("shareCard")
                     .semantics { contentDescription = cardDescription }
                     // Rounded on screen only: the recording below is taken inside this clip.

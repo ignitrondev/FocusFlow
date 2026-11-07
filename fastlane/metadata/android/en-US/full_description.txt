@@ -17,4 +17,4 @@ History lists every session by day. Statistics show today, this week, your daily
 <b>Private by design</b>
 No account, no ads, no analytics and no internet permission. Everything stays on your device.
 
-FocusFlow is open source under the Apache License 2.0, made by IgnitronDev.
+FocusFlow is open source under the Apache License 2.0, made by Bima Adam Nugraha at IgnitronDev.

@@ -28,6 +28,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.content.IntentCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -116,6 +117,24 @@ class ShareStatisticsTest {
         assertEquals(MediaStore.ACTION_IMAGE_CAPTURE, started.action)
         val output = IntentCompat.getParcelableExtra(started, MediaStore.EXTRA_OUTPUT, Uri::class.java)!!
         assertEquals("${composeRule.activity.packageName}.fileprovider", output.authority)
+    }
+
+    @Test
+    fun storyFormatExportsAFullScreenStoryImage() {
+        openShareSheet()
+        composeRule.onNodeWithTag("shareRole").performTextInput("Software Engineer")
+        composeRule.onNodeWithTag("shareFormatStory").performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag("shareCard").captureToImage()
+        // The story preview is tall: the button is below the fold of the sheet.
+        composeRule.onNodeWithTag("shareButton").performScrollTo().performClick()
+        // Encoding a 1080x1920 PNG is much slower on Robolectric than on a phone.
+        composeRule.waitUntil(20_000) { shadowOf(composeRule.activity).nextStartedActivity != null }
+
+        val image = BitmapFactory.decodeFile(File(File(composeRule.activity.cacheDir, "shared"), ShareImage.FILE_NAME).path)
+        assertEquals(1080, image.width)
+        assertEquals(1920, image.height)
     }
 
     @Test

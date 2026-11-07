@@ -15,7 +15,10 @@ All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://
 - The card shows your role (e.g. "Software Engineer", asked once and remembered) and can use a
   photo of where you are working as its background, taken with the camera app or picked with
   Android's photo picker. No camera or storage permission is needed.
+- Two card formats: feed post (4:5, 1080×1350) and story (9:16, 1080×1920), whose content stays
+  clear of the areas Instagram covers with the account name, music and reply bar.
 - Current streak: consecutive days with a completed focus session.
+- Settings → About credits the author.
 
 - Pick the alert sound with Android's sound picker (Settings → Notifications → Alert sound),
   including silent and any alarm or notification sound.

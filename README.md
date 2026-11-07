@@ -3,7 +3,8 @@
 **Focus better. Work smarter.**
 
 FocusFlow is a minimalist, offline-first Pomodoro timer for Android, built with Kotlin and
-Jetpack Compose by [IgnitronDev](https://ignitrondev.space).
+Jetpack Compose by **Bima Adam Nugraha**, AI-native engineer at
+[IgnitronDev](https://ignitrondev.space).
 
 * **Private by design:** no account, no analytics, no ads, and no internet permission. Your
   sessions never leave the device, unless you choose to share a statistics card.
@@ -32,7 +33,7 @@ Jetpack Compose by [IgnitronDev](https://ignitrondev.space).
 | Alerts | Sound and vibration when a session ends, also with the app closed; pick any alarm or notification sound; notification with the time left in large digits, Pause and Resume |
 | History | Every session by day, including the ones you stopped early |
 | Statistics | Today, this week, daily average, average session, streak, all time, and a 7-day chart |
-| Share | A Strava-style card of your day or week (1080×1350 image) with your role and, if you like, a photo of where you are working, for Instagram, WhatsApp, X and any other app |
+| Share | A Strava-style card of your day or week, as a feed post (1080×1350) or a full-screen story (1080×1920), with your role and, if you like, a photo of where you are working |
 | Everywhere | Light and dark theme, wallpaper colors, phones, foldables and tablets, large font sizes, TalkBack |
 
 ## Download
@@ -87,7 +88,8 @@ Contributions are welcome. No CLA is required; read [CONTRIBUTING.md](CONTRIBUTI
 
 ## License
 
-Copyright 2026 IgnitronDev. Licensed under the [Apache License 2.0](LICENSE).
+Created by Bima Adam Nugraha. Copyright 2026 IgnitronDev. Licensed under the
+[Apache License 2.0](LICENSE).
 
 FocusFlow started in a fork of [android/compose-samples](https://github.com/android/compose-samples)
 (Copyright The Android Open Source Project, Apache-2.0) and reuses its build setup; see

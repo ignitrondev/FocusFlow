@@ -396,6 +396,10 @@ private fun AboutSection() {
         modifier = Modifier.selectable(selected = false, onClick = { uriHandler.openUri(SOURCE_CODE_URL) }, role = Role.Button),
     )
     ListItem(
+        headlineContent = { Text(stringResource(R.string.settings_made_by)) },
+        supportingContent = { Text(stringResource(R.string.settings_made_by_summary)) },
+    )
+    ListItem(
         headlineContent = { Text(stringResource(R.string.settings_license)) },
         supportingContent = { Text(stringResource(R.string.settings_license_summary)) },
     )

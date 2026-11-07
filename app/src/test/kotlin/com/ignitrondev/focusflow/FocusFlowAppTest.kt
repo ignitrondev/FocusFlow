@@ -205,6 +205,12 @@ class FocusFlowAppTest {
         assertEquals(RingtoneManager.ACTION_RINGTONE_PICKER, started.intent.action)
     }
 
+    @Test
+    fun aboutCreditsTheAuthor() {
+        composeRule.onNodeWithTag("nav_Settings").performClick()
+        composeRule.onNodeWithText("Bima Adam Nugraha · IgnitronDev").performScrollTo().assertExists()
+    }
+
     private companion object {
         const val TIMEOUT_MILLIS = 5_000L
     }

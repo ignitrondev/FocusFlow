@@ -20,6 +20,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -72,6 +73,17 @@ import java.time.format.TextStyle as DateTextStyle
 
 enum class SharePeriod { Today, Week }
 
+/**
+ * Where the card is going: an Instagram feed post (4:5, 1080x1350) or a full-screen story (9:16,
+ * 1080x1920). A story fills the screen, but Instagram draws the account name and music over the
+ * top and the reply bar over the bottom, so the content keeps clear of those areas (fractions of
+ * the width, measured on a 1080 px story).
+ */
+enum class ShareFormat(val aspectRatio: Float, val topSafeArea: Float, val bottomSafeArea: Float) {
+    Post(aspectRatio = 4f / 5f, topSafeArea = 0f, bottomSafeArea = 0f),
+    Story(aspectRatio = 9f / 16f, topSafeArea = 270f / 1080f, bottomSafeArea = 340f / 1080f),
+}
+
 // The card is an image for other people's feeds: fixed brand colors, independent of the app theme.
 private val CardGradient = Brush.linearGradient(listOf(Color(0xFF151A5C), Color(0xFF3B44B8), Color(0xFF00605A)))
 private val OnCard = Color.White
@@ -103,6 +115,7 @@ fun FocusShareCard(
     modifier: Modifier = Modifier,
     role: String = "",
     photo: ImageBitmap? = null,
+    format: ShareFormat = ShareFormat.Post,
 ) {
     val density = LocalDensity.current
     CompositionLocalProvider(
@@ -123,7 +136,7 @@ fun FocusShareCard(
                 statistics.today.date.format(DateTimeFormatter.ofPattern("d MMM", locale)),
             )
         }
-        Box(modifier.aspectRatio(4f / 5f).background(CardGradient)) {
+        BoxWithConstraints(modifier.aspectRatio(format.aspectRatio).background(CardGradient)) {
             if (photo != null) {
                 Image(
                     bitmap = photo,
@@ -135,7 +148,14 @@ fun FocusShareCard(
                 // darker at the bottom, where the numbers are.
                 Box(Modifier.fillMaxSize().background(PhotoScrim))
             }
-            Column(Modifier.fillMaxSize().padding(24.dp)) {
+            Column(
+                Modifier.fillMaxSize().padding(
+                    start = 24.dp,
+                    end = 24.dp,
+                    top = 24.dp + maxWidth * format.topSafeArea,
+                    bottom = 24.dp + maxWidth * format.bottomSafeArea,
+                ),
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     LogoMark(Modifier.size(22.dp))
                     Spacer(Modifier.width(8.dp))
