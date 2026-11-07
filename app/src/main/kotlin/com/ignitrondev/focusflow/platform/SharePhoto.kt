@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:SuppressLint("ExifInterface")
+
 package com.ignitrondev.focusflow.platform
 
 import android.annotation.SuppressLint
@@ -31,6 +33,10 @@ import kotlin.math.max
 /**
  * The photo behind a shared statistics card. Taken with the camera app or picked with Android's
  * photo picker, so FocusFlow needs neither the camera nor a storage permission.
+ *
+ * The framework ExifInterface (lint "ExifInterface" suppressed for this file) is only used on
+ * Android 8.0/8.1, where reading the orientation tag is reliable; 9+ decodes with ImageDecoder,
+ * which applies the orientation itself. The androidx copy is not worth a dependency for that.
  */
 object SharePhoto {
     /** Longest side of the decoded photo: enough for a 1080x1350 card, small enough for memory. */
@@ -56,9 +62,7 @@ object SharePhoto {
         }
     }.getOrNull()
 
-    // Only Android 8.0/8.1 get here (9+ uses ImageDecoder). Reading the orientation tag is reliable
-    // in the framework ExifInterface on these versions; the androidx copy is not worth a dependency.
-    @SuppressLint("ExifInterface")
+    // Only Android 8.0/8.1 get here (9+ uses ImageDecoder).
     private fun loadLegacy(context: Context, uri: Uri): Bitmap? {
         val resolver = context.contentResolver
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
