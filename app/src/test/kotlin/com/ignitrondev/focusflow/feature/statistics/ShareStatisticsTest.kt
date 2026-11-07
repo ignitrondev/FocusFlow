@@ -129,7 +129,7 @@ class ShareStatisticsTest {
         composeRule.onNodeWithTag("shareCard").captureToImage()
         // The story preview is tall: the button is below the fold of the sheet.
         composeRule.onNodeWithTag("shareButton").performScrollTo().performClick()
-        // Encoding a 1080x1920 PNG is much slower on Robolectric than on a phone.
+        // Encoding a 1080x1920 image is slower on Robolectric than on a phone.
         composeRule.waitUntil(20_000) { shadowOf(composeRule.activity).nextStartedActivity != null }
 
         val image = BitmapFactory.decodeFile(File(File(composeRule.activity.cacheDir, "shared"), ShareImage.FILE_NAME).path)
@@ -156,7 +156,7 @@ class ShareStatisticsTest {
         assertEquals(Intent.ACTION_CHOOSER, started.action)
         val send = IntentCompat.getParcelableExtra(started, Intent.EXTRA_INTENT, Intent::class.java)!!
         assertEquals(Intent.ACTION_SEND, send.action)
-        assertEquals("image/png", send.type)
+        assertEquals("image/jpeg", send.type)
         assertTrue("the receiving app may read the image", send.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
         val uri = IntentCompat.getParcelableExtra(send, Intent.EXTRA_STREAM, Uri::class.java)!!
         assertEquals("${composeRule.activity.packageName}.fileprovider", uri.authority)
@@ -164,7 +164,7 @@ class ShareStatisticsTest {
 
         val file = File(File(composeRule.activity.cacheDir, "shared"), ShareImage.FILE_NAME)
         val image = BitmapFactory.decodeFile(file.path)
-        assertNotNull("a valid PNG was written", image)
+        assertNotNull("a valid JPEG was written", image)
         assertEquals(1080, image.width)
         assertEquals(1350, image.height)
     }

@@ -23,24 +23,29 @@ import androidx.core.content.FileProvider
 import java.io.File
 
 /**
- * Hands [image] to the app the user picks in Android's share sheet. The PNG is written to the
+ * Hands [image] to the app the user picks in Android's share sheet. The JPEG is written to the
  * app's cache (exposed only through FileProvider, read-only, to the chosen app); FocusFlow itself
  * never sends anything over the network.
  */
 object ShareImage {
-    const val FILE_NAME = "focusflow-stats.png"
+    const val FILE_NAME = "focusflow-stats.jpg"
+    const val MIME_TYPE = "image/jpeg"
 
-    /** Writes the PNG; call off the main thread. Returns the content URI to share. */
+    // The card is full-bleed (no transparency) and often a photo: JPEG encodes several times
+    // faster than PNG and is much smaller, and social apps re-encode to JPEG anyway.
+    private const val JPEG_QUALITY = 95
+
+    /** Writes the image; call off the main thread. Returns the content URI to share. */
     fun export(context: Context, image: Bitmap): android.net.Uri {
         val dir = File(context.cacheDir, "shared").apply { mkdirs() }
         val file = File(dir, FILE_NAME)
-        file.outputStream().use { image.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        file.outputStream().use { image.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) }
         return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
 
     fun chooser(uri: android.net.Uri, text: String, title: String): Intent {
         val send = Intent(Intent.ACTION_SEND)
-            .setType("image/png")
+            .setType(MIME_TYPE)
             .putExtra(Intent.EXTRA_STREAM, uri)
             .putExtra(Intent.EXTRA_TEXT, text)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
