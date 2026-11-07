@@ -17,10 +17,9 @@ package com.ignitrondev.focusflow.testing
 
 import com.ignitrondev.focusflow.domain.timer.TimeSource
 import com.ignitrondev.focusflow.domain.timer.TimerInstant
-import java.time.ZoneId
-import java.time.ZoneOffset
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.datetime.TimeZone
 
 /** A clock that only moves when a test moves it. */
 @Singleton
@@ -28,11 +27,11 @@ class FakeTimeSource @Inject constructor() : TimeSource {
     var elapsedRealtimeMillis: Long = 1_000_000L
     var epochMillis: Long = START_EPOCH_MILLIS
     var bootCount: Int? = 7
-    var zone: ZoneId = ZoneOffset.UTC
+    var zone: TimeZone = TimeZone.UTC
 
     override fun now() = TimerInstant(elapsedRealtimeMillis, epochMillis, bootCount)
 
-    override fun zone(): ZoneId = zone
+    override fun zone(): TimeZone = zone
 
     /** Real time passing: both clocks move together. */
     fun advanceBy(millis: Long) {

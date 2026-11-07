@@ -23,10 +23,10 @@ import com.ignitrondev.focusflow.domain.statistics.FocusStatisticsCalculator
 import com.ignitrondev.focusflow.domain.timer.FocusSessionRepository
 import com.ignitrondev.focusflow.domain.timer.TimeSource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Instant
 import java.time.temporal.WeekFields
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +34,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.toKotlinDayOfWeek
+import kotlinx.datetime.toLocalDateTime
 
 sealed interface StatisticsUiState {
     data object Loading : StatisticsUiState
@@ -59,8 +61,8 @@ class StatisticsViewModel @Inject constructor(
     val uiState: StateFlow<StatisticsUiState> = focusSessionRepository.observeSessions()
         .map { sessions ->
             val zone = timeSource.zone()
-            val today = Instant.ofEpochMilli(timeSource.now().epochMillis).atZone(zone).toLocalDate()
-            val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
+            val today = Instant.fromEpochMilliseconds(timeSource.now().epochMillis).toLocalDateTime(zone).date
+            val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek.toKotlinDayOfWeek()
             StatisticsUiState.Success(FocusStatisticsCalculator.calculate(sessions, today, zone, firstDayOfWeek))
         }
         .flowOn(Dispatchers.Default)

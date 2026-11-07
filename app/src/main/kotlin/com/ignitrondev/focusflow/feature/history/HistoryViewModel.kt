@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.datetime.toJavaZoneId
 
 @Immutable
 data class HistoryItem(
@@ -64,7 +65,8 @@ sealed interface HistoryUiState {
 class HistoryViewModel @Inject constructor(focusSessionRepository: FocusSessionRepository, timeSource: TimeSource) : ViewModel() {
     val uiState: StateFlow<HistoryUiState> = focusSessionRepository.observeSessions()
         .map { sessions ->
-            val zone = timeSource.zone()
+            // History is formatted with java.time on Android until the UI moves to the shared module.
+            val zone = timeSource.zone().toJavaZoneId()
             val today = Instant.ofEpochMilli(timeSource.now().epochMillis).atZone(zone).toLocalDate()
             HistoryUiState.Success(groupByDay(sessions, today, zone))
         }

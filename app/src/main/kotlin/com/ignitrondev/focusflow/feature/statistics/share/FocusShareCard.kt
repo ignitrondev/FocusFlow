@@ -66,10 +66,13 @@ import com.ignitrondev.focusflow.R
 import com.ignitrondev.focusflow.core.ui.durationText
 import com.ignitrondev.focusflow.domain.statistics.DayFocus
 import com.ignitrondev.focusflow.domain.statistics.FocusStatistics
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle as DateTextStyle
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.minus
+import kotlinx.datetime.toJavaLocalDate
 
 enum class SharePeriod { Today, Week }
 
@@ -128,12 +131,12 @@ fun FocusShareCard(
         val sessions = if (period == SharePeriod.Today) statistics.today.sessions else statistics.weekSessions
         val periodLabel = when (period) {
             SharePeriod.Today -> stringResource(R.string.share_period_today) + " · " +
-                statistics.today.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale))
+                statistics.today.date.toJavaLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale))
 
             SharePeriod.Week -> stringResource(R.string.share_period_week) + " · " + stringResource(
                 R.string.share_card_week_range,
-                statistics.weekStart.format(DateTimeFormatter.ofPattern("d MMM", locale)),
-                statistics.today.date.format(DateTimeFormatter.ofPattern("d MMM", locale)),
+                statistics.weekStart.toJavaLocalDate().format(DateTimeFormatter.ofPattern("d MMM", locale)),
+                statistics.today.date.toJavaLocalDate().format(DateTimeFormatter.ofPattern("d MMM", locale)),
             )
         }
         BoxWithConstraints(modifier.aspectRatio(format.aspectRatio).background(CardGradient)) {
@@ -248,7 +251,7 @@ private fun WeekBars(days: List<DayFocus>, locale: java.util.Locale) {
         Row(Modifier.fillMaxWidth()) {
             days.forEach { day ->
                 Text(
-                    day.date.dayOfWeek.getDisplayName(DateTextStyle.NARROW, locale),
+                    day.date.toJavaLocalDate().dayOfWeek.getDisplayName(DateTextStyle.NARROW, locale),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     color = OnCardMuted,
@@ -281,8 +284,15 @@ private fun LogoMark(modifier: Modifier) {
 @Preview(widthDp = 360)
 @Composable
 private fun FocusShareCardPreview() {
-    val today = LocalDate.of(2026, 11, 7)
-    val days = remember { (6L downTo 0L).mapIndexed { i, ago -> DayFocus(today.minusDays(ago), (i % 4 + 1) * 25 * 60_000L, i % 4 + 1) } }
+    val today = LocalDate(2026, 11, 7)
+    val days = remember {
+        (6L downTo 0L).mapIndexed { i, ago ->
+            DayFocus(
+                today.minus(ago.toInt(), DateTimeUnit.DAY),
+                (i % 4 + 1) * 25 * 60_000L, i % 4 + 1,
+            )
+        }
+    }
     FocusShareCard(
         modifier = Modifier.padding(16.dp).clip(RoundedCornerShape(28.dp)),
         statistics = FocusStatistics(
@@ -294,7 +304,7 @@ private fun FocusShareCardPreview() {
             totalSessions = 40,
             totalFocusMillis = 1_000 * 60_000L,
             lastSevenDays = days,
-            weekStart = today.minusDays(6),
+            weekStart = today.minus(6, DateTimeUnit.DAY),
             currentStreakDays = 5,
         ),
         role = "Software Engineer",

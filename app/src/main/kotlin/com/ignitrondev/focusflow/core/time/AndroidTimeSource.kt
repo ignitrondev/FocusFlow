@@ -25,8 +25,8 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import java.time.ZoneId
 import javax.inject.Inject
+import kotlinx.datetime.TimeZone
 
 class AndroidTimeSource @Inject constructor(@ApplicationContext private val context: Context) : TimeSource {
     override fun now() = TimerInstant(
@@ -35,7 +35,7 @@ class AndroidTimeSource @Inject constructor(@ApplicationContext private val cont
         bootCount = bootCount(),
     )
 
-    override fun zone(): ZoneId = ZoneId.systemDefault()
+    override fun zone(): TimeZone = TimeZone.currentSystemDefault()
 
     // Settings.Global.BOOT_COUNT is readable without a permission since API 24, but OEM builds may
     // omit it; TimerEngine then detects a reboot from the monotonic clock going backwards.

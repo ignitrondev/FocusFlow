@@ -15,7 +15,7 @@
  */
 package com.ignitrondev.focusflow.domain.timer
 
-import java.time.ZoneId
+import kotlinx.datetime.TimeZone
 
 /**
  * One reading of the device clocks, taken at the same moment.
@@ -33,5 +33,5 @@ data class TimerInstant(val elapsedRealtimeMillis: Long, val epochMillis: Long, 
 interface TimeSource {
     fun now(): TimerInstant
 
-    fun zone(): ZoneId
+    fun zone(): TimeZone
 }

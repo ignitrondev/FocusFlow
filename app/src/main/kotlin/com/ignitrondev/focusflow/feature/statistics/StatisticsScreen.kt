@@ -71,8 +71,11 @@ import com.ignitrondev.focusflow.core.ui.durationText
 import com.ignitrondev.focusflow.domain.statistics.DayFocus
 import com.ignitrondev.focusflow.domain.statistics.FocusStatistics
 import com.ignitrondev.focusflow.feature.statistics.share.ShareStatisticsSheet
-import java.time.LocalDate
 import java.time.format.TextStyle
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.minus
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -211,7 +214,7 @@ private fun StatCard(title: String, value: String, modifier: Modifier = Modifier
 @Composable
 private fun ChartCard(days: List<DayFocus>) {
     val locale = LocalConfiguration.current.locales[0]
-    val labels = days.map { it.date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale) }
+    val labels = days.map { it.date.toJavaLocalDate().dayOfWeek.getDisplayName(TextStyle.SHORT, locale) }
     val durations = days.map { durationText(it.focusMillis) }
     val description = stringResource(
         R.string.statistics_chart_description,
@@ -273,8 +276,13 @@ private fun ChartCard(days: List<DayFocus>) {
 @Preview
 @Composable
 private fun StatisticsScreenPreview() {
-    val today = LocalDate.of(2026, 11, 7)
-    val days = (6L downTo 0L).mapIndexed { i, ago -> DayFocus(today.minusDays(ago), (i % 4 + 1) * 25 * 60_000L, i % 4 + 1) }
+    val today = LocalDate(2026, 11, 7)
+    val days = (6L downTo 0L).mapIndexed { i, ago ->
+        DayFocus(
+            today.minus(ago.toInt(), DateTimeUnit.DAY), (i % 4 + 1) * 25 * 60_000L,
+            i % 4 + 1,
+        )
+    }
     FocusFlowTheme {
         StatisticsScreen(
             StatisticsUiState.Success(

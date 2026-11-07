@@ -17,12 +17,16 @@ package com.ignitrondev.focusflow.domain.statistics
 
 import com.ignitrondev.focusflow.domain.timer.FinishedSession
 import com.ignitrondev.focusflow.domain.timer.SessionType
-import java.time.DayOfWeek
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalAdjusters
+import kotlin.time.Instant
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.isoDayNumber
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 
 data class DayFocus(val date: LocalDate, val focusMillis: Long, val sessions: Int)
 
@@ -54,18 +58,19 @@ object FocusStatisticsCalculator {
      * Sessions belong to the local day on which they ended. The week starts on [firstDayOfWeek]
      * (taken from the user's locale).
      */
-    fun calculate(sessions: List<FinishedSession>, today: LocalDate, zone: ZoneId, firstDayOfWeek: DayOfWeek): FocusStatistics {
+    fun calculate(sessions: List<FinishedSession>, today: LocalDate, zone: TimeZone, firstDayOfWeek: DayOfWeek): FocusStatistics {
         val focus = sessions.filter { it.completed && it.sessionType == SessionType.Focus }
         val byDay: Map<LocalDate, List<FinishedSession>> =
-            focus.groupBy { Instant.ofEpochMilli(it.endedAtEpochMillis).atZone(zone).toLocalDate() }
+            focus.groupBy { Instant.fromEpochMilliseconds(it.endedAtEpochMillis).toLocalDateTime(zone).date }
 
         fun day(date: LocalDate): DayFocus {
             val items = byDay[date].orEmpty()
             return DayFocus(date, items.sumOf { it.actualDurationMillis }, items.size)
         }
 
-        val weekStart = today.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
-        val weekDays = generateSequence(weekStart) { it.plusDays(1) }.takeWhile { !it.isAfter(today) }.map(::day).toList()
+        val daysSinceWeekStart = (today.dayOfWeek.isoDayNumber - firstDayOfWeek.isoDayNumber + 7) % 7
+        val weekStart = today.minus(daysSinceWeekStart, DateTimeUnit.DAY)
+        val weekDays = generateSequence(weekStart) { it.plus(1, DateTimeUnit.DAY) }.takeWhile { it <= today }.map(::day).toList()
         val weekFocus = weekDays.sumOf { it.focusMillis }
         val totalFocus = focus.sumOf { it.actualDurationMillis }
 
@@ -73,22 +78,22 @@ object FocusStatisticsCalculator {
             today = day(today),
             weekFocusMillis = weekFocus,
             weekSessions = weekDays.sumOf { it.sessions },
-            weekDailyAverageMillis = weekFocus / (ChronoUnit.DAYS.between(weekStart, today) + 1),
+            weekDailyAverageMillis = weekFocus / (weekStart.daysUntil(today) + 1),
             averageSessionMillis = if (focus.isEmpty()) 0 else totalFocus / focus.size,
             totalSessions = focus.size,
             totalFocusMillis = totalFocus,
-            lastSevenDays = (6L downTo 0L).map { day(today.minusDays(it)) },
+            lastSevenDays = (6 downTo 0).map { day(today.minus(it, DateTimeUnit.DAY)) },
             weekStart = weekStart,
             currentStreakDays = streak(byDay.keys, today),
         )
     }
 
     private fun streak(activeDays: Set<LocalDate>, today: LocalDate): Int {
-        var day = if (today in activeDays) today else today.minusDays(1)
+        var day = if (today in activeDays) today else today.minus(1, DateTimeUnit.DAY)
         var count = 0
         while (day in activeDays) {
             count++
-            day = day.minusDays(1)
+            day = day.minus(1, DateTimeUnit.DAY)
         }
         return count
     }

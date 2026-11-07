@@ -149,6 +149,8 @@ android {
 dependencies {
     coreLibraryDesugaring(libs.core.jdk.desugaring)
 
+    implementation(project(":shared"))
+
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
     implementation(libs.androidx.compose.ui)

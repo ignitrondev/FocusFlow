@@ -17,17 +17,21 @@ package com.ignitrondev.focusflow.domain.statistics
 
 import com.ignitrondev.focusflow.domain.timer.FinishedSession
 import com.ignitrondev.focusflow.domain.timer.SessionType
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneId
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.toInstant
 
 class FocusStatisticsCalculatorTest {
-    private val zone = ZoneId.of("Asia/Jakarta")
-    private val today = LocalDate.of(2026, 11, 7) // a Saturday
+    private val zone = TimeZone.of("Asia/Jakarta")
+    private val today = LocalDate(2026, 11, 7) // a Saturday
     private val minute = 60_000L
     private var nextId = 0
 
@@ -36,9 +40,9 @@ class FocusStatisticsCalculatorTest {
         minutes: Long,
         type: SessionType = SessionType.Focus,
         completed: Boolean = true,
-        endTime: LocalTime = LocalTime.of(10, 0),
+        endTime: LocalTime = LocalTime(10, 0),
     ): FinishedSession {
-        val end = date.atTime(endTime).atZone(zone).toInstant().toEpochMilli()
+        val end = LocalDateTime(date, endTime).toInstant(zone).toEpochMilliseconds()
         return FinishedSession("s${nextId++}", type, end - minutes * minute, end, minutes * minute, minutes * minute, completed)
     }
 
@@ -82,7 +86,7 @@ class FocusStatisticsCalculatorTest {
 
         assertEquals(75 * minute, mondayWeek.weekFocusMillis)
         assertEquals(2, mondayWeek.weekSessions)
-        assertEquals("Mon..Sat is 6 days", 75 * minute / 6, mondayWeek.weekDailyAverageMillis)
+        assertEquals(75 * minute / 6, mondayWeek.weekDailyAverageMillis, "Mon..Sat is 6 days")
         assertEquals(100 * minute, sundayWeek.weekFocusMillis)
         assertEquals(3, sundayWeek.weekSessions)
     }
@@ -99,7 +103,7 @@ class FocusStatisticsCalculatorTest {
     @Test
     fun sessionsBelongToTheLocalDayTheyEnded() {
         // Ends at 00:10 local time: counts for today even though it started yesterday.
-        val stats = calculate(listOf(session(today, 25, endTime = LocalTime.of(0, 10))))
+        val stats = calculate(listOf(session(today, 25, endTime = LocalTime(0, 10))))
 
         assertEquals(25 * minute, stats.today.focusMillis)
     }
@@ -153,3 +157,5 @@ class FocusStatisticsCalculatorTest {
         assertEquals(35 * minute, stats.averageSessionMillis)
     }
 }
+
+private fun LocalDate.minusDays(days: Int): LocalDate = minus(days, DateTimeUnit.DAY)

@@ -15,13 +15,13 @@
  */
 package com.ignitrondev.focusflow.domain.timer
 
-import com.ignitrondev.focusflow.testing.FakeTimeSource
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertSame
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import com.ignitrondev.focusflow.domain.testing.FakeTimeSource
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class TimerEngineTest {
     private var nextId = 0
@@ -84,7 +84,7 @@ class TimerEngineTest {
         clock.advanceBy(5 * minute)
         assertEquals(TimerStatus.Running, state.status)
         assertEquals(10 * minute, state.remainingAt(clock.now()))
-        assertEquals("resume keeps the original start time", FakeTimeSource.START_EPOCH_MILLIS, state.startedAtEpochMillis)
+        assertEquals(FakeTimeSource.START_EPOCH_MILLIS, state.startedAtEpochMillis, "resume keeps the original start time")
     }
 
     @Test
@@ -150,7 +150,7 @@ class TimerEngineTest {
             ),
             types,
         )
-        assertEquals("long break completed: new cycle", SessionType.Focus, state.sessionType)
+        assertEquals(SessionType.Focus, state.sessionType, "long break completed: new cycle")
         assertEquals(0, state.completedFocusInCycle)
     }
 
@@ -260,7 +260,7 @@ class TimerEngineTest {
         val update = engine.skip(shortBreak, clock.now(), config)
 
         assertEquals(SessionType.Focus, update.state.sessionType)
-        assertTrue("never started: nothing to record", update.finishedSessions.isEmpty())
+        assertTrue(update.finishedSessions.isEmpty(), "never started: nothing to record")
     }
 
     @Test

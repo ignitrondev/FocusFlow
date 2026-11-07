@@ -15,13 +15,17 @@
  */
 package com.ignitrondev.focusflow.core.time
 
-import java.time.Instant
-import java.time.ZoneId
+import kotlin.time.Instant
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 
 /** Start (inclusive) and end (exclusive) of the local calendar day containing [epochMillis]. */
-fun dayBounds(epochMillis: Long, zone: ZoneId): Pair<Long, Long> {
-    val day = Instant.ofEpochMilli(epochMillis).atZone(zone).toLocalDate()
-    val start = day.atStartOfDay(zone).toInstant().toEpochMilli()
-    val end = day.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+fun dayBounds(epochMillis: Long, zone: TimeZone): Pair<Long, Long> {
+    val day = Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(zone).date
+    val start = day.atStartOfDayIn(zone).toEpochMilliseconds()
+    val end = day.plus(1, DateTimeUnit.DAY).atStartOfDayIn(zone).toEpochMilliseconds()
     return start to end
 }
