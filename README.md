@@ -39,7 +39,8 @@ Jetpack Compose and Compose Multiplatform by **Bima Adam Nugraha**, AI-native en
 ## Download
 
 Get the APK from the [Releases](https://github.com/ignitrondev/FocusFlow/releases) page
-(Android 8.0 or newer). An F-Droid submission is planned.
+(Android 8.0 or newer). FocusFlow is not on F-Droid yet: F-Droid takes apps after at least three
+months of development, so it will be submitted in February 2027.
 
 **iPhone and iPad (iOS 15 or newer, beta):** there is no App Store version. Install the unsigned
 build with [AltStore](https://altstore.io) or [SideStore](https://sidestore.io) and your own Apple

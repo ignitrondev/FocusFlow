@@ -18,7 +18,8 @@
 - Beta feedback; the manual device checklist in [QA.md](QA.md) on several Android versions and
   manufacturers.
 - Release signing in CI (repository secrets) so releases are built reproducibly from tags.
-- F-Droid submission (metadata is in `fastlane/`).
+- F-Droid submission in February 2027, once the app has three months of development behind it
+  (F-Droid's inclusion policy, Quality point 6). Store metadata is in `fastlane/`.
 - Baseline profile for faster startup (needs a device or emulator in CI).
 
 ## Ideas after 1.0
