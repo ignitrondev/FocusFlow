@@ -2,6 +2,13 @@
 
 All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+### Fixed
+- Settings → Notifications → Alert sound no longer closes on Android 17 after an alarm tone was
+  picked: Google's sound picker crashed on the combined "notification or alarm" request. The picker
+  now lists every system sound and your own.
+
 ## 1.0.0 — 2026-11-08
 
 First stable release.

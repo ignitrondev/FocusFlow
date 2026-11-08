@@ -32,12 +32,16 @@ sealed interface AlertSoundPick {
 }
 
 /**
- * Android's own sound picker (the one used by alarm clocks and messaging apps), listing alarm and
- * notification sounds plus "Default" and "Silent". Input: the sound selected now.
+ * Android's own sound picker (the one used by alarm clocks and messaging apps), listing every
+ * system sound (alarms, notifications, ringtones) and the user's own, plus "Default" and "Silent".
+ * Input: the sound selected now.
  */
 class PickAlertSound(private val title: String) : ActivityResultContract<Uri?, AlertSoundPick>() {
     override fun createIntent(context: Context, input: Uri?): Intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
-        .putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION or RingtoneManager.TYPE_ALARM)
+        // TYPE_ALL, not TYPE_NOTIFICATION or TYPE_ALARM: Google's sound picker on Android 17 crashes
+        // ("Invalid RingtoneManager type: 6") when that combination meets an existing media sound,
+        // such as an alarm tone picked earlier. It accepts single types and TYPE_ALL.
+        .putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL)
         .putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, title)
         .putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
         .putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_NOTIFICATION_URI)

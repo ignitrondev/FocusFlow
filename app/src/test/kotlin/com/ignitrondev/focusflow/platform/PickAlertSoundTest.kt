@@ -45,6 +45,17 @@ class PickAlertSoundTest {
     }
 
     @Test
+    fun asksForAllSoundsSoGooglesPickerDoesNotCrash() {
+        // An alarm tone picked earlier is a media sound. Google's picker on Android 17 crashed with
+        // "Invalid RingtoneManager type: 6" (notification | alarm) when reopened on it.
+        val alarmTone = Uri.parse("content://media/external_primary/audio/media/40655?title=Constellation&canonical=1")
+        val intent = contract.createIntent(context, alarmTone)
+
+        assertEquals(RingtoneManager.TYPE_ALL, intent.getIntExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, -1))
+        assertEquals(alarmTone, IntentCompat.getParcelableExtra(intent, RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri::class.java))
+    }
+
+    @Test
     fun readsThePickedSoundSilenceOrCancel() {
         val picked = Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, chime)
 
