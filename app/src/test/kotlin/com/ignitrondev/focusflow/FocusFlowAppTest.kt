@@ -41,8 +41,9 @@ import com.ignitrondev.focusflow.resources.history_empty_title
 import com.ignitrondev.focusflow.resources.history_today
 import com.ignitrondev.focusflow.resources.settings_section_appearance
 import com.ignitrondev.focusflow.resources.settings_theme_dark
-import com.ignitrondev.focusflow.resources.statistics_empty_title
+import com.ignitrondev.focusflow.resources.statistics_chart_empty
 import com.ignitrondev.focusflow.resources.statistics_this_week
+import com.ignitrondev.focusflow.resources.statistics_today
 import com.ignitrondev.focusflow.resources.timer_action_start
 import com.ignitrondev.focusflow.testing.FakeTimeSource
 import com.ignitrondev.focusflow.testing.FakeTimerConfigRepository
@@ -163,7 +164,8 @@ class FocusFlowAppTest {
     @Test
     fun navigatesBetweenTopLevelDestinations() {
         composeRule.onNodeWithTag("nav_Statistics").performClick()
-        composeRule.onNodeWithText(string(Res.string.statistics_empty_title)).assertExists()
+        composeRule.onNodeWithText(string(Res.string.statistics_today)).assertExists()
+        composeRule.onNodeWithText(string(Res.string.statistics_chart_empty)).assertExists()
 
         composeRule.onNodeWithTag("nav_History").performClick()
         composeRule.onNodeWithText(string(Res.string.history_empty_title)).assertExists()

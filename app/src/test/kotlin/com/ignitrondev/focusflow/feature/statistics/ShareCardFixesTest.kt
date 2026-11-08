@@ -19,6 +19,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -104,9 +105,10 @@ class ShareCardFixesTest {
         composeRule.waitUntilAtLeastOneExists(hasTestTag("shareCardEmpty"), 5_000)
 
         composeRule.onNodeWithTag("shareCardEmpty").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText(prompt).assertIsDisplayed()
+        // The empty statistics chart uses the same sentence, so the share card is matched by its tag.
+        composeRule.onNodeWithTag("shareCardEmpty").assertTextEquals(prompt)
         composeRule.onNodeWithText(string(Res.string.share_card_focus_time).uppercase()).assertDoesNotExist()
-        composeRule.onNodeWithText(weekLabel(), substring = true).assertIsDisplayed()
+        assertTrue(composeRule.onAllNodesWithText(weekLabel(), substring = true).fetchSemanticsNodes().isNotEmpty())
         composeRule.onNodeWithTag("shareButton").assertIsNotEnabled()
         composeRule.onNodeWithTag("shareRole").performTextInput("Software Engineer")
         composeRule.onNodeWithTag("shareButton").assertIsEnabled()

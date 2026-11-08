@@ -98,7 +98,27 @@ internal val DarkColors =
         surfaceContainerHighest = Color(0xFF34343B),
     )
 
-// Segmented phone bar: the same orange capsule in light and dark. White on #C84A00 is 4.7:1, and
-// the orange is at least 3:1 against surfaceContainerHigh in both themes.
-internal val NavigationCapsule = Color(0xFFC84A00)
-internal val OnNavigationCapsule = Color(0xFFFFFFFF)
+/**
+ * Dark statistics palette from the approved phase-1 screen spec. The selected navbar capsule uses
+ * the same accent and on-accent pair. #18181B on #FF6A1A is 6.18:1. The accent on the light
+ * navigation surface is below 3:1, so inactive tabs stay on the theme colors in light mode.
+ */
+internal object FocusTokens {
+    val screen = Color(0xFF0E0E10)
+    val card = Color(0xFF1A1A1E)
+    val cardPressed = Color(0xFF232328)
+    val cardBorder = Color(0x14FFFFFF)
+    val baseline = Color(0xFF2A2A30)
+    val accent = Color(0xFFFF6A1A)
+    val accentPressed = Color(0xFFE5560B)
+    val textPrimary = Color(0xFFFFFFFF)
+    val textSecondary = Color(0xFFA1A1AA)
+    val onAccent = Color(0xFF18181B)
+    val streak = Color(0xFFF5B83D)
+    val session = Color(0xFF9B6BFF)
+    val focusRing = Color(0xFFFFB27A)
+    val gridline = Color(0x1AFFFFFF)
+}
+
+internal val NavigationCapsule = FocusTokens.accent
+internal val OnNavigationCapsule = FocusTokens.onAccent
