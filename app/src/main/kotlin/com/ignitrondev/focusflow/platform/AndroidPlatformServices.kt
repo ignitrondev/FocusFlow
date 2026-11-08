@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -194,9 +195,32 @@ class AndroidPlatformServices @Inject constructor(@ApplicationContext private va
         Log.e(tag, message, error)
     }
 
+    @Composable
+    override fun rememberSystemAnimationsDisabled(): Boolean {
+        val context = LocalContext.current
+        // Remove animations and the duration scales live in system settings, outside the app.
+        var disabled by remember { mutableStateOf(context.systemAnimationsDisabled()) }
+        LifecycleResumeEffect(Unit) {
+            disabled = context.systemAnimationsDisabled()
+            onPauseOrDispose {}
+        }
+        return disabled
+    }
+
     private companion object {
         const val TAG = "PlatformServices"
     }
+}
+
+/**
+ * Remove animations (Reduce Motion) writes the animator and transition duration scales to 0.
+ * Either scale at 0 skips the navbar transition, including when only one of them was turned off.
+ */
+private fun Context.systemAnimationsDisabled(): Boolean {
+    val resolver = contentResolver
+    val animator = Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+    val transition = Settings.Global.getFloat(resolver, Settings.Global.TRANSITION_ANIMATION_SCALE, 1f)
+    return animator <= 0f || transition <= 0f
 }
 
 /**
