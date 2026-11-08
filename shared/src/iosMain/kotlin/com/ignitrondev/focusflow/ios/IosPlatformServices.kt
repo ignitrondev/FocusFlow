@@ -155,6 +155,20 @@ class IosPlatformServices : PlatformServices {
         NSLog("%@", "E/$tag: $message${error?.let { "\n" + it.stackTraceToString() }.orEmpty()}")
     }
 
+    /**
+     * STUB for the Senior iOS Developer — replace this on this same pull request.
+     *
+     * Return true when Reduce Motion is on: `UIAccessibility.isReduceMotionEnabled`
+     * (`UIAccessibilityIsReduceMotionEnabled()`). Re-read it when the app returns to the
+     * foreground and when `UIAccessibilityReduceMotionStatusDidChangeNotification` is posted.
+     *
+     * This stub returns false (animations allowed) so shared Compose keeps moving until that
+     * actual lands. Do not build a separate SwiftUI navbar; SegmentedNavBar is the UI on both
+     * platforms.
+     */
+    @Composable
+    override fun rememberSystemAnimationsDisabled(): Boolean = false
+
     private fun openAppSettings() {
         val url = NSURL.URLWithString(UIApplicationOpenSettingsURLString) ?: return
         UIApplication.sharedApplication.openURL(url, options = emptyMap<Any?, Any>(), completionHandler = null)

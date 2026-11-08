@@ -65,6 +65,13 @@ interface PlatformServices {
     fun firstDayOfWeek(): DayOfWeek
 
     fun logError(tag: String, message: String, error: Throwable? = null)
+
+    /**
+     * True when tab-switch motion must be skipped: Reduce Motion, or Android animation scale 0.
+     * Re-read when the app returns to the foreground.
+     */
+    @Composable
+    fun rememberSystemAnimationsDisabled(): Boolean
 }
 
 /** What the system allows for session alerts, and the actions to change it. */
