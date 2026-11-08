@@ -39,6 +39,12 @@
 
     <!-- Statistics -->
     <string name="statistics_title">Statistics</string>
+    <string name="statistics_subtitle">Track your focus journey</string>
+    <string name="statistics_chart_empty">Start your first session</string>
+    <string name="statistics_chart_summary">Focus this week, %1$s to %2$s, total %3$s</string>
+    <string name="statistics_bar_description">%1$s, %2$s</string>
+    <string name="statistics_summary_description">%1$s, %2$s, %3$s</string>
+    <string name="statistics_metric_description">%1$s, %2$s</string>
     <string name="statistics_empty_title">No focus time yet</string>
     <string name="statistics_empty_body">Complete a focus session and your daily and weekly progress will show up here.</string>
 

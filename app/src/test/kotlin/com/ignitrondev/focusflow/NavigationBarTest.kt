@@ -282,7 +282,7 @@ class NavigationBarTest {
 
     private companion object {
         // NavigationCapsule / surfaceContainerHigh from the theme. The capsule is orange in both themes.
-        val CAPSULE = android.graphics.Color.parseColor("#C84A00")
+        val CAPSULE = android.graphics.Color.parseColor("#FF6A1A")
         val LIGHT_CONTAINER = android.graphics.Color.parseColor("#E9E7EF")
         val DARK_CONTAINER = android.graphics.Color.parseColor("#292930")
     }
