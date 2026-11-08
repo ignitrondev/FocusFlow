@@ -2,7 +2,7 @@
 
 All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://semver.org).
 
-## Unreleased
+## 1.0.1 — 2026-11-08
 
 ### Fixed
 - Settings → Notifications → Alert sound no longer closes on Android 17 after an alarm tone was

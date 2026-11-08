@@ -1,0 +1,1 @@
+Fixes Settings → Notifications → Alert sound closing on Android 17 after an alarm tone was picked. The sound picker now lists every system sound and your own.
