@@ -20,6 +20,7 @@ Run everything from the repository root with the bundled wrapper.
 | Lint | `./gradlew lintDebug` |
 | Format (ktlint + license headers) | `./gradlew spotlessApply` |
 | Same checks as CI | `./gradlew spotlessCheck lintDebug assembleDebug testDebugUnitTest -PwarningsAsErrors=true` |
+| README and store screenshots | `README_SCREENSHOTS=$PWD/docs/screenshots ./gradlew :app:testDebugUnitTest --tests '*ReadmeScreenshotsTest*'`, then copy them to `fastlane/metadata/android/en-US/images/phoneScreenshots/` (1 timer, 2 dark, 3 history, 4 statistics, 5 settings) |
 
 ### iOS
 
