@@ -12,9 +12,15 @@ FocusFlow is a minimalist Pomodoro timer that helps you work in focused sessions
 The timer keeps the right time when you leave the app, turn off the screen, change the clock or restart the phone. It needs no always-running background service.
 
 <b>See your progress</b>
-History lists every session by day. Statistics show today, this week, your daily average and the last 7 days at a glance.
+History lists every session by day. Statistics show today, this week, your daily average, your streak and the week at a glance.
+
+<b>Achievements</b>
+13 badges for completed sessions, streaks and hours of focus, from bronze to legendary.
 
 <b>Private by design</b>
 No account, no ads, no analytics and no internet permission. Everything stays on your device.
+
+<b>Your colors, your language</b>
+Light and dark theme, wallpaper colors (Material You) and a Liquid Glass navigation bar. In English and Bahasa Indonesia.
 
 FocusFlow is open source under the Apache License 2.0, made by Bima Adam Nugraha at IgnitronDev.

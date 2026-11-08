@@ -1,0 +1,1 @@
+FocusFlow 1.0.0: a floating Liquid Glass navigation bar, redesigned Statistics that follow your theme and wallpaper colors (Material You, now on by default), 13 achievement badges, Bahasa Indonesia, and Check for updates in Settings → About.

@@ -2,7 +2,33 @@
 
 All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://semver.org).
 
-## Unreleased
+## 1.0.0 — 2026-11-08
+
+First stable release.
+
+### Added
+- Achievements: 13 badges for completed sessions, streaks and hours of focus, in bronze, silver,
+  gold and legendary. An unlocked badge shows its date; a locked one shows how far along you are.
+  They stay on the device, and a notification announces each new one when notifications are
+  allowed (Android and iOS). Achievements stay in English in every language.
+- Bahasa Indonesia. FocusFlow follows the device language, or the app language chosen in
+  Android 13+ settings.
+- Settings → About → Check for updates opens the latest release on GitHub. FocusFlow itself still
+  has no internet permission.
+
+### Changed
+- The phone navigation bar floats over the screen as a Liquid Glass pill, with each icon above its
+  label, and screens scroll underneath it. The glass refracts the screen on Android 13+ and iOS,
+  blurs it on Android 12, and is a translucent surface on older Android. The selected tab fades
+  in, or switches at once when animations are turned off.
+- Wallpaper colors (Material You) are on by default on Android 12+. The selected tab, buttons and
+  statistics follow them; Settings → Appearance turns them off.
+- Statistics are redesigned: summary cards, a chart of the week with an hour axis, and cards for
+  the daily average, average session and streak. They follow the app theme (light or dark) and its
+  colors, and Share is a round tonal button.
+- Achievements open from the end of Statistics, with a round Back button.
+
+## Earlier changes (shipped in the 1.0.0 betas)
 
 ### Fixed
 - The end of a session, and an automatic break, could be up to ~18 minutes late on Android 14+

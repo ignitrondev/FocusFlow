@@ -13,15 +13,16 @@ Jetpack Compose and Compose Multiplatform by **Bima Adam Nugraha**, AI-native en
 * **Open source:** Apache License 2.0, with no Google Play Services or proprietary libraries, so it
   can be published on F-Droid.
 
-> **Status: beta (1.0.0-beta.4).** All core features are in. Please
+> **Status: 1.0.0, the first stable release.** Please
 > [report problems](https://github.com/ignitrondev/FocusFlow/issues/new/choose), especially about
 > alerts on your device.
 
 <p>
-  <img src="docs/screenshots/timer_light.png" width="200" alt="Timer screen, light theme">
-  <img src="docs/screenshots/app_dark.png" width="200" alt="Timer screen, dark theme">
-  <img src="docs/screenshots/history_light.png" width="200" alt="History screen">
-  <img src="docs/screenshots/statistics_light.png" width="200" alt="Statistics screen">
+  <img src="docs/screenshots/timer_light.png" width="160" alt="Timer screen, light theme">
+  <img src="docs/screenshots/app_dark.png" width="160" alt="Timer screen, dark theme">
+  <img src="docs/screenshots/history_light.png" width="160" alt="History screen">
+  <img src="docs/screenshots/statistics_light.png" width="160" alt="Statistics screen">
+  <img src="docs/screenshots/achievements_light.png" width="160" alt="Achievements screen">
 </p>
 
 ## Features
@@ -32,9 +33,10 @@ Jetpack Compose and Compose Multiplatform by **Bima Adam Nugraha**, AI-native en
 | Controls | Start, pause, resume, reset, skip; optional automatic start of breaks and focus sessions |
 | Alerts | Sound and vibration when a session ends, also with the app closed; pick any alarm or notification sound; notification with the time left in large digits, Pause and Resume |
 | History | Every session by day, including the ones you stopped early |
-| Statistics | Today, this week, daily average, average session, streak, all time, and a chart of the locale week |
+| Statistics | Today, this week, daily average, average session, streak, and a chart of the locale week |
+| Achievements | 13 badges for sessions, streaks and hours of focus, in bronze, silver, gold and legendary |
 | Share | A Strava-style card of your day or week, as a feed post (1080×1350) or a full-screen story (1080×1920), with your role and, if you like, a photo of where you are working |
-| Everywhere | Light and dark theme, wallpaper colors, phones, foldables and tablets, large font sizes, TalkBack |
+| Everywhere | A Liquid Glass navigation bar, light and dark theme, wallpaper colors (Material You), English and Bahasa Indonesia, phones, foldables and tablets, large font sizes, TalkBack |
 
 ## Download
 
