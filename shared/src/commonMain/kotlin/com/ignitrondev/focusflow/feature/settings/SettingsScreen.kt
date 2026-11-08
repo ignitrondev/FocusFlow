@@ -66,6 +66,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.ignitrondev.focusflow.app.LocalAppDependencies
+import com.ignitrondev.focusflow.core.designsystem.component.screenContentInsets
+import com.ignitrondev.focusflow.core.designsystem.component.withoutBottom
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.model.UserPreferences
@@ -79,6 +81,8 @@ import com.ignitrondev.focusflow.resources.settings_alert_more_summary
 import com.ignitrondev.focusflow.resources.settings_alert_sound
 import com.ignitrondev.focusflow.resources.settings_auto_start_breaks
 import com.ignitrondev.focusflow.resources.settings_auto_start_focus
+import com.ignitrondev.focusflow.resources.settings_check_updates
+import com.ignitrondev.focusflow.resources.settings_check_updates_summary
 import com.ignitrondev.focusflow.resources.settings_dynamic_color
 import com.ignitrondev.focusflow.resources.settings_dynamic_color_summary
 import com.ignitrondev.focusflow.resources.settings_exact_alarms
@@ -118,6 +122,9 @@ data object SettingsRoute
 
 private const val SOURCE_CODE_URL = "https://github.com/ignitrondev/FocusFlow"
 
+// FocusFlow has no internet permission: the browser shows the newest release and its downloads.
+private const val LATEST_RELEASE_URL = "https://github.com/ignitrondev/FocusFlow/releases/latest"
+
 fun NavGraphBuilder.settingsScreen() {
     composable<SettingsRoute> {
         val dependencies = LocalAppDependencies.current
@@ -155,13 +162,15 @@ fun SettingsScreen(
 ) {
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = screenContentInsets(),
         topBar = { TopAppBar(title = { Text(stringResource(Res.string.settings_title)) }) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState()),
+                .padding(innerPadding.withoutBottom())
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = innerPadding.calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(Modifier.widthIn(max = 640.dp).fillMaxWidth()) {
@@ -385,6 +394,13 @@ private fun AboutSection(appVersion: String) {
     ListItem(
         headlineContent = { Text(stringResource(Res.string.settings_version)) },
         supportingContent = { Text(appVersion) },
+    )
+    ListItem(
+        headlineContent = { Text(stringResource(Res.string.settings_check_updates)) },
+        supportingContent = { Text(stringResource(Res.string.settings_check_updates_summary)) },
+        modifier = Modifier
+            .selectable(selected = false, onClick = { uriHandler.openUri(LATEST_RELEASE_URL) }, role = Role.Button)
+            .testTag("setting_check_updates"),
     )
     ListItem(
         headlineContent = { Text(stringResource(Res.string.settings_source_code)) },

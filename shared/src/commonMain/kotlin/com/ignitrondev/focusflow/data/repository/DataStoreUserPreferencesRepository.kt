@@ -43,7 +43,7 @@ class DataStoreUserPreferencesRepository(private val dataStore: DataStore<Prefer
             }.map { preferences ->
                 UserPreferences(
                     themeMode = preferences[Keys.THEME_MODE].toThemeMode(),
-                    useDynamicColor = preferences[Keys.USE_DYNAMIC_COLOR] ?: false,
+                    useDynamicColor = preferences[Keys.USE_DYNAMIC_COLOR] ?: true,
                     shareRole = preferences[Keys.SHARE_ROLE].orEmpty(),
                 )
             }.distinctUntilChanged()

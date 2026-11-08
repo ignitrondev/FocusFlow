@@ -60,10 +60,16 @@ class DataStoreUserPreferencesRepositoryTest {
     }
 
     @Test
-    fun dynamicColorIsPersisted() = runTest(UnconfinedTestDispatcher()) {
+    fun dynamicColorIsOnByDefault() = runTest(UnconfinedTestDispatcher()) {
         val (repository, _) = createRepository()
-        repository.setUseDynamicColor(true)
         assertEquals(true, repository.userPreferences.first().useDynamicColor)
+    }
+
+    @Test
+    fun turningDynamicColorOffIsPersisted() = runTest(UnconfinedTestDispatcher()) {
+        val (repository, _) = createRepository()
+        repository.setUseDynamicColor(false)
+        assertEquals(false, repository.userPreferences.first().useDynamicColor)
     }
 
     @Test

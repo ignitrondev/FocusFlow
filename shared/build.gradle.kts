@@ -66,6 +66,8 @@ kotlin {
             implementation(libs.cmp.material3.navigationSuite)
             implementation(libs.cmp.material3.adaptive)
             implementation(libs.cmp.material.iconsExtended)
+            implementation(libs.haze)
+            implementation(libs.haze.glass)
             api(libs.cmp.components.resources)
             implementation(libs.cmp.ui.tooling.preview)
             implementation(libs.jetbrains.navigation.compose)

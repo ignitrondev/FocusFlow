@@ -32,7 +32,7 @@ import kotlinx.datetime.toLocalDateTime
 
 /**
  * Recomputes achievements whenever session history changes, including the first launch after
- * install of 1.2.0. Each newly unlocked achievement is one [PlatformServices.notifyAchievementUnlocked]
+ * an update that adds them. Each newly unlocked achievement is one [PlatformServices.notifyAchievementUnlocked]
  * call. Up to 13 calls can happen on that first evaluation. They are not combined.
  */
 class AchievementMonitor(

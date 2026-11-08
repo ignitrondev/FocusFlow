@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 IgnitronDev
+  SPDX-License-Identifier: Apache-2.0
+  -->
+<!-- Bahasa Indonesia. Achievement notifications stay in English on purpose. -->
+<resources>
+    <!-- Timer -->
+    <string name="timer_mode_focus">Fokus</string>
+    <string name="timer_mode_short_break">Istirahat singkat</string>
+    <string name="timer_mode_long_break">Istirahat panjang</string>
+    <string name="timer_action_pause">Jeda</string>
+    <string name="timer_action_resume">Lanjutkan</string>
+    <string name="timer_action_reset">Ulang</string>
+    <!-- Notifications -->
+    <string name="notification_channel_timer">Timer berjalan</string>
+    <string name="notification_channel_timer_description">Notifikasi senyap yang menampilkan sisa waktu sesi saat ini</string>
+    <string name="notification_channel_session_end">Sesi selesai</string>
+    <string name="notification_channel_session_end_description">Memberi tahu dengan suara dan getaran saat sesi berakhir</string>
+    <string name="notification_paused">Dijeda · sisa %1$s</string>
+    <string name="notification_paused_label">%1$s · Dijeda</string>
+    <string name="notification_focus_done">Sesi fokus selesai</string>
+    <string name="notification_break_done">Istirahat selesai</string>
+    <string name="notification_next_short_break">Waktunya %1$s.</string>
+    <string name="notification_next_long_break">Kerja bagus, waktunya %1$s.</string>
+    <string name="notification_next_focus">Siap untuk sesi fokus berikutnya?</string>
+    <string name="notification_next_started">%1$s dimulai.</string>
+    <!-- Settings: notifications -->
+    <string name="settings_alert_sound_silent">Senyap</string>
+    <string name="settings_alert_sound_custom">Suara kustom</string>
+    <string name="settings_alert_sound_default">Bawaan (%1$s)</string>
+</resources>

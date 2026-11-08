@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -50,6 +51,7 @@ import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material.icons.rounded.TrackChanges
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -58,6 +60,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -92,10 +95,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ignitrondev.focusflow.app.LocalAppDependencies
+import com.ignitrondev.focusflow.core.designsystem.component.screenContentInsets
+import com.ignitrondev.focusflow.core.designsystem.component.withoutBottom
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowShapes
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowSpacing
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
-import com.ignitrondev.focusflow.core.designsystem.theme.FocusTokens
 import com.ignitrondev.focusflow.core.ui.durationText
 import com.ignitrondev.focusflow.domain.statistics.DayFocus
 import com.ignitrondev.focusflow.domain.statistics.FocusStatistics
@@ -194,7 +198,7 @@ fun StatisticsScreen(
     // Loading stays a title bar and an empty body. A successful load, including an empty week, uses the screen.
     Scaffold(
         modifier = modifier,
-        containerColor = if (statistics != null) FocusTokens.screen else MaterialTheme.colorScheme.background,
+        contentWindowInsets = screenContentInsets(),
         topBar = {
             if (statistics == null) {
                 TopAppBar(title = { Text(stringResource(Res.string.statistics_title)) })
@@ -211,7 +215,7 @@ fun StatisticsScreen(
                 onOpenAchievements = onOpenAchievements,
                 restoreAchievementsFocus = restoreAchievementsFocus,
                 onAchievementsFocusRestored = onAchievementsFocusRestored,
-                modifier = Modifier.padding(innerPadding),
+                contentPadding = innerPadding,
             )
         }
     }
@@ -224,15 +228,16 @@ private fun StatisticsContent(
     onOpenAchievements: () -> Unit,
     restoreAchievementsFocus: Boolean,
     onAchievementsFocusRestored: () -> Unit,
-    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues,
 ) {
     val fontScale = LocalDensity.current.fontScale
-    BoxWithConstraints(modifier.fillMaxSize()) {
+    BoxWithConstraints(Modifier.fillMaxSize().padding(contentPadding.withoutBottom())) {
         val stack = maxWidth < 360.dp || fontScale >= 1.3f
         Column(
             Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .padding(bottom = contentPadding.calculateBottomPadding())
                 .padding(horizontal = FocusFlowSpacing.lg, vertical = FocusFlowSpacing.sm),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -253,7 +258,7 @@ private fun StatisticsContent(
                         statistics.currentStreakDays,
                     ),
                     icon = Icons.Rounded.EmojiEvents,
-                    iconTint = FocusTokens.streak,
+                    iconTint = StatColors.streak,
                     tag = "metricStreak",
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -274,53 +279,30 @@ private fun Header(onShare: () -> Unit) {
             Text(
                 stringResource(Res.string.statistics_title),
                 style = DisplayStyle,
-                color = FocusTokens.textPrimary,
+                color = StatColors.textPrimary,
                 modifier = Modifier.semantics { heading() },
             )
             Text(
                 stringResource(Res.string.statistics_subtitle),
                 style = SubtitleStyle,
-                color = FocusTokens.textSecondary,
+                color = StatColors.textSecondary,
             )
         }
         ShareButton(onShare)
     }
 }
 
+/** A round tonal button in the theme's colors, which follow the wallpaper when Material You is on. */
 @Composable
 private fun ShareButton(onShare: () -> Unit) {
-    val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-    val focused by interaction.collectIsFocusedAsState()
-    IconButton(
+    FilledTonalIconButton(
         onClick = onShare,
-        interactionSource = interaction,
-        colors = IconButtonDefaults.iconButtonColors(
-            containerColor = Color.Transparent,
-            contentColor = FocusTokens.textPrimary,
-        ),
-        modifier = Modifier
-            .size(48.dp)
-            .graphicsLayerScale(if (pressed) 0.96f else 1f)
-            .clip(FocusFlowShapes.iconButton)
-            .background(if (pressed) FocusTokens.cardPressed else FocusTokens.card)
-            .border(
-                width = if (focused) 2.dp else 0.dp,
-                color = FocusTokens.focusRing,
-                shape = FocusFlowShapes.iconButton,
-            )
-            .testTag("shareStatistics"),
+        shape = FocusFlowShapes.iconButton,
+        modifier = Modifier.size(48.dp).testTag("shareStatistics"),
     ) {
         Icon(Icons.Rounded.Share, contentDescription = stringResource(Res.string.statistics_share), modifier = Modifier.size(24.dp))
     }
 }
-
-private fun Modifier.graphicsLayerScale(scale: Float): Modifier = this.then(
-    Modifier.graphicsLayer {
-        scaleX = scale
-        scaleY = scale
-    },
-)
 
 @Composable
 private fun SummaryRow(statistics: FocusStatistics, stack: Boolean) {
@@ -335,7 +317,7 @@ private fun SummaryRow(statistics: FocusStatistics, stack: Boolean) {
                 spokenValue = spokenMinutes(todayMinutes),
                 caption = sessionsText(statistics.today.sessions),
                 icon = Icons.Rounded.Timer,
-                iconTint = FocusTokens.accent,
+                iconTint = StatColors.accent,
                 glow = true,
                 tag = "summaryToday",
                 modifier = modifier,
@@ -348,7 +330,7 @@ private fun SummaryRow(statistics: FocusStatistics, stack: Boolean) {
                 spokenValue = spokenMinutes(weekMinutes),
                 caption = sessionsText(statistics.weekSessions),
                 icon = Icons.Rounded.CalendarMonth,
-                iconTint = FocusTokens.textSecondary,
+                iconTint = StatColors.textSecondary,
                 glow = false,
                 tag = "summaryWeek",
                 modifier = modifier,
@@ -369,7 +351,7 @@ private fun MetricRow(statistics: FocusStatistics, stack: Boolean) {
                 value = durationText(statistics.weekDailyAverageMillis),
                 spokenValue = spokenMinutes(dailyMinutes),
                 icon = Icons.Rounded.LocalFireDepartment,
-                iconTint = FocusTokens.accent,
+                iconTint = StatColors.accent,
                 tag = "metricDaily",
                 modifier = modifier,
             )
@@ -380,7 +362,7 @@ private fun MetricRow(statistics: FocusStatistics, stack: Boolean) {
                 value = durationText(statistics.averageSessionMillis),
                 spokenValue = spokenMinutes(sessionMinutes),
                 icon = Icons.Rounded.TrackChanges,
-                iconTint = FocusTokens.session,
+                iconTint = StatColors.session,
                 tag = "metricSession",
                 modifier = modifier,
             )
@@ -422,15 +404,15 @@ private fun SummaryCard(
                 Modifier
                     .size(40.dp)
                     .clip(FocusFlowShapes.iconButton)
-                    .background(FocusTokens.cardPressed),
+                    .background(StatColors.cardPressed),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
             }
             Spacer(Modifier.height(FocusFlowSpacing.xs))
             Label(title)
-            Text(value, style = ValueLargeStyle, color = FocusTokens.textPrimary)
-            Text(caption, style = CaptionStyle, color = FocusTokens.textSecondary)
+            Text(value, style = ValueLargeStyle, color = StatColors.textPrimary)
+            Text(caption, style = CaptionStyle, color = StatColors.textSecondary)
         }
     }
 }
@@ -455,7 +437,7 @@ private fun MetricCard(
             Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(28.dp))
             Column {
                 Label(title)
-                Text(value, style = ValueMediumStyle, color = FocusTokens.textPrimary)
+                Text(value, style = ValueMediumStyle, color = StatColors.textPrimary)
             }
         }
     }
@@ -466,8 +448,8 @@ private fun SurfaceCard(modifier: Modifier, description: String, tag: String, gl
     Box(
         modifier
             .clip(FocusFlowShapes.card)
-            .background(FocusTokens.card)
-            .border(1.dp, FocusTokens.cardBorder, FocusFlowShapes.card)
+            .background(StatColors.card)
+            .border(1.dp, StatColors.cardBorder, FocusFlowShapes.card)
             .semantics { contentDescription = description }
             .testTag(tag),
     ) {
@@ -475,7 +457,7 @@ private fun SurfaceCard(modifier: Modifier, description: String, tag: String, gl
             Box(
                 Modifier
                     .matchParentSize()
-                    .background(Brush.verticalGradient(listOf(FocusTokens.accent.copy(alpha = 0.18f), Color.Transparent))),
+                    .background(Brush.verticalGradient(listOf(StatColors.accent.copy(alpha = 0.18f), Color.Transparent))),
             )
         }
         content()
@@ -487,7 +469,7 @@ private fun Label(text: String) {
     Text(
         text,
         style = LabelStyle,
-        color = FocusTokens.textSecondary,
+        color = StatColors.textSecondary,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
     )
@@ -513,11 +495,11 @@ private fun WeekChart(statistics: FocusStatistics, fontScale: Float) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(FocusFlowSpacing.xs),
             ) {
-                Icon(Icons.Rounded.BarChart, contentDescription = null, tint = FocusTokens.accent, modifier = Modifier.size(20.dp))
+                Icon(Icons.Rounded.BarChart, contentDescription = null, tint = StatColors.accent, modifier = Modifier.size(20.dp))
                 Text(
                     weekRangeLabel(statistics.weekStart, statistics.weekEnd, dates),
                     style = LabelStyle,
-                    color = FocusTokens.textSecondary,
+                    color = StatColors.textSecondary,
                     modifier = Modifier.testTag("weekRange"),
                 )
             }
@@ -575,7 +557,7 @@ private fun Plot(
             Text(
                 stringResource(Res.string.statistics_chart_empty),
                 style = LabelStyle,
-                color = FocusTokens.textSecondary,
+                color = StatColors.textSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.Center).testTag("chartEmpty"),
             )
@@ -602,12 +584,13 @@ private fun Plot(
 
 @Composable
 private fun GridLines(axis: ChartAxis, modifier: Modifier) {
+    val gridline = StatColors.gridline
     Canvas(modifier) {
         val dash = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 4.dp.toPx()))
         axis.ticksMinutes.forEach { tick ->
             val y = size.height * (1f - tick.toFloat() / axis.axisMaxMinutes)
             drawLine(
-                color = FocusTokens.gridline,
+                color = gridline,
                 start = Offset(0f, y),
                 end = Offset(size.width, y),
                 strokeWidth = 1.dp.toPx(),
@@ -634,14 +617,14 @@ private fun RowScope.BarSlot(minutes: Int, axisMax: Int, plotHeight: Dp, barWidt
                     .width(barWidth)
                     .height(plotHeight * fraction)
                     .clip(FocusFlowShapes.bar)
-                    .background(if (highlighted) FocusTokens.accent else FocusTokens.accent.copy(alpha = 0.45f)),
+                    .background(if (highlighted) StatColors.accent else StatColors.accent.copy(alpha = 0.45f)),
             )
         } else {
             Box(
                 Modifier
                     .size(4.dp)
                     .clip(FocusFlowShapes.iconButton)
-                    .background(FocusTokens.baseline),
+                    .background(StatColors.baseline),
             )
         }
     }
@@ -653,14 +636,14 @@ private fun Tooltip(text: String, modifier: Modifier = Modifier) {
         Text(
             text,
             style = TooltipStyle,
-            color = FocusTokens.textPrimary,
+            color = StatColors.textPrimary,
             modifier = Modifier
                 .clip(FocusFlowShapes.chip)
-                .background(FocusTokens.cardPressed)
+                .background(StatColors.cardPressed)
                 .padding(horizontal = FocusFlowSpacing.xs, vertical = FocusFlowSpacing.xxs),
         )
         Spacer(Modifier.height(FocusFlowSpacing.xxs))
-        Box(Modifier.size(4.dp).clip(FocusFlowShapes.iconButton).background(FocusTokens.accent))
+        Box(Modifier.size(4.dp).clip(FocusFlowShapes.iconButton).background(StatColors.accent))
     }
 }
 
@@ -672,7 +655,7 @@ private fun YAxis(axis: ChartAxis, modifier: Modifier) {
             Text(
                 chartTickLabel(tick),
                 style = AxisStyle,
-                color = FocusTokens.textSecondary,
+                color = StatColors.textSecondary,
                 textAlign = TextAlign.End,
                 maxLines = 1,
                 modifier = Modifier
@@ -705,7 +688,7 @@ private fun RowScope.DayLabel(day: DayFocus, today: LocalDate, dates: DateFormat
             if (fontScale >= 1.3f && !useNarrow && layout.hasVisualOverflow) useNarrow = true
         },
         style = AxisStyle.copy(fontWeight = if (highlight) FontWeight.Bold else FontWeight.Normal),
-        color = if (highlight) FocusTokens.textPrimary else FocusTokens.textSecondary,
+        color = if (highlight) StatColors.textPrimary else StatColors.textSecondary,
     )
 }
 
@@ -750,4 +733,41 @@ private fun StatisticsScreenPreview() {
             ),
         )
     }
+}
+
+/**
+ * The statistics colors, taken from the app theme: light or dark with the app, and from the
+ * wallpaper when Material You is on.
+ */
+private object StatColors {
+    val card: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.surfaceContainer
+    val cardPressed: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.surfaceContainerHighest
+    val cardBorder: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+    val baseline: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.outlineVariant
+    val accent: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.primary
+    val textPrimary: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.onSurface
+    val textSecondary: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.onSurfaceVariant
+    val streak: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.tertiary
+    val session: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.secondary
+    val gridline: Color
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
 }

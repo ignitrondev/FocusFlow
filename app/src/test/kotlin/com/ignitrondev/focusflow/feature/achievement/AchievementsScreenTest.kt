@@ -18,9 +18,11 @@ package com.ignitrondev.focusflow.feature.achievement
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -35,9 +37,8 @@ import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.timer.TimerRepository
 import com.ignitrondev.focusflow.navigation.TopLevelDestination
 import com.ignitrondev.focusflow.resources.Res
-import com.ignitrondev.focusflow.resources.achievements_earned
 import com.ignitrondev.focusflow.resources.achievements_no_completed_sessions
-import com.ignitrondev.focusflow.resources.achievements_not_earned
+import com.ignitrondev.focusflow.resources.achievements_unlocked
 import com.ignitrondev.focusflow.testing.FakeTimeSource
 import com.ignitrondev.focusflow.testing.FakeUserPreferencesRepository
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -112,8 +113,9 @@ class AchievementsScreenTest {
         composeRule.onNodeWithTag("achievementsEmpty").assertExists()
         Achievements.all.forEach { achievement ->
             composeRule.onNodeWithTag("achievement_${achievement.id}").performScrollTo().assertExists()
-            composeRule.onNodeWithTag("achievement_${achievement.id}_status")
-                .assertTextEquals(string(Res.string.achievements_not_earned))
+            // Locked badges show how far along they are instead of an unlock date.
+            composeRule.onNodeWithTag("achievement_${achievement.id}_progress", useUnmergedTree = true).assertExists()
+            composeRule.onNodeWithTag("achievement_${achievement.id}_status", useUnmergedTree = true).assertDoesNotExist()
         }
         assertFourTabs(statisticsSelected = true)
         composeRule.onNodeWithTag("nav_Achievements").assertDoesNotExist()
@@ -139,9 +141,11 @@ class AchievementsScreenTest {
         composeRule.waitUntilAtLeastOneExists(hasTestTag("achievement_sessions_1"), 5_000)
 
         composeRule.onNodeWithTag("achievementsEmpty").assertDoesNotExist()
-        composeRule.onNodeWithTag("achievement_sessions_1_status").assertTextEquals(string(Res.string.achievements_earned))
+        composeRule.onNodeWithTag("achievement_sessions_1_status", useUnmergedTree = true)
+            .assert(hasText(string(Res.string.achievements_unlocked), substring = true))
+        composeRule.onNodeWithTag("achievement_sessions_1_progress", useUnmergedTree = true).assertDoesNotExist()
         composeRule.onNodeWithTag("achievement_sessions_10").performScrollTo()
-        composeRule.onNodeWithTag("achievement_sessions_10_status").assertTextEquals(string(Res.string.achievements_not_earned))
+        composeRule.onNodeWithTag("achievement_sessions_10_progress", useUnmergedTree = true).assertExists()
         assertFourTabs(statisticsSelected = true)
     }
 

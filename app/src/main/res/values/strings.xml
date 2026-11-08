@@ -19,8 +19,9 @@
     <string name="notification_channel_timer_description">Silent notification showing the time left in the current session</string>
     <string name="notification_channel_session_end">Session finished</string>
     <string name="notification_channel_session_end_description">Alerts you with sound and vibration when a session ends</string>
-    <string name="notification_channel_achievements">Achievements</string>
-    <string name="notification_channel_achievements_description">One notification for each achievement unlocked on this device</string>
+    <!-- Achievements stay in English in every language. -->
+    <string name="notification_channel_achievements" translatable="false">Achievements</string>
+    <string name="notification_channel_achievements_description" translatable="false">One notification for each achievement unlocked on this device</string>
     <string name="notification_paused">Paused · %1$s left</string>
     <string name="notification_paused_label">%1$s · Paused</string>
     <string name="notification_focus_done">Focus session complete</string>

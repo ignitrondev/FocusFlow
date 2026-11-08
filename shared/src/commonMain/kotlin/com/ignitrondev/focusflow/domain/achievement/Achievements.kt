@@ -16,7 +16,7 @@
 package com.ignitrondev.focusflow.domain.achievement
 
 /**
- * The 13 on-device achievements for FocusFlow 1.2.0.
+ * The 13 on-device achievements.
  *
  * Stable ids, one per threshold. These ids are the Room primary key and the
  * `achievementId` passed to [com.ignitrondev.focusflow.platform.PlatformServices.notifyAchievementUnlocked].
@@ -52,7 +52,7 @@ object Achievements {
     )
 
     init {
-        require(all.size == 13) { "FocusFlow 1.2.0 ships 13 achievements" }
+        require(all.size == 13) { "FocusFlow ships 13 achievements" }
         require(all.distinctBy { it.id }.size == all.size) { "Achievement ids must be unique" }
     }
 }

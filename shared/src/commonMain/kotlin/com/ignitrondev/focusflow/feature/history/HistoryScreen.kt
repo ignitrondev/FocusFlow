@@ -57,6 +57,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.ignitrondev.focusflow.app.LocalAppDependencies
 import com.ignitrondev.focusflow.core.designsystem.component.EmptyState
+import com.ignitrondev.focusflow.core.designsystem.component.screenContentInsets
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.core.ui.durationText
 import com.ignitrondev.focusflow.core.ui.labelRes
@@ -99,6 +100,7 @@ fun NavGraphBuilder.historyScreen() {
 fun HistoryScreen(uiState: HistoryUiState, dates: DateFormats, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = screenContentInsets(),
         topBar = { TopAppBar(title = { Text(stringResource(Res.string.history_title)) }) },
     ) { innerPadding ->
         when {

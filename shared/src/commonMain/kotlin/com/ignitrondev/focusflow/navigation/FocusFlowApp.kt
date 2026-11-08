@@ -17,12 +17,10 @@ package com.ignitrondev.focusflow.navigation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Icon
@@ -34,7 +32,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavDestination
@@ -49,6 +47,7 @@ import androidx.window.core.layout.WindowSizeClass
 import com.ignitrondev.focusflow.app.AppDependencies
 import com.ignitrondev.focusflow.app.LocalAppDependencies
 import com.ignitrondev.focusflow.core.designsystem.component.FittedLabel
+import com.ignitrondev.focusflow.core.designsystem.component.LocalFloatingBarInsets
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.domain.model.UserPreferences
 import com.ignitrondev.focusflow.feature.history.historyScreen
@@ -57,9 +56,11 @@ import com.ignitrondev.focusflow.feature.statistics.statisticsScreen
 import com.ignitrondev.focusflow.feature.timer.TimerRoute
 import com.ignitrondev.focusflow.feature.timer.timerScreen
 import com.ignitrondev.focusflow.platform.LocalDateFormats
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import org.jetbrains.compose.resources.stringResource
 
-/** App shell: segmented bottom bar on phones, navigation rail or drawer on larger windows, one NavHost. */
+/** App shell: floating glass bottom bar on phones, navigation rail or drawer on larger windows, one NavHost. */
 @Composable
 fun FocusFlowApp(navController: NavHostController = rememberNavController()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -78,8 +79,8 @@ fun FocusFlowApp(navController: NavHostController = rememberNavController()) {
     }
 
     if (layoutType == NavigationSuiteType.NavigationBar) {
-        SegmentedNavigation(currentDestination = currentDestination, onNavigate = navController::navigateToTopLevel) {
-            AppContent(navController, layoutType)
+        FloatingNavigation(currentDestination = currentDestination, onNavigate = navController::navigateToTopLevel) {
+            AppContent(navController)
         }
     } else {
         NavigationSuiteScaffold(
@@ -102,39 +103,47 @@ fun FocusFlowApp(navController: NavHostController = rememberNavController()) {
                 }
             },
         ) {
-            AppContent(navController, layoutType)
+            // The rail already pads for the system bars on its side; consume those insets so
+            // screen Scaffolds don't add the same padding a second time.
+            Box(Modifier.consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Start))) {
+                AppContent(navController)
+            }
         }
     }
 }
 
 @Composable
-private fun AppContent(navController: NavHostController, layoutType: NavigationSuiteType) {
-    // The navigation bar/rail already pads for the system bars on its side; consume those
-    // insets so screen Scaffolds don't add the same padding a second time.
-    val navigationSide = if (layoutType == NavigationSuiteType.NavigationBar) {
-        WindowInsetsSides.Bottom
-    } else {
-        WindowInsetsSides.Start
-    }
-    Box(Modifier.consumeWindowInsets(WindowInsets.safeDrawing.only(navigationSide))) {
-        NavHost(navController = navController, startDestination = TimerRoute) {
-            timerScreen()
-            statisticsScreen()
-            historyScreen()
-            settingsScreen()
-        }
+private fun AppContent(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = TimerRoute) {
+        timerScreen()
+        statisticsScreen()
+        historyScreen()
+        settingsScreen()
     }
 }
 
+/**
+ * Screens fill the window and the bar floats over their bottom edge. The screens are the glass's
+ * source, and [LocalFloatingBarInsets] tells their Scaffolds how much of the bottom the bar covers,
+ * so scrolling content passes under the glass and still ends clear of it.
+ */
 @Composable
-private fun SegmentedNavigation(
+private fun FloatingNavigation(
     currentDestination: NavDestination?,
     onNavigate: (TopLevelDestination) -> Unit,
     content: @Composable () -> Unit,
 ) {
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        Box(Modifier.weight(1f).fillMaxWidth()) { content() }
-        SegmentedNavBar(currentDestination, onNavigate)
+    val hazeState = rememberHazeState()
+    Box(Modifier.fillMaxSize()) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .hazeSource(hazeState)
+                .background(MaterialTheme.colorScheme.background),
+        ) {
+            CompositionLocalProvider(LocalFloatingBarInsets provides rememberFloatingBarInsets()) { content() }
+        }
+        FloatingNavBar(currentDestination, onNavigate, hazeState, Modifier.align(Alignment.BottomCenter))
     }
 }
 

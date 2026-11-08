@@ -28,7 +28,8 @@ import kotlinx.coroutines.flow.update
 class FakeUserPreferencesRepository
 @Inject
 constructor() : UserPreferencesRepository {
-    private val state = MutableStateFlow(UserPreferences())
+    // Tests check the fixed FocusFlow palette; Robolectric's wallpaper colors are arbitrary.
+    private val state = MutableStateFlow(UserPreferences(useDynamicColor = false))
     override val userPreferences: StateFlow<UserPreferences> = state
 
     override suspend fun setThemeMode(themeMode: ThemeMode) = state.update { it.copy(themeMode = themeMode) }

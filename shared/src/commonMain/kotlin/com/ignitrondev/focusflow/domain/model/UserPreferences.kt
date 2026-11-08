@@ -19,8 +19,8 @@ enum class ThemeMode { System, Light, Dark }
 
 data class UserPreferences(
     val themeMode: ThemeMode = ThemeMode.System,
-    /** Material You wallpaper colors; only honoured on Android 12+. */
-    val useDynamicColor: Boolean = false,
+    /** Material You wallpaper colors, on unless the user turns them off; only honoured on Android 12+. */
+    val useDynamicColor: Boolean = true,
     /** The user's role shown on shared statistics cards, e.g. "Software Engineer". */
     val shareRole: String = "",
 )

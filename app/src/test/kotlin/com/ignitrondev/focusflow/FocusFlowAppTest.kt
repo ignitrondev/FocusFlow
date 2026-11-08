@@ -15,6 +15,7 @@
  */
 package com.ignitrondev.focusflow
 
+import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Looper
 import androidx.compose.ui.semantics.SemanticsActions
@@ -23,6 +24,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -33,6 +35,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.timer.TimerRepository
@@ -223,6 +227,19 @@ class FocusFlowAppTest {
 
         val started = shadowOf(composeRule.activity).nextStartedActivityForResult
         assertEquals(RingtoneManager.ACTION_RINGTONE_PICKER, started.intent.action)
+    }
+
+    @Test
+    fun checkForUpdatesOpensTheLatestReleaseInTheBrowser() {
+        composeRule.onNodeWithTag("nav_Settings").performClick()
+        // Scroll to the end so the row sits above the floating navigation bar, not under it.
+        repeat(6) { composeRule.onNode(hasScrollAction()).performTouchInput { swipeUp() } }
+        composeRule.onNodeWithTag("setting_check_updates").performClick()
+        composeRule.waitForIdle()
+
+        val started = shadowOf(composeRule.activity).nextStartedActivity
+        assertEquals(Intent.ACTION_VIEW, started.action)
+        assertEquals("https://github.com/ignitrondev/FocusFlow/releases/latest", started.dataString)
     }
 
     @Test

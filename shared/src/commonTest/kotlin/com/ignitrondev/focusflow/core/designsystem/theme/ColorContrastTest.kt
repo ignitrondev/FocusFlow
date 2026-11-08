@@ -41,10 +41,15 @@ class ColorContrastTest {
         Triple("primary on surface (section headers, focus label)", primary to surface, 4.5),
         Triple("tertiary on surface (break label)", tertiary to surface, 4.5),
         Triple("onPrimary on primary (start button)", onPrimary to primary, 4.5),
-        Triple("onSurfaceVariant on surfaceContainerHigh (navigation bar)", onSurfaceVariant to surfaceContainerHigh, 4.5),
+        Triple("onSurface on surface (inactive tab on the glass navigation bar)", onSurface to surface, 4.5),
+        Triple("primary on surfaceContainerHigh (selected tab over a busy screen)", primary to surfaceContainerHigh, 4.5),
         Triple("onSecondaryContainer on secondaryContainer (selected segment)", onSecondaryContainer to secondaryContainer, 4.5),
         Triple("primary on surfaceContainerHighest (dial arc vs track)", primary to surfaceContainerHighest, 3.0),
         Triple("tertiary on surfaceContainer (today's bar)", tertiary to surfaceContainer, 3.0),
+        Triple("onSurface on surfaceContainer (statistics values)", onSurface to surfaceContainer, 4.5),
+        Triple("primary on surfaceContainer (statistics icons and bars)", primary to surfaceContainer, 3.0),
+        Triple("secondary on surfaceContainer (session icon)", secondary to surfaceContainer, 3.0),
+        Triple("onSecondaryContainer on secondaryContainer (share and back buttons)", onSecondaryContainer to secondaryContainer, 4.5),
     )
 
     private fun assertContrast(name: String, scheme: ColorScheme) {
@@ -53,23 +58,6 @@ class ColorContrastTest {
             if (ratio < minimum) "$label: ${(ratio * 100).roundToInt() / 100.0} < $minimum" else null
         }
         assertTrue(failures.isEmpty(), "$name theme:\n" + failures.joinToString("\n"))
-    }
-
-    @Test
-    fun navigationCapsuleMeetsWcag() {
-        // Approved capsule is #18181B on #FF6A1A (6.18:1). The same orange on the light bar
-        // surface is below 3:1, so that pair is not a text or component requirement here.
-        val text = contrast(OnNavigationCapsule, NavigationCapsule)
-        assertTrue(text >= 4.5, "text on orange capsule: ${(text * 100).roundToInt() / 100.0} < 4.5")
-        val onDarkBar = contrast(NavigationCapsule, DarkColors.surfaceContainerHigh)
-        assertTrue(
-            onDarkBar >= 3.0,
-            "orange capsule on dark navigation bar: ${(onDarkBar * 100).roundToInt() / 100.0} < 3",
-        )
-        val primaryOnCard = contrast(FocusTokens.textPrimary, FocusTokens.card)
-        assertTrue(primaryOnCard >= 4.5, "statistics primary text: ${(primaryOnCard * 100).roundToInt() / 100.0} < 4.5")
-        val secondaryOnCard = contrast(FocusTokens.textSecondary, FocusTokens.card)
-        assertTrue(secondaryOnCard >= 4.5, "statistics secondary text: ${(secondaryOnCard * 100).roundToInt() / 100.0} < 4.5")
     }
 
     @Test

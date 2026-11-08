@@ -66,6 +66,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import com.ignitrondev.focusflow.core.designsystem.component.FittedLabel
+import com.ignitrondev.focusflow.core.designsystem.component.screenContentInsets
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
 import com.ignitrondev.focusflow.core.designsystem.theme.TimerTextStyle
 import com.ignitrondev.focusflow.core.time.formatMinutesSeconds
@@ -95,6 +96,7 @@ import org.jetbrains.compose.resources.stringResource
 fun TimerScreen(uiState: TimerUiState, onAction: (TimerAction) -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = screenContentInsets(),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {

@@ -19,12 +19,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 
-/** Corner radii for the statistics screen and the segmented navbar. Screens must use these, not raw dp. */
+/** Corner radii for the statistics screen and the floating navbar. Screens must use these, not raw dp. */
 internal object FocusFlowShapes {
     val card = RoundedCornerShape(24.dp)
     val chip = RoundedCornerShape(12.dp)
     val bar = RoundedCornerShape(999.dp)
-    val navContainer = RoundedCornerShape(32.dp)
-    val navCapsule = RoundedCornerShape(28.dp)
+
+    /** The floating glass navbar is a full pill, and so is the press and focus shape of each tab. */
+    val navContainer = RoundedCornerShape(percent = 50)
+    val navItem = RoundedCornerShape(percent = 50)
     val iconButton = CircleShape
 }

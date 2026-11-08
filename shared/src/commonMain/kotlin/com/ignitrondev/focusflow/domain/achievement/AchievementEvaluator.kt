@@ -30,6 +30,7 @@ data class AchievementUnlockRecord(val id: String, val unlockedAtEpochMillis: Lo
  * [currentWholeUnits] is completed sessions, streak days, or whole focus hours floored.
  * [remainderMinutes] is the leftover whole minutes after those hours, also floored, and is 0 for
  * the session and streak metrics. Neither value is rounded up to the next unit.
+ * [unlockedAtEpochMillis] is when the unlock was stored; null until it is.
  */
 data class AchievementStatus(
     val definition: AchievementDefinition,
@@ -37,6 +38,7 @@ data class AchievementStatus(
     val currentWholeUnits: Long,
     val remainderMinutes: Long,
     val notified: Boolean,
+    val unlockedAtEpochMillis: Long? = null,
 )
 
 /**
@@ -62,6 +64,7 @@ object AchievementEvaluator {
                 currentWholeUnits = wholeUnits(statistics, definition.metric),
                 remainderMinutes = if (definition.metric == AchievementMetric.FocusHours) remainderMinutes(statistics) else 0L,
                 notified = record?.notified == true,
+                unlockedAtEpochMillis = record?.unlockedAtEpochMillis,
             )
         }
         return AchievementPlan(

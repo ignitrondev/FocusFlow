@@ -63,6 +63,8 @@
     <string name="settings_dynamic_color_summary">Use colors from your wallpaper instead of the FocusFlow palette</string>
     <string name="settings_section_about">About</string>
     <string name="settings_version">Version</string>
+    <string name="settings_check_updates">Check for updates</string>
+    <string name="settings_check_updates_summary">Opens the latest release on GitHub. FocusFlow itself never goes online.</string>
     <string name="settings_source_code">Source code</string>
     <string name="settings_source_code_summary">FocusFlow is open source. View it on GitHub.</string>
     <string name="settings_made_by">Made by</string>
@@ -131,7 +133,8 @@
     <string name="share_card_sessions">Sessions</string>
     <string name="share_card_daily_average">Daily avg</string>
     <string name="share_card_streak">Streak</string>
-    <string name="share_card_footer">Focus better. Work smarter.</string>
+    <!-- The FocusFlow tagline stays in English. -->
+    <string name="share_card_footer" translatable="false">Focus better. Work smarter.</string>
     <string name="share_card_week_range">%1$s – %2$s</string>
     <!-- Same calendar month, e.g. "2 – 8 Nov". Month name comes from the device locale. -->
     <string name="week_range_same_month">%1$d – %2$d %3$s</string>
@@ -159,17 +162,39 @@
     <string name="notification_next_focus">Ready for the next focus session?</string>
     <string name="notification_next_started">%1$s started.</string>
 
-    <!-- Achievements (1.2.0). Criteria labels only; names and marketing copy are not final. -->
+    <!-- Achievements stay in English in every language: do not add translations for achievement* strings. -->
     <string name="achievements_title">Achievements</string>
     <string name="achievements_open">Achievements</string>
     <string name="achievements_back">Back</string>
-    <string name="achievements_earned">Earned</string>
-    <string name="achievements_not_earned">Not yet earned</string>
+    <string name="achievements_unlocked">Unlocked</string>
+    <!-- e.g. "Unlocked · 21 Oct 2026"; the date follows the device locale. -->
+    <string name="achievements_unlocked_on">Unlocked · %1$s</string>
     <string name="achievements_no_completed_sessions">No completed focus sessions yet. Achievements stay on this device and unlock as you focus.</string>
     <string name="achievements_progress_sessions">%1$d of %2$d completed sessions</string>
     <string name="achievements_progress_days">%1$d of %2$d days</string>
     <string name="achievements_progress_hours">%1$d h of %2$d h</string>
     <string name="achievements_progress_hours_minutes">%1$d h %2$d min of %3$d h</string>
+    <!-- Short progress under a badge, e.g. "86 / 100", "9 / 30 days", "36 / 50 h" -->
+    <string name="achievements_progress_count">%1$d / %2$d</string>
+    <string name="achievements_progress_days_short">%1$d / %2$d days</string>
+    <string name="achievements_progress_hours_short">%1$d / %2$d h</string>
+    <string name="achievement_tier_bronze">Bronze</string>
+    <string name="achievement_tier_silver">Silver</string>
+    <string name="achievement_tier_gold">Gold</string>
+    <string name="achievement_tier_legendary">Legendary</string>
+    <string name="achievement_title_sessions_1">First Tomato</string>
+    <string name="achievement_title_sessions_10">Ten Down</string>
+    <string name="achievement_title_sessions_25">Quarter Century</string>
+    <string name="achievement_title_sessions_50">Half Century</string>
+    <string name="achievement_title_sessions_100">Century</string>
+    <string name="achievement_title_streak_3">Warming Up</string>
+    <string name="achievement_title_streak_7">Steady Week</string>
+    <string name="achievement_title_streak_14">Two Weeks Strong</string>
+    <string name="achievement_title_streak_30">Focus Legend</string>
+    <string name="achievement_title_focus_hours_1">First Hour</string>
+    <string name="achievement_title_focus_hours_10">Deep Work</string>
+    <string name="achievement_title_focus_hours_25">Deep Diver</string>
+    <string name="achievement_title_focus_hours_100">Marathon</string>
     <plurals name="achievement_sessions">
         <item quantity="one">%1$d completed session</item>
         <item quantity="other">%1$d completed sessions</item>

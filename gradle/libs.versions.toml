@@ -19,6 +19,8 @@ compileSdk = "37"
 coroutines = "1.11.0"
 gradle-versions = "0.64.0"
 hilt = "2.60.1"
+# Backdrop blur and Liquid Glass for the floating navigation bar (Android and iOS).
+haze = "2.0.1"
 jdkDesugar = "2.1.5"
 junit = "4.13.2"
 kotlin = "2.4.20"
@@ -73,6 +75,8 @@ androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-te
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-test-ext-junit" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test" }
 core-jdk-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "jdkDesugar" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+haze-glass = { module = "dev.chrisbanes.haze:haze-glass", version.ref = "haze" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }

@@ -16,19 +16,24 @@
 package com.ignitrondev.focusflow
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
+import android.view.PixelCopy
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -36,8 +41,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -58,22 +65,22 @@ import kotlin.math.abs
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * The phone bar is a segmented container: the active tab is an orange capsule around its icon and
- * label, inactive tabs stay on the container color, and every tab keeps a 48dp target.
- * Wider, short windows keep the side rail.
+ * The phone bar is a floating glass pill: every tab is an icon above its label, the selected tab is
+ * tinted with the theme's primary color, every tab keeps a 48dp target, and screens scroll under
+ * the bar but end clear of it. Wider, short windows keep the side rail.
  */
+@OptIn(ExperimentalTestApi::class)
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 @Config(application = HiltTestApplication::class, qualifiers = "w411dp-h891dp-xxhdpi")
@@ -90,39 +97,28 @@ class NavigationBarTest {
 
     @Before
     fun setUp() {
+        System.setProperty("robolectric.pixelCopyRenderMode", "hardware")
         hiltRule.inject()
     }
 
-    @After
-    fun restoreAnimationScales() {
-        val resolver = composeRule.activity.contentResolver
-        Settings.Global.putFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
-        Settings.Global.putFloat(resolver, Settings.Global.TRANSITION_ANIMATION_SCALE, 1f)
-    }
-
     @Test
-    fun activeTabIsACapsuleAndNavigationIsUnchanged() {
+    fun selectedTabIsPrimaryAndNavigationIsUnchanged() {
         assertBarInsetFromScreenEdges()
-        assertTabs(selected = "nav_Timer")
-        assertCapsule("nav_Timer", CAPSULE)
-        assertInactive("nav_Statistics", LIGHT_CONTAINER)
+        assertSelected("nav_Timer", LIGHT_PRIMARY)
         saveShot("light-411-timer")
 
         composeRule.onNodeWithTag("nav_Statistics").performClick()
         composeRule.onNodeWithTag("timerDial").assertDoesNotExist()
-        assertTabs(selected = "nav_Statistics")
-        assertCapsule("nav_Statistics", CAPSULE)
-        assertInactive("nav_Timer", LIGHT_CONTAINER)
+        assertSelected("nav_Statistics", LIGHT_PRIMARY)
         saveShot("light-411-statistics")
 
         composeRule.onNodeWithTag("nav_History").performClick()
-        assertTabs(selected = "nav_History")
+        assertSelected("nav_History", LIGHT_PRIMARY)
         saveShot("light-411-history")
 
         composeRule.onNodeWithTag("nav_Settings").performClick()
         composeRule.onNodeWithText(string(Res.string.settings_section_appearance)).assertExists()
-        assertTabs(selected = "nav_Settings")
-        assertCapsule("nav_Settings", CAPSULE)
+        assertSelected("nav_Settings", LIGHT_PRIMARY)
         saveShot("light-411-settings")
 
         composeRule.onNodeWithTag("nav_Timer").performClick()
@@ -131,38 +127,33 @@ class NavigationBarTest {
     }
 
     @Test
-    fun darkThemeKeepsTheOrangeCapsule() {
+    fun darkThemeTintsTheSelectedTabWithItsPrimary() {
         runBlocking { preferences.setThemeMode(ThemeMode.Dark) }
         composeRule.waitForIdle()
-        assertTabs(selected = "nav_Timer")
-        assertCapsule("nav_Timer", CAPSULE)
-        assertInactive("nav_Settings", DARK_CONTAINER)
+        assertSelected("nav_Timer", DARK_PRIMARY)
         saveShot("dark-411-timer")
 
         composeRule.onNodeWithTag("nav_Statistics").performClick()
-        assertTabs(selected = "nav_Statistics")
-        assertCapsule("nav_Statistics", CAPSULE)
-        assertInactive("nav_History", DARK_CONTAINER)
+        assertSelected("nav_Statistics", DARK_PRIMARY)
         saveShot("dark-411-statistics")
     }
 
     @Test
     @Config(qualifiers = "w320dp-h640dp-xxhdpi")
     fun narrowPhoneKeepsHitTargets() {
-        assertTabs(selected = "nav_Timer")
-        assertCapsule("nav_Timer", CAPSULE)
+        assertSelected("nav_Timer", LIGHT_PRIMARY)
         saveShot("light-320-timer")
         composeRule.onNodeWithTag("nav_Statistics").performClick()
-        assertTabs(selected = "nav_Statistics")
-        assertCapsule("nav_Statistics", CAPSULE)
+        assertSelected("nav_Statistics", LIGHT_PRIMARY)
+        assertTargetsDoNotOverlap()
         saveShot("light-320-statistics")
     }
 
     @Test
     @Config(qualifiers = "w360dp-h740dp-xxhdpi")
     fun commonPhoneWidthKeepsHitTargets() {
-        assertTabs(selected = "nav_Timer")
-        assertCapsule("nav_Timer", CAPSULE)
+        assertSelected("nav_Timer", LIGHT_PRIMARY)
+        assertTargetsDoNotOverlap()
         saveShot("light-360-timer")
     }
 
@@ -170,118 +161,52 @@ class NavigationBarTest {
     @Config(qualifiers = "w320dp-h640dp-xxhdpi", fontScale = 2f)
     fun largeFontKeepsLabelsAndHitTargets() {
         composeRule.onNodeWithTag("nav_Statistics").performClick()
-        assertTabs(selected = "nav_Statistics")
-        assertCapsule("nav_Statistics", CAPSULE)
+        assertSelected("nav_Statistics", LIGHT_PRIMARY)
+        assertTargetsDoNotOverlap()
         saveShot("light-320-font2-statistics")
     }
 
     @Test
-    @Config(qualifiers = "w320dp-h640dp-xxhdpi", fontScale = 2f)
-    fun largeFontKeepsLabelsAndTargetsDuringMotion() {
+    fun selectionMovesBeforeTheColorFadeEnds() {
         allowMotion()
         withPausedClock {
             composeRule.onNodeWithTag("nav_Statistics").performClick()
-            composeRule.mainClock.advanceTimeBy(100)
-            assertTabs(selected = "nav_Statistics")
-            assertTargetsDoNotOverlap()
-            assertOneNodePerTab()
-            composeRule.mainClock.advanceTimeBy(300)
-            assertTabs(selected = "nav_Statistics")
-            assertCapsuleOn("nav_Statistics")
-        }
-    }
-
-    @Test
-    fun capsuleAnimatesToTheSelectedTab() {
-        allowMotion()
-        assertCapsuleOn("nav_Timer")
-        val origin = capsule().left
-        withPausedClock {
-            composeRule.onNodeWithTag("nav_Statistics").performClick()
-            // The first frames publish the new slot positions; motion is visible after that.
-            composeRule.mainClock.advanceTimeBy(100)
-            // Selection is applied before the capsule arrives.
+            composeRule.mainClock.advanceTimeBy(48)
+            // Navigation does not wait for the fade.
             composeRule.onNodeWithTag("nav_Statistics").assertIsSelected()
             composeRule.onNodeWithTag("nav_Timer").assertIsNotSelected()
-            val destination = tabBounds("nav_Statistics").left
-            assertBetween(capsule().left, origin, destination)
             assertTabs(selected = "nav_Statistics")
-            assertTargetsDoNotOverlap()
             assertOneNodePerTab()
             composeRule.mainClock.advanceTimeBy(400)
-            assertCapsuleOn("nav_Statistics")
+            assertSelected("nav_Statistics", LIGHT_PRIMARY)
         }
         composeRule.waitForIdle()
         composeRule.onNodeWithTag("timerDial").assertDoesNotExist()
     }
 
     @Test
-    fun animatorScaleZeroSwapsTheCapsuleImmediately() = assertInstantSwap(animator = 0f, transition = 1f)
+    fun animatorScaleZeroTintsTheTabImmediately() = assertInstantTint(animator = 0f, transition = 1f)
 
     @Test
-    fun transitionScaleZeroSwapsTheCapsuleImmediately() = assertInstantSwap(animator = 1f, transition = 0f)
+    fun transitionScaleZeroTintsTheTabImmediately() = assertInstantTint(animator = 1f, transition = 0f)
 
     @Test
-    fun rapidTabSwitchRetargetsWithoutQueuing() {
+    fun rapidTabSwitchEndsOnTheLastTab() {
         allowMotion()
-        val origin = capsule().left
         withPausedClock {
             composeRule.onNodeWithTag("nav_Statistics").performClick()
-            composeRule.mainClock.advanceTimeBy(70)
-            val towardStatistics = capsule().left
-            assertBetween(towardStatistics, origin, tabBounds("nav_Statistics").left)
-
+            composeRule.mainClock.advanceTimeBy(48)
+            composeRule.onNodeWithTag("nav_History").performClick()
+            composeRule.mainClock.advanceTimeBy(48)
             composeRule.onNodeWithTag("nav_Settings").performClick()
-            composeRule.mainClock.advanceTimeBy(32)
-            val retargeted = capsule().left
-            val settings = tabBounds("nav_Settings").left
-            assertTrue(
-                "capsule restarted at $retargeted after leaving $towardStatistics",
-                retargeted + 1f >= towardStatistics,
-            )
-            assertTrue("capsule snapped to settings at $retargeted", abs(retargeted - settings) > 8f)
-            composeRule.onNodeWithTag("nav_Settings").assertIsSelected()
-            composeRule.onNodeWithTag("nav_Statistics").assertIsNotSelected()
-            // One duration after the second tap. A queued first animation would still be short of Settings.
-            composeRule.mainClock.advanceTimeBy(220)
-            assertCapsuleOn("nav_Settings")
-            assertOneNodePerTab()
+            composeRule.mainClock.advanceTimeBy(400)
         }
+        composeRule.waitForIdle()
+        assertSelected("nav_Settings", LIGHT_PRIMARY)
     }
 
     @Test
-    fun reselectingTheActiveTabDoesNotMoveTheCapsule() {
-        allowMotion()
-        val start = capsule()
-        withPausedClock {
-            composeRule.onNodeWithTag("nav_Timer").performClick()
-            composeRule.mainClock.advanceTimeBy(250)
-            assertNear(capsule().left, start.left, "capsule left")
-            assertNear(capsule().width, start.width, "capsule width")
-            composeRule.onNodeWithTag("nav_Timer").assertIsSelected()
-            composeRule.onNodeWithTag("timerDial").assertExists()
-        }
-    }
-
-    @Test
-    fun reselectingDuringTheTransitionDoesNotRestartIt() {
-        allowMotion()
-        withPausedClock {
-            composeRule.onNodeWithTag("nav_Statistics").performClick()
-            composeRule.mainClock.advanceTimeBy(60)
-            val mid = capsule().left
-            val destination = tabBounds("nav_Statistics").left
-            assertTrue("animation had already finished", mid < destination - 2f)
-            composeRule.onNodeWithTag("nav_Statistics").performClick()
-            // 160ms more is 220ms from the first tap: the original transition has finished,
-            // and a transition restarted by the second tap would still be short of the target.
-            composeRule.mainClock.advanceTimeBy(160)
-            assertCapsuleOn("nav_Statistics")
-        }
-    }
-
-    @Test
-    fun focusStaysOnTheActivatedTabDuringMotion() {
+    fun focusStaysOnTheActivatedTab() {
         allowMotion()
         // Compose 1.12 keeps AndroidComposeView unfocusable until the window gives it focus.
         // Keyboard focus inside the bar only sticks after that view is the focused Android view.
@@ -300,17 +225,33 @@ class NavigationBarTest {
     }
 
     @Test
+    fun screensScrollUnderTheBarAndEndClearOfIt() {
+        composeRule.onNodeWithTag("nav_Settings").performClick()
+        composeRule.onNodeWithText(string(Res.string.settings_section_appearance)).assertExists()
+        val bar = tabBounds("nav_bar")
+        val root = composeRule.onRoot().fetchSemanticsNode().boundsInRoot
+        // The screen reaches the bottom of the window: the bar floats over it instead of below it.
+        val scroller = composeRule.onNode(hasScrollAction()).fetchSemanticsNode().boundsInRoot
+        assertTrue("screen ends at ${scroller.bottom}, above the bar at ${bar.top}", scroller.bottom > bar.bottom)
+        assertTrue(scroller.bottom >= root.bottom - with(composeRule.density) { 1.dp.toPx() })
+        // Scrolled to the end, the last row sits above the glass.
+        repeat(6) { composeRule.onNode(hasScrollAction()).performTouchInput { swipeUp() } }
+        composeRule.waitForIdle()
+        val credit = composeRule.onNodeWithText(AUTHOR_CREDIT).fetchSemanticsNode().boundsInRoot
+        assertTrue("last row ends at ${credit.bottom}, under the bar at ${bar.top}", credit.bottom <= bar.top)
+        saveShot("light-411-settings-end")
+    }
+
+    @Test
     @Config(qualifiers = "w840dp-h360dp-xxhdpi")
     fun landscapePhoneKeepsTheSideRail() {
         composeRule.onNodeWithTag("nav_bar").assertDoesNotExist()
-        composeRule.onNodeWithTag("nav_capsule").assertDoesNotExist()
         composeRule.onNodeWithTag("nav_Timer").assertIsSelected()
         composeRule.onNodeWithTag("nav_Settings").performClick()
         composeRule.onNodeWithText(string(Res.string.settings_section_appearance)).assertExists()
         composeRule.onNodeWithTag("nav_Settings").assertIsSelected()
         composeRule.onNodeWithTag("nav_Timer").assertIsNotSelected()
         composeRule.onNodeWithTag("nav_bar").assertDoesNotExist()
-        composeRule.onNodeWithTag("nav_capsule").assertDoesNotExist()
     }
 
     @Test
@@ -333,16 +274,12 @@ class NavigationBarTest {
         saveShot("light-411-safe-area")
     }
 
-    private fun assertInstantSwap(animator: Float, transition: Float) {
+    private fun assertInstantTint(animator: Float, transition: Float) {
         applyAnimationScales(animator, transition)
-        val origin = capsule().left
         withPausedClock {
             composeRule.onNodeWithTag("nav_History").performClick()
             composeRule.mainClock.advanceTimeBy(64)
-            composeRule.onNodeWithTag("nav_History").assertIsSelected()
-            assertCapsuleOn("nav_History")
-            assertTrue("capsule did not move", abs(capsule().left - origin) > 2f)
-            assertTabs(selected = "nav_History")
+            assertSelected("nav_History", LIGHT_PRIMARY)
             assertOneNodePerTab()
         }
     }
@@ -405,28 +342,7 @@ class NavigationBarTest {
         }
     }
 
-    private fun capsule(): Rect = composeRule.onNodeWithTag("nav_capsule").fetchSemanticsNode().boundsInRoot
-
     private fun tabBounds(tag: String): Rect = composeRule.onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot
-
-    private fun assertNear(actual: Float, expected: Float, what: String) {
-        assertTrue("$what was $actual, expected $expected", abs(actual - expected) <= 2f)
-    }
-
-    private fun assertCapsuleOn(tag: String) {
-        val item = tabBounds(tag)
-        val pill = capsule()
-        assertNear(pill.left, item.left, "$tag capsule left")
-        assertNear(pill.right, item.right, "$tag capsule right")
-        assertNear(pill.top, item.top, "$tag capsule top")
-        assertNear(pill.bottom, item.bottom, "$tag capsule bottom")
-    }
-
-    private fun assertBetween(value: Float, start: Float, end: Float) {
-        val low = minOf(start, end) + 2f
-        val high = maxOf(start, end) - 2f
-        assertTrue("position $value was not strictly between $start and $end", value > low && value < high)
-    }
 
     private fun assertTargetsDoNotOverlap() {
         val boxes = tabs.map { (tag, _) -> composeRule.onNodeWithTag(tag).fetchSemanticsNode().touchBoundsInRoot }
@@ -443,9 +359,6 @@ class NavigationBarTest {
         tabs.forEach { (tag, _) ->
             assertEquals(tag, 1, composeRule.onAllNodesWithTag(tag).fetchSemanticsNodes().size)
         }
-        val capsuleNode = composeRule.onNodeWithTag("nav_capsule").fetchSemanticsNode()
-        assertTrue(capsuleNode.config.getOrNull(SemanticsProperties.Text).isNullOrEmpty())
-        assertNull(capsuleNode.config.getOrNull(SemanticsProperties.Role))
     }
 
     private fun assertBarInsetFromScreenEdges() {
@@ -454,8 +367,22 @@ class NavigationBarTest {
         val margin = with(composeRule.density) { 12.dp.toPx() } - 0.5f
         assertTrue(bar.left - root.left >= margin)
         assertTrue(root.right - bar.right >= margin)
-        assertTrue(root.bottom - bar.bottom >= margin)
+        assertTrue(root.bottom - bar.bottom >= with(composeRule.density) { 8.dp.toPx() } - 0.5f)
         assertTrue(bar.right <= root.right + 0.5f)
+    }
+
+    /** [selected] is the only selected tab and the only one painted in [primary]. */
+    private fun assertSelected(selected: String, primary: Int) {
+        assertTabs(selected)
+        val shot = screenshot()
+        tabs.forEach { (tag, _) ->
+            val hits = pixelsNear(shot, tag, primary)
+            if (tag == selected) {
+                assertTrue("$tag has $hits pixels of ${hex(primary)}, expected a primary icon and label", hits >= 20)
+            } else {
+                assertTrue("$tag has $hits pixels of ${hex(primary)}, expected none on an inactive tab", hits <= 2)
+            }
+        }
     }
 
     private fun assertTabs(selected: String) {
@@ -476,19 +403,8 @@ class NavigationBarTest {
         }
     }
 
-    private fun assertCapsule(tag: String, color: Int) {
-        val hits = pixelsNear(tag, color)
-        assertTrue("$tag capsule has $hits pixels of ${hex(color)}, expected the orange fill", hits >= 20)
-    }
-
-    private fun assertInactive(tag: String, container: Int) {
-        val hits = pixelsNear(tag, container)
-        assertTrue("$tag has $hits container pixels (${hex(container)})", hits >= 20)
-    }
-
-    private fun pixelsNear(tag: String, color: Int): Int {
-        val bounds = composeRule.onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot
-        val bitmap = screenshot()
+    private fun pixelsNear(bitmap: Bitmap, tag: String, color: Int): Int {
+        val bounds = tabBounds(tag)
         val left = bounds.left.toInt().coerceIn(0, bitmap.width - 1)
         val top = bounds.top.toInt().coerceIn(0, bitmap.height - 1)
         val right = bounds.right.toInt().coerceIn(left + 1, bitmap.width)
@@ -514,13 +430,21 @@ class NavigationBarTest {
     }
 
     /**
-     * Compose's captureToImage allocates a bitmap with a DisplayMetrics overload that Robolectric's
-     * SDK 36 shadow returns as null. Drawing the window into an ARGB_8888 bitmap avoids that.
+     * The window as the GPU draws it. The glass bar is a hardware render effect, so a software
+     * `View.draw` shows it as an empty black box; PixelCopy in Robolectric's hardware mode does not.
+     * (Compose's captureToImage needs a DisplayMetrics overload that Robolectric's SDK 36 shadow
+     * returns as null, so PixelCopy is called directly.)
      */
     private fun screenshot(): Bitmap {
-        val view = composeRule.activity.window.decorView
+        val window = composeRule.activity.window
+        val view = window.decorView
         val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-        composeRule.runOnUiThread { view.draw(Canvas(bitmap)) }
+        var result = -1
+        composeRule.runOnUiThread {
+            PixelCopy.request(window, bitmap, { result = it }, Handler(Looper.getMainLooper()))
+        }
+        shadowOf(Looper.getMainLooper()).idle()
+        check(result == PixelCopy.SUCCESS) { "PixelCopy failed with $result" }
         return bitmap
     }
 
@@ -543,9 +467,9 @@ class NavigationBarTest {
     )
 
     private companion object {
-        // NavigationCapsule / surfaceContainerHigh from the theme. The capsule is orange in both themes.
-        val CAPSULE = android.graphics.Color.parseColor("#FF6A1A")
-        val LIGHT_CONTAINER = android.graphics.Color.parseColor("#E9E7EF")
-        val DARK_CONTAINER = android.graphics.Color.parseColor("#292930")
+        // Tests run on the fixed FocusFlow palette (see FakeUserPreferencesRepository).
+        val LIGHT_PRIMARY = androidx.compose.ui.graphics.Color(0xFF4A55C8).toArgb()
+        val DARK_PRIMARY = androidx.compose.ui.graphics.Color(0xFFBFC2FF).toArgb()
+        const val AUTHOR_CREDIT = "Bima Adam Nugraha · IgnitronDev"
     }
 }

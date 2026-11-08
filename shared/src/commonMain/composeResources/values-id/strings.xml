@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 IgnitronDev
+  SPDX-License-Identifier: Apache-2.0
+  -->
+<!--
+  Bahasa Indonesia. Android reports Indonesian as "in" and iOS as "id", so values-id holds the
+  same file; SharedStringsTest keeps the two identical. Achievements stay in English on purpose:
+  achievement* strings are not translated here.
+  -->
+<resources>
+    <!-- Navigation -->
+    <string name="nav_timer">Timer</string>
+    <string name="nav_statistics">Statistik</string>
+    <string name="nav_history">Riwayat</string>
+    <string name="nav_settings">Pengaturan</string>
+    <!-- Timer -->
+    <string name="timer_mode_focus">Fokus</string>
+    <string name="timer_mode_short_break">Istirahat singkat</string>
+    <string name="timer_mode_long_break">Istirahat panjang</string>
+    <string name="timer_action_start">Mulai</string>
+    <string name="timer_action_pause">Jeda</string>
+    <string name="timer_action_resume">Lanjutkan</string>
+    <string name="timer_action_reset">Ulang</string>
+    <string name="timer_action_skip">Lewati ke sesi berikutnya</string>
+    <string name="timer_cycle_position">Sesi %1$d dari %2$d</string>
+    <string name="timer_dial_description">%1$s, sisa %2$s</string>
+    <string name="timer_today_summary">Hari ini: %1$s · %2$s</string>
+    <plurals name="duration_minutes">
+        <item quantity="other">%1$d menit</item>
+    </plurals>
+    <plurals name="completed_sessions">
+        <item quantity="other">%1$d sesi</item>
+    </plurals>
+    <!-- Statistics -->
+    <string name="statistics_title">Statistik</string>
+    <string name="statistics_subtitle">Pantau perjalanan fokusmu</string>
+    <string name="statistics_chart_empty">Mulai sesi pertamamu</string>
+    <string name="statistics_chart_summary">Fokus minggu ini, %1$s sampai %2$s, total %3$s</string>
+    <string name="statistics_bar_description">%1$s, %2$s</string>
+    <string name="statistics_summary_description">%1$s, %2$s, %3$s</string>
+    <string name="statistics_metric_description">%1$s, %2$s</string>
+    <string name="statistics_empty_title">Belum ada waktu fokus</string>
+    <string name="statistics_empty_body">Selesaikan satu sesi fokus, lalu progres harian dan mingguanmu muncul di sini.</string>
+    <!-- History -->
+    <string name="history_title">Riwayat</string>
+    <string name="history_empty_title">Belum ada sesi</string>
+    <string name="history_empty_body">Setiap sesi fokus yang kamu selesaikan disimpan di perangkat ini dan tercantum di sini.</string>
+    <!-- Settings -->
+    <string name="settings_title">Pengaturan</string>
+    <string name="settings_section_appearance">Tampilan</string>
+    <string name="settings_theme_system">Ikuti sistem</string>
+    <string name="settings_theme_light">Terang</string>
+    <string name="settings_theme_dark">Gelap</string>
+    <string name="settings_dynamic_color">Warna wallpaper</string>
+    <string name="settings_dynamic_color_summary">Pakai warna dari wallpaper, bukan palet FocusFlow</string>
+    <string name="settings_section_about">Tentang</string>
+    <string name="settings_version">Versi</string>
+    <string name="settings_check_updates">Cek pembaruan</string>
+    <string name="settings_check_updates_summary">Membuka rilis terbaru di GitHub. FocusFlow sendiri tidak pernah online.</string>
+    <string name="settings_source_code">Kode sumber</string>
+    <string name="settings_source_code_summary">FocusFlow bersifat open source. Lihat di GitHub.</string>
+    <string name="settings_made_by">Dibuat oleh</string>
+    <string name="settings_license">Lisensi</string>
+    <!-- Settings: notifications -->
+    <string name="settings_section_notifications">Notifikasi</string>
+    <string name="settings_notifications">Peringatan sesi</string>
+    <string name="settings_notifications_on">Aktif. Kamu diberi tahu saat sesi berakhir.</string>
+    <string name="settings_notifications_off">Nonaktif. FocusFlow tidak bisa memberi tahu saat sesi berakhir.</string>
+    <string name="settings_alert_sound">Suara peringatan</string>
+    <string name="settings_alert_more">Getaran dan opsi peringatan lainnya</string>
+    <string name="settings_alert_more_summary">Buka pengaturan peringatan di Android</string>
+    <string name="settings_exact_alarms">Peringatan tepat waktu</string>
+    <string name="settings_exact_alarms_on">Aktif. Peringatan datang tepat waktu.</string>
+    <string name="settings_exact_alarms_off">Nonaktif. Saat ponsel tidak dipakai, peringatan bisa telat beberapa menit. Ketuk untuk mengizinkan alarm &amp; pengingat.</string>
+    <!-- Settings: timer -->
+    <string name="settings_section_timer">Timer</string>
+    <string name="settings_focus_duration">Fokus</string>
+    <string name="settings_short_break_duration">Istirahat singkat</string>
+    <string name="settings_long_break_duration">Istirahat panjang</string>
+    <string name="settings_long_break_interval">Istirahat panjang setelah</string>
+    <string name="settings_auto_start_breaks">Mulai istirahat otomatis</string>
+    <string name="settings_auto_start_focus">Mulai sesi fokus otomatis</string>
+    <string name="settings_timer_note">Perubahan berlaku mulai sesi berikutnya.</string>
+    <plurals name="focus_sessions_count">
+        <item quantity="other">%1$d sesi fokus</item>
+    </plurals>
+    <!-- History -->
+    <string name="history_today">Hari ini</string>
+    <string name="history_yesterday">Kemarin</string>
+    <string name="history_time_range">%1$s – %2$s</string>
+    <string name="history_interrupted">Dihentikan lebih awal</string>
+    <string name="history_day_total">%1$s fokus</string>
+    <string name="history_item_description">%1$s, %2$s, %3$s</string>
+    <!-- Statistics -->
+    <string name="statistics_today">Hari ini</string>
+    <string name="statistics_this_week">Minggu ini</string>
+    <string name="statistics_daily_average">Rata-rata harian minggu ini</string>
+    <string name="statistics_average_session">Rata-rata sesi fokus</string>
+    <string name="statistics_all_time">Sepanjang waktu</string>
+    <string name="statistics_chart_description">Waktu fokus minggu ini: %1$s</string>
+    <string name="duration_hours">%1$d j</string>
+    <string name="duration_hours_minutes">%1$d j %2$d mnt</string>
+    <string name="duration_minutes_short">%1$d mnt</string>
+    <!-- Statistics: streak and sharing -->
+    <string name="statistics_streak">Streak saat ini</string>
+    <plurals name="streak_days">
+        <item quantity="other">%1$d hari</item>
+    </plurals>
+    <string name="statistics_share">Bagikan statistik</string>
+    <string name="share_title">Bagikan fokusmu</string>
+    <string name="share_period_today">Hari ini</string>
+    <string name="share_period_week">Minggu ini</string>
+    <string name="share_button">Bagikan</string>
+    <string name="share_chooser_title">Bagikan statistik fokusmu</string>
+    <string name="share_card_focus_time">Waktu fokus</string>
+    <string name="share_card_sessions">Sesi</string>
+    <string name="share_card_daily_average">Rata-rata harian</string>
+    <string name="share_card_streak">Streak</string>
+    <string name="share_card_week_range">%1$s – %2$s</string>
+    <string name="week_range_same_month">%1$d – %2$d %3$s</string>
+    <string name="share_card_empty">Mulai sesi pertamamu</string>
+    <string name="share_text_empty">Mulai sesi pertamamu dengan FocusFlow.</string>
+    <string name="share_text_today">Hari ini aku fokus %1$s dengan FocusFlow.</string>
+    <string name="share_text_week">Minggu ini aku fokus %1$s dengan FocusFlow.</string>
+    <string name="share_card_description">Kartu statistik FocusFlow: %1$s, waktu fokus %2$s, %3$s</string>
+    <string name="share_failed">Gagal membuat gambar</string>
+    <string name="share_format_post">Post feed</string>
+    <string name="share_format_story">Story</string>
+    <string name="share_role_label">Peranmu</string>
+    <string name="share_role_placeholder">mis. Software Engineer</string>
+    <string name="share_role_required">Isi peranmu untuk membagikan kartu</string>
+    <string name="share_take_photo">Ambil foto</string>
+    <string name="share_choose_photo">Pilih foto</string>
+    <string name="share_remove_photo">Hapus foto</string>
+    <string name="share_photo_failed">Gagal memuat foto</string>
+    <!-- Session alerts (iOS notifications; Android keeps its own copies in app resources) -->
+    <string name="notification_focus_done">Sesi fokus selesai</string>
+    <string name="notification_break_done">Istirahat selesai</string>
+    <string name="notification_next_short_break">Waktunya %1$s.</string>
+    <string name="notification_next_long_break">Kerja bagus, waktunya %1$s.</string>
+    <string name="notification_next_focus">Siap untuk sesi fokus berikutnya?</string>
+    <string name="notification_next_started">%1$s dimulai.</string>
+</resources>
