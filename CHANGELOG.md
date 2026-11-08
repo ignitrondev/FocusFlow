@@ -2,6 +2,13 @@
 
 All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+### Fixed
+- The share card shows the whole focus time ("9 h 35 min", not "9 h 35"), and on the weekly card
+  the streak keeps its label and value whole instead of "STRE / AK" and "14": every label and
+  value now shrinks to fit one line, in three equal columns.
+
 ## 1.0.1 — 2026-11-08
 
 ### Fixed

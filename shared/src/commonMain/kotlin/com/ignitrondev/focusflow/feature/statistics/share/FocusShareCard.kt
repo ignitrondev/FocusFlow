@@ -32,6 +32,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -204,21 +206,23 @@ fun FocusShareCard(
                     Spacer(Modifier.weight(1f))
                 } else {
                     Text(stringResource(Res.string.share_card_focus_time).uppercase(), color = OnCardMuted, style = LabelStyle.onCard())
-                    Text(
-                        durationText(focusMillis),
-                        color = OnCard,
-                        style = FocusTimeStyle.onCard(),
-                        maxLines = 1,
-                    )
+                    FittedCardText(durationText(focusMillis), FocusTimeStyle.onCard(), OnCard, Modifier.fillMaxWidth())
                     Spacer(Modifier.height(16.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                        Metric(stringResource(Res.string.share_card_sessions), sessions.toString())
+                    // Equal columns: with three metrics the last one used to be squeezed until its
+                    // label broke mid-word ("STRE / AK") and its value lost a word ("14").
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Metric(stringResource(Res.string.share_card_sessions), sessions.toString(), Modifier.weight(1f))
                         if (period == SharePeriod.Week) {
-                            Metric(stringResource(Res.string.share_card_daily_average), durationText(statistics.weekDailyAverageMillis))
+                            Metric(
+                                stringResource(Res.string.share_card_daily_average),
+                                durationText(statistics.weekDailyAverageMillis),
+                                Modifier.weight(1f),
+                            )
                         }
                         Metric(
                             stringResource(Res.string.share_card_streak),
                             pluralStringResource(Res.plurals.streak_days, statistics.currentStreakDays, statistics.currentStreakDays),
+                            Modifier.weight(1f),
                         )
                     }
                     Spacer(Modifier.height(24.dp))
@@ -241,11 +245,29 @@ private val FocusTimeStyle = TextStyle(fontSize = 50.sp, fontWeight = FontWeight
 private val LabelStyle = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp)
 
 @Composable
-private fun Metric(label: String, value: String) {
-    Column {
-        Text(label.uppercase(), color = OnCardMuted, style = LabelStyle.onCard())
-        Text(value, color = OnCard, style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.SemiBold).onCard(), maxLines = 1)
+private fun Metric(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        FittedCardText(label.uppercase(), LabelStyle.onCard(), OnCardMuted)
+        FittedCardText(value, MetricValueStyle.onCard(), OnCard)
     }
+}
+
+private val MetricValueStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+
+/**
+ * One line that shrinks to fit its width. A plain `Text` with `maxLines = 1` hides the words that
+ * wrap ("9 h 35 min" showed as "9 h 35"), and without it a long word breaks mid-word.
+ */
+@Composable
+private fun FittedCardText(text: String, style: TextStyle, color: Color, modifier: Modifier = Modifier) {
+    val maxSize = style.fontSize
+    BasicText(
+        text = text,
+        modifier = modifier,
+        style = style.merge(TextStyle(color = color)),
+        maxLines = 1,
+        autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = maxSize),
+    )
 }
 
 @Composable
