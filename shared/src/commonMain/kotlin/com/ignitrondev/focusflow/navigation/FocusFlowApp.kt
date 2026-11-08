@@ -16,12 +16,13 @@
 package com.ignitrondev.focusflow.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -32,11 +33,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -49,12 +53,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -68,6 +73,8 @@ import com.ignitrondev.focusflow.app.AppDependencies
 import com.ignitrondev.focusflow.app.LocalAppDependencies
 import com.ignitrondev.focusflow.core.designsystem.component.FittedLabel
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowTheme
+import com.ignitrondev.focusflow.core.designsystem.theme.NavigationCapsule
+import com.ignitrondev.focusflow.core.designsystem.theme.OnNavigationCapsule
 import com.ignitrondev.focusflow.domain.model.UserPreferences
 import com.ignitrondev.focusflow.feature.history.historyScreen
 import com.ignitrondev.focusflow.feature.settings.settingsScreen
@@ -77,7 +84,7 @@ import com.ignitrondev.focusflow.feature.timer.timerScreen
 import com.ignitrondev.focusflow.platform.LocalDateFormats
 import org.jetbrains.compose.resources.stringResource
 
-/** App shell: floating glass bar on phones, navigation rail or drawer on larger windows, one NavHost. */
+/** App shell: segmented bottom bar on phones, navigation rail or drawer on larger windows, one NavHost. */
 @Composable
 fun FocusFlowApp(navController: NavHostController = rememberNavController()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -96,7 +103,7 @@ fun FocusFlowApp(navController: NavHostController = rememberNavController()) {
     }
 
     if (layoutType == NavigationSuiteType.NavigationBar) {
-        FloatingGlassNavigation(currentDestination = currentDestination, onNavigate = navController::navigateToTopLevel) {
+        SegmentedNavigation(currentDestination = currentDestination, onNavigate = navController::navigateToTopLevel) {
             AppContent(navController, layoutType)
         }
     } else {
@@ -145,106 +152,124 @@ private fun AppContent(navController: NavHostController, layoutType: NavigationS
 }
 
 @Composable
-private fun FloatingGlassNavigation(
+private fun SegmentedNavigation(
     currentDestination: NavDestination?,
     onNavigate: (TopLevelDestination) -> Unit,
     content: @Composable () -> Unit,
 ) {
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Box(Modifier.weight(1f).fillMaxWidth()) { content() }
-        FloatingGlassNavBar(currentDestination, onNavigate)
+        SegmentedNavBar(currentDestination, onNavigate)
     }
 }
 
 @Composable
-private fun FloatingGlassNavBar(currentDestination: NavDestination?, onNavigate: (TopLevelDestination) -> Unit) {
+private fun SegmentedNavBar(currentDestination: NavDestination?, onNavigate: (TopLevelDestination) -> Unit) {
     val scheme = MaterialTheme.colorScheme
     val dark = scheme.background.luminance() < 0.5f
-    val shape = RoundedCornerShape(percent = 50)
-    val glass = if (dark) {
-        Brush.verticalGradient(
-            listOf(
-                Color.White.copy(alpha = 0.16f),
-                scheme.surfaceContainerHigh.copy(alpha = 0.78f),
-                scheme.surfaceContainer.copy(alpha = 0.90f),
-            ),
-        )
-    } else {
-        Brush.verticalGradient(
-            listOf(
-                Color.White.copy(alpha = 0.94f),
-                scheme.surfaceContainerLowest.copy(alpha = 0.78f),
-                scheme.surfaceContainerLow.copy(alpha = 0.88f),
-            ),
-        )
-    }
-    val border = if (dark) Color.White.copy(alpha = 0.20f) else scheme.outlineVariant.copy(alpha = 0.55f)
+    // Orange capsule in both themes. The bar and inactive tabs stay on the theme colors.
+    // Inactive slots stay at least 48dp; the capsule narrows before they do.
+    val shape = RoundedCornerShape(28.dp)
+    val innerPadding = 6.dp
     Box(
         Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp),
+            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 12.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(72.dp)
-                .shadow(
-                    elevation = if (dark) 12.dp else 20.dp,
-                    shape = shape,
-                    ambientColor = Color.Black.copy(alpha = if (dark) 0.45f else 0.12f),
-                    spotColor = Color.Black.copy(alpha = if (dark) 0.55f else 0.16f),
-                )
-                .clip(shape)
-                .background(glass)
-                .border(width = 1.dp, color = border, shape = shape)
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            TopLevelDestination.entries.forEach { destination ->
-                FloatingNavItem(
-                    destination = destination,
-                    selected = currentDestination.isInHierarchy(destination),
-                    onClick = { onNavigate(destination) },
-                )
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val inactiveSlots = TopLevelDestination.entries.size - 1
+            val activeMaxWidth = (maxWidth - innerPadding * 2 - MinTabSlot * inactiveSlots).coerceAtLeast(MinTabSlot)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(68.dp)
+                    .shadow(
+                        elevation = if (dark) 8.dp else 16.dp,
+                        shape = shape,
+                        ambientColor = Color.Black.copy(alpha = if (dark) 0.40f else 0.10f),
+                        spotColor = Color.Black.copy(alpha = if (dark) 0.50f else 0.14f),
+                    )
+                    .clip(shape)
+                    .background(scheme.surfaceContainerHigh)
+                    .testTag("nav_bar")
+                    .padding(horizontal = innerPadding, vertical = innerPadding),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TopLevelDestination.entries.forEach { destination ->
+                    SegmentedNavItem(
+                        destination = destination,
+                        selected = currentDestination.isInHierarchy(destination),
+                        activeMaxWidth = activeMaxWidth,
+                        onClick = { onNavigate(destination) },
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun RowScope.FloatingNavItem(destination: TopLevelDestination, selected: Boolean, onClick: () -> Unit) {
+private fun RowScope.SegmentedNavItem(destination: TopLevelDestination, selected: Boolean, activeMaxWidth: Dp, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
-    val color = if (selected) scheme.primary else scheme.onSurfaceVariant
-    Column(
-        modifier = Modifier
-            .weight(1f)
-            .fillMaxHeight()
-            .clip(RoundedCornerShape(percent = 50))
-            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
-            .testTag("nav_${destination.name}")
-            .padding(horizontal = 4.dp, vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Box(
+    val capsule = RoundedCornerShape(percent = 50)
+    val label = stringResource(destination.labelRes)
+    if (selected) {
+        Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(percent = 50))
-                .background(if (selected) scheme.primaryContainer else Color.Transparent)
-                .padding(horizontal = 14.dp, vertical = 4.dp),
-            contentAlignment = Alignment.Center,
+                .fillMaxHeight()
+                .widthIn(min = MinTabSlot, max = activeMaxWidth)
+                .clip(capsule)
+                .background(NavigationCapsule)
+                .selectable(selected = true, role = Role.Tab, onClick = onClick)
+                .testTag("nav_${destination.name}")
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
         ) {
             Icon(
-                imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
+                imageVector = destination.selectedIcon,
                 contentDescription = null,
-                tint = if (selected) scheme.onPrimaryContainer else scheme.onSurfaceVariant,
+                tint = OnNavigationCapsule,
             )
+            Spacer(Modifier.width(6.dp))
+            CompositionLocalProvider(
+                LocalContentColor provides OnNavigationCapsule,
+                LocalTextStyle provides MaterialTheme.typography.labelLarge,
+            ) {
+                FittedLabel(label, minFontSize = 4.sp)
+            }
         }
-        CompositionLocalProvider(LocalContentColor provides color) {
-            FittedLabel(stringResource(destination.labelRes))
+    } else {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .widthIn(min = MinTabSlot)
+                .clip(capsule)
+                .selectable(selected = false, role = Role.Tab, onClick = onClick)
+                .testTag("nav_${destination.name}")
+                .padding(horizontal = 2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                imageVector = destination.unselectedIcon,
+                contentDescription = null,
+                tint = scheme.onSurfaceVariant,
+            )
+            CompositionLocalProvider(
+                LocalContentColor provides scheme.onSurfaceVariant,
+                LocalTextStyle provides MaterialTheme.typography.labelMedium,
+            ) {
+                // 4sp floor: a 48dp slot still fits the whole word at 200% font size.
+                FittedLabel(label, minFontSize = 4.sp)
+            }
         }
     }
 }
+
+private val MinTabSlot = 48.dp
 
 private fun NavDestination?.isInHierarchy(destination: TopLevelDestination): Boolean =
     this?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true
