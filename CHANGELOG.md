@@ -2,7 +2,7 @@
 
 All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://semver.org).
 
-## Unreleased
+## 1.0.2 — 2026-11-08
 
 ### Fixed
 - The share card shows the whole focus time ("9 h 35 min", not "9 h 35"), and on the weekly card
