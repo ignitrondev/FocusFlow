@@ -5,20 +5,9 @@ All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://
 ## Unreleased
 
 ### Fixed
-- Statistics use one locale week for the label, the chart and the weekly totals. On Sunday 8 Nov 2026
-  with a Monday week start the range is 2–8 Nov, and the first weekday comes from the device calendar
-  on Android and iOS.
-- A streak counts consecutive days with a completed focus session, ending today or yesterday.
-  No completed session means a streak of 0.
-- Sharing with no focus time keeps the Share button. The card shows "Start your first session"
-  instead of zeros.
 - The end of a session, and an automatic break, could be up to ~18 minutes late on Android 14+
   while the app was not open: the alarm was inexact unless the user allowed "Alarms & reminders".
   FocusFlow now uses exact alarms (`USE_EXACT_ALARM`, granted at install on Android 13+).
-
-### Changed
-- On phones the bottom navigation is a segmented bar: a rounded container, with the active tab in an
-  orange capsule around its icon and label. Tablets and phones in landscape keep the side rail.
 
 ### Added
 - Share a Strava-style statistics card (today or this week) through Android's share sheet:
@@ -35,6 +24,21 @@ All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://
   including silent and any alarm or notification sound.
 - The timer notification shows the time left in large digits, in both the collapsed and the
   expanded notification.
+
+## 1.0.0-beta.4 — 2026-11-08
+
+### Fixed
+- Statistics use one locale week for the label, the chart and the weekly totals. On Sunday 8 Nov 2026
+  with a Monday week start the range is 2–8 Nov, and the first weekday comes from the device calendar
+  on Android and iOS.
+- A streak counts consecutive days with a completed focus session, ending today or yesterday.
+  No completed session means a streak of 0.
+- Sharing with no focus time keeps the Share button. The card shows "Start your first session"
+  instead of zeros.
+
+### Changed
+- On phones the bottom navigation is a segmented bar: a rounded container, with the active tab in an
+  orange capsule around its icon and label. Tablets and phones in landscape keep the side rail.
 
 ## 1.0.0-beta.2 — 2026-11-07
 

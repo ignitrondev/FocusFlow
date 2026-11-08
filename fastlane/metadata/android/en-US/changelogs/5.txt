@@ -1,0 +1,1 @@
+Segmented bottom bar on phones. Statistics use the device week, streaks count completed sessions, and an empty week can still be shared.

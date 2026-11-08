@@ -38,7 +38,7 @@ atau **SideStore**. Ini cara resmi yang dipakai banyak aplikasi open-source, buk
 
 Tab **Sources** ada di AltStore 2.0 ke atas. Kalau tidak ada, perbarui AltStore dulu. Kalau tetap
 ingin memasang dari file, unduh `FocusFlow-ios-unsigned.ipa` dari
-[halaman rilis](https://github.com/ignitrondev/FocusFlow/releases/tag/v1.0.0-beta.2), simpan ke
+[halaman rilis](https://github.com/ignitrondev/FocusFlow/releases/tag/v1.0.0-beta.4), simpan ke
 Files, lalu AltStore → **My Apps** → **+**. File dari WhatsApp: buka chat → ketuk file → ikon
 bagikan → **Save to Files**.
 
