@@ -76,6 +76,7 @@ import com.ignitrondev.focusflow.domain.statistics.FocusStatistics
 import com.ignitrondev.focusflow.resources.Res
 import com.ignitrondev.focusflow.resources.share_button
 import com.ignitrondev.focusflow.resources.share_card_description
+import com.ignitrondev.focusflow.resources.share_card_empty
 import com.ignitrondev.focusflow.resources.share_choose_photo
 import com.ignitrondev.focusflow.resources.share_chooser_title
 import com.ignitrondev.focusflow.resources.share_failed
@@ -89,6 +90,7 @@ import com.ignitrondev.focusflow.resources.share_role_label
 import com.ignitrondev.focusflow.resources.share_role_placeholder
 import com.ignitrondev.focusflow.resources.share_role_required
 import com.ignitrondev.focusflow.resources.share_take_photo
+import com.ignitrondev.focusflow.resources.share_text_empty
 import com.ignitrondev.focusflow.resources.share_text_today
 import com.ignitrondev.focusflow.resources.share_text_week
 import com.ignitrondev.focusflow.resources.share_title
@@ -121,11 +123,20 @@ fun ShareStatisticsSheet(statistics: FocusStatistics, savedRole: String, onSaveR
     val photo = cardPhoto.photo
     val sharer = platform.rememberImageSharer()
 
-    val focusTime = durationText(if (period == SharePeriod.Today) statistics.today.focusMillis else statistics.weekFocusMillis)
+    val focusMillis = if (period == SharePeriod.Today) statistics.today.focusMillis else statistics.weekFocusMillis
+    val focusTime = durationText(focusMillis)
     val periodName = stringResource(if (period == SharePeriod.Today) Res.string.share_period_today else Res.string.share_period_week)
-    val shareText = stringResource(if (period == SharePeriod.Today) Res.string.share_text_today else Res.string.share_text_week, focusTime)
+    val shareText = if (focusMillis == 0L) {
+        stringResource(Res.string.share_text_empty)
+    } else {
+        stringResource(if (period == SharePeriod.Today) Res.string.share_text_today else Res.string.share_text_week, focusTime)
+    }
     val chooserTitle = stringResource(Res.string.share_chooser_title)
-    val cardDescription = stringResource(Res.string.share_card_description, periodName, focusTime, statistics.currentStreakDays)
+    val cardDescription = if (focusMillis == 0L) {
+        stringResource(Res.string.share_card_empty)
+    } else {
+        stringResource(Res.string.share_card_description, periodName, focusTime, statistics.currentStreakDays)
+    }
     val shareFailed = stringResource(Res.string.share_failed)
     val roleMissing = role.isBlank()
 

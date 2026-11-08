@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.ignitrondev.focusflow.core.time.dayOfWeekFromSundayBased
 import com.ignitrondev.focusflow.platform.AlertSettings
 import com.ignitrondev.focusflow.platform.CardPhoto
 import com.ignitrondev.focusflow.platform.DateFormats
@@ -148,11 +149,7 @@ class IosPlatformServices : PlatformServices {
 
     override val dates: DateFormats = IosDateFormats
 
-    override fun firstDayOfWeek(): DayOfWeek {
-        // NSCalendar: 1 = Sunday ... 7 = Saturday. ISO: 1 = Monday ... 7 = Sunday.
-        val weekday = NSCalendar.currentCalendar.firstWeekday.toInt()
-        return DayOfWeek((weekday + 5) % 7 + 1)
-    }
+    override fun firstDayOfWeek(): DayOfWeek = dayOfWeekFromSundayBased(NSCalendar.currentCalendar.firstWeekday.toInt())
 
     override fun logError(tag: String, message: String, error: Throwable?) {
         NSLog("%@", "E/$tag: $message${error?.let { "\n" + it.stackTraceToString() }.orEmpty()}")

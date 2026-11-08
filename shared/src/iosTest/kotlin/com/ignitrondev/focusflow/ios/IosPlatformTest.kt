@@ -15,6 +15,7 @@
  */
 package com.ignitrondev.focusflow.ios
 
+import com.ignitrondev.focusflow.core.time.dayOfWeekFromSundayBased
 import com.ignitrondev.focusflow.domain.timer.SessionType
 import com.ignitrondev.focusflow.domain.timer.UpcomingSessionEnd
 import kotlin.test.Test
@@ -24,6 +25,7 @@ import kotlin.test.assertTrue
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import platform.Foundation.NSCalendar
 
 class IosPlatformTest {
     private val end = UpcomingSessionEnd(SessionType.Focus, 1_794_043_500_000L, SessionType.ShortBreak, nextStartsAutomatically = false)
@@ -66,5 +68,12 @@ class IosPlatformTest {
     @Test
     fun firstDayOfWeekIsAValidDay() {
         assertTrue(IosPlatformServices().firstDayOfWeek() in DayOfWeek.entries)
+    }
+
+    @Test
+    fun firstDayOfWeekUsesTheDeviceCalendar() {
+        val platformDay = NSCalendar.currentCalendar.firstWeekday.toInt()
+
+        assertEquals(dayOfWeekFromSundayBased(platformDay), IosPlatformServices().firstDayOfWeek())
     }
 }

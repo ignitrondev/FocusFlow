@@ -29,6 +29,8 @@ object PreviewDateFormats : DateFormats {
 
     override fun dayMonth(date: LocalDate) = "${date.day} ${months[date.month.ordinal]}"
 
+    override fun monthShort(date: LocalDate) = months[date.month.ordinal]
+
     override fun shortTime(time: LocalTime) = "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
 
     override fun weekdayShort(day: DayOfWeek) = day.name.take(3).lowercase().replaceFirstChar { it.uppercase() }

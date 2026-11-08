@@ -5,6 +5,13 @@ All notable changes to FocusFlow. Versions follow [Semantic Versioning](https://
 ## Unreleased
 
 ### Fixed
+- Statistics use one locale week for the label, the chart and the weekly totals. On Sunday 8 Nov 2026
+  with a Monday week start the range is 2–8 Nov, and the first weekday comes from the device calendar
+  on Android and iOS.
+- A streak counts consecutive days with a completed focus session, ending today or yesterday.
+  No completed session means a streak of 0.
+- Sharing with no focus time keeps the Share button. The card shows "Start your first session"
+  instead of zeros.
 - The end of a session, and an automatic break, could be up to ~18 minutes late on Android 14+
   while the app was not open: the alarm was inexact unless the user allowed "Alarms & reminders".
   FocusFlow now uses exact alarms (`USE_EXACT_ALARM`, granted at install on Android 13+).

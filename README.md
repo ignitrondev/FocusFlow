@@ -32,7 +32,7 @@ Jetpack Compose and Compose Multiplatform by **Bima Adam Nugraha**, AI-native en
 | Controls | Start, pause, resume, reset, skip; optional automatic start of breaks and focus sessions |
 | Alerts | Sound and vibration when a session ends, also with the app closed; pick any alarm or notification sound; notification with the time left in large digits, Pause and Resume |
 | History | Every session by day, including the ones you stopped early |
-| Statistics | Today, this week, daily average, average session, streak, all time, and a 7-day chart |
+| Statistics | Today, this week, daily average, average session, streak, all time, and a chart of the locale week |
 | Share | A Strava-style card of your day or week, as a feed post (1080×1350) or a full-screen story (1080×1920), with your role and, if you like, a photo of where you are working |
 | Everywhere | Light and dark theme, wallpaper colors, phones, foldables and tablets, large font sizes, TalkBack |
 

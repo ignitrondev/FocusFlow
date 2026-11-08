@@ -11,7 +11,7 @@ release.
 | Persistence | Process recreation, sessions completed while closed, concurrent completion recorded once, interrupted sessions, corrupt rows, settings clamping | `RoomTimerRepositoryTest`, `DataStore*Test` |
 | Database schema | Database built from the committed schema JSON must open with the current entities; negative-tested with a tampered hash | `DatabaseSchemaTest` |
 | Alarms and notifications | Monotonic-clock alarm, exact/inexact fallback, notification content and channels, no posting without permission, deadline alarm end to end (one record, one alert), notification buttons, boot recovery | `platform/*Test` |
-| Statistics and history | Completed focus only, locale week start, last 7 days, local-day grouping | `FocusStatisticsCalculatorTest`, `GroupByDayTest` |
+| Statistics and history | Completed focus only, one locale week for the label and chart, local-day grouping | `FocusStatisticsCalculatorTest`, `WeekRangeTest`, `GroupByDayTest` |
 | UI flows | Start/pause/resume/reset, countdown, locked session type, settings → timer, history and statistics populated, theme persistence, navigation | `FocusFlowAppTest` (Robolectric) |
 | Accessibility: labels and touch targets | Every clickable element on every screen (with data, scrolled) has a label and a 48×48 dp target; negative-tested | `AccessibilityTest` |
 | Accessibility: contrast | WCAG ratios for the text/background pairs used, light and dark | `ColorContrastTest` |

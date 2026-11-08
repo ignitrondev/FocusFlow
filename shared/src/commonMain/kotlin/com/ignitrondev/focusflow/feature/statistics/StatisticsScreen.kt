@@ -77,7 +77,6 @@ import com.ignitrondev.focusflow.resources.statistics_chart_description
 import com.ignitrondev.focusflow.resources.statistics_daily_average
 import com.ignitrondev.focusflow.resources.statistics_empty_body
 import com.ignitrondev.focusflow.resources.statistics_empty_title
-import com.ignitrondev.focusflow.resources.statistics_last_seven_days
 import com.ignitrondev.focusflow.resources.statistics_share
 import com.ignitrondev.focusflow.resources.statistics_streak
 import com.ignitrondev.focusflow.resources.statistics_this_week
@@ -86,7 +85,7 @@ import com.ignitrondev.focusflow.resources.statistics_today
 import com.ignitrondev.focusflow.resources.streak_days
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -120,13 +119,14 @@ fun StatisticsScreen(
     onSaveShareRole: (String) -> Unit = {},
 ) {
     var sharing by rememberSaveable { mutableStateOf(false) }
-    val statistics = (uiState as? StatisticsUiState.Success)?.statistics?.takeUnless { it.isEmpty }
+    val statistics = (uiState as? StatisticsUiState.Success)?.statistics
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(Res.string.statistics_title)) },
                 actions = {
+                    // Kept with no focus time: the card then invites the user to start, instead of hiding Share.
                     if (statistics != null) {
                         IconButton(onClick = { sharing = true }, modifier = Modifier.testTag("shareStatistics")) {
                             Icon(Icons.Rounded.Share, contentDescription = stringResource(Res.string.statistics_share))
@@ -140,8 +140,8 @@ fun StatisticsScreen(
             ShareStatisticsSheet(statistics, savedRole = shareRole, onSaveRole = onSaveShareRole, onDismiss = { sharing = false })
         }
         when {
-            uiState is StatisticsUiState.Success && !uiState.statistics.isEmpty -> StatisticsContent(
-                statistics = uiState.statistics,
+            statistics != null && !statistics.isEmpty -> StatisticsContent(
+                statistics = statistics,
                 modifier = Modifier.padding(innerPadding),
             )
 
@@ -181,7 +181,7 @@ private fun StatisticsContent(statistics: FocusStatistics, modifier: Modifier = 
                     modifier = Modifier.weight(1f),
                 )
             }
-            ChartCard(statistics.lastSevenDays)
+            ChartCard(statistics.weekDays, statistics.today.date, statistics.weekStart, statistics.weekEnd)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatCard(
                     title = stringResource(Res.string.statistics_daily_average),
@@ -231,9 +231,9 @@ private fun StatCard(title: String, value: String, modifier: Modifier = Modifier
     }
 }
 
-/** Bars of focus time per day. TalkBack reads the values instead of the drawing. */
+/** Bars for the locale week. TalkBack reads the values instead of the drawing. */
 @Composable
-private fun ChartCard(days: List<DayFocus>) {
+private fun ChartCard(days: List<DayFocus>, today: LocalDate, weekStart: LocalDate, weekEnd: LocalDate) {
     val dates = LocalDateFormats.current
     val labels = days.map { dates.weekdayShort(it.date.dayOfWeek) }
     val durations = days.map { durationText(it.focusMillis) }
@@ -248,7 +248,7 @@ private fun ChartCard(days: List<DayFocus>) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                stringResource(Res.string.statistics_last_seven_days),
+                weekRangeLabel(weekStart, weekEnd, dates),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.semantics { heading() },
@@ -269,7 +269,7 @@ private fun ChartCard(days: List<DayFocus>) {
                     val height = size.height * day.focusMillis / maxMillis
                     if (height > 0f) {
                         drawRoundRect(
-                            color = if (index == days.lastIndex) todayColor else barColor,
+                            color = if (day.date == today) todayColor else barColor,
                             topLeft = Offset(left, size.height - height),
                             size = Size(barWidth, height),
                             cornerRadius = radius,
@@ -297,25 +297,25 @@ private fun ChartCard(days: List<DayFocus>) {
 @Preview
 @Composable
 private fun StatisticsScreenPreview() {
+    val weekStart = LocalDate(2026, 11, 2)
     val today = LocalDate(2026, 11, 7)
-    val days = (6L downTo 0L).mapIndexed { i, ago ->
-        DayFocus(
-            today.minus(ago.toInt(), DateTimeUnit.DAY), (i % 4 + 1) * 25 * 60_000L,
-            i % 4 + 1,
-        )
+    val days = (0..6).map { offset ->
+        DayFocus(weekStart.plus(offset, DateTimeUnit.DAY), (offset % 4 + 1) * 25 * 60_000L, offset % 4 + 1)
     }
     FocusFlowTheme {
         StatisticsScreen(
             StatisticsUiState.Success(
                 FocusStatistics(
-                    today = days.last(),
+                    today = days.first { it.date == today },
                     weekFocusMillis = 300 * 60_000L,
                     weekSessions = 12,
                     weekDailyAverageMillis = 60 * 60_000L,
                     averageSessionMillis = 25 * 60_000L,
                     totalSessions = 40,
                     totalFocusMillis = 1_000 * 60_000L,
-                    lastSevenDays = days,
+                    weekDays = days,
+                    weekStart = weekStart,
+                    weekEnd = LocalDate(2026, 11, 8),
                 ),
             ),
         )

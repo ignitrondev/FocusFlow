@@ -15,6 +15,7 @@
  */
 package com.ignitrondev.focusflow.domain.statistics
 
+import com.ignitrondev.focusflow.core.time.weekContaining
 import com.ignitrondev.focusflow.domain.timer.FinishedSession
 import com.ignitrondev.focusflow.domain.timer.SessionType
 import kotlin.time.Instant
@@ -22,10 +23,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.daysUntil
-import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
-import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
 data class DayFocus(val date: LocalDate, val focusMillis: Long, val sessions: Int)
@@ -40,13 +38,16 @@ data class FocusStatistics(
     val averageSessionMillis: Long,
     val totalSessions: Int,
     val totalFocusMillis: Long,
-    /** Seven entries, oldest first, ending today. */
-    val lastSevenDays: List<DayFocus>,
-    /** First day of the current week, per the user's locale. */
-    val weekStart: LocalDate = today.date,
+    /** The seven days of the current locale week, [weekStart] through [weekEnd], oldest first. */
+    val weekDays: List<DayFocus>,
+    /** First day of the current week. Same value the chart and the week label use. */
+    val weekStart: LocalDate,
+    /** Last day of that week (six days after [weekStart]), including days still ahead of today. */
+    val weekEnd: LocalDate,
     /**
-     * Consecutive days with at least one completed focus session, up to today. A streak that
-     * reached yesterday is still alive today until the day ends.
+     * Consecutive days that each contain at least one completed focus session, ending today, or
+     * yesterday when today has none yet. No completed focus session means 0, including when today
+     * is empty and yesterday is empty. A run that crosses a week or month boundary stays intact.
      */
     val currentStreakDays: Int = 0,
 ) {
@@ -55,8 +56,9 @@ data class FocusStatistics(
 
 object FocusStatisticsCalculator {
     /**
-     * Sessions belong to the local day on which they ended. The week starts on [firstDayOfWeek]
-     * (taken from the user's locale).
+     * Sessions belong to the local day on which they ended. The week is [weekContaining] of
+     * [today] starting on [firstDayOfWeek] (the device locale). That one range feeds the weekly
+     * totals, [FocusStatistics.weekDays] and the start/end the label prints.
      */
     fun calculate(sessions: List<FinishedSession>, today: LocalDate, zone: TimeZone, firstDayOfWeek: DayOfWeek): FocusStatistics {
         val focus = sessions.filter { it.completed && it.sessionType == SessionType.Focus }
@@ -68,9 +70,9 @@ object FocusStatisticsCalculator {
             return DayFocus(date, items.sumOf { it.actualDurationMillis }, items.size)
         }
 
-        val daysSinceWeekStart = (today.dayOfWeek.isoDayNumber - firstDayOfWeek.isoDayNumber + 7) % 7
-        val weekStart = today.minus(daysSinceWeekStart, DateTimeUnit.DAY)
-        val weekDays = generateSequence(weekStart) { it.plus(1, DateTimeUnit.DAY) }.takeWhile { it <= today }.map(::day).toList()
+        val week = weekContaining(today, firstDayOfWeek)
+        val weekDays = week.dates.map(::day)
+        val elapsedDays = week.dates.count { it <= today }
         val weekFocus = weekDays.sumOf { it.focusMillis }
         val totalFocus = focus.sumOf { it.actualDurationMillis }
 
@@ -78,18 +80,29 @@ object FocusStatisticsCalculator {
             today = day(today),
             weekFocusMillis = weekFocus,
             weekSessions = weekDays.sumOf { it.sessions },
-            weekDailyAverageMillis = weekFocus / (weekStart.daysUntil(today) + 1),
+            weekDailyAverageMillis = weekFocus / elapsedDays,
             averageSessionMillis = if (focus.isEmpty()) 0 else totalFocus / focus.size,
             totalSessions = focus.size,
             totalFocusMillis = totalFocus,
-            lastSevenDays = (6 downTo 0).map { day(today.minus(it, DateTimeUnit.DAY)) },
-            weekStart = weekStart,
+            weekDays = weekDays,
+            weekStart = week.start,
+            weekEnd = week.end,
             currentStreakDays = streak(byDay.keys, today),
         )
     }
 
+    /**
+     * Days in [activeDays] already have a completed focus session. Today counts only when it is
+     * one of them; otherwise the run must reach yesterday or it is 0.
+     */
     private fun streak(activeDays: Set<LocalDate>, today: LocalDate): Int {
-        var day = if (today in activeDays) today else today.minus(1, DateTimeUnit.DAY)
+        if (activeDays.isEmpty()) return 0
+        val yesterday = today.minus(1, DateTimeUnit.DAY)
+        var day = when {
+            today in activeDays -> today
+            yesterday in activeDays -> yesterday
+            else -> return 0
+        }
         var count = 0
         while (day in activeDays) {
             count++

@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.ignitrondev.focusflow.BuildConfig
 import com.ignitrondev.focusflow.R
+import com.ignitrondev.focusflow.core.time.dayOfWeekFromSundayBased
 import com.ignitrondev.focusflow.resources.Res
 import com.ignitrondev.focusflow.resources.settings_alert_sound
 import com.ignitrondev.focusflow.resources.share_photo_failed
@@ -50,7 +51,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
-import java.time.temporal.WeekFields
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -62,7 +62,6 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalTime
-import kotlinx.datetime.toKotlinDayOfWeek
 import org.jetbrains.compose.resources.stringResource
 
 /** The Android side of the shared UI: permissions, pickers, sharing, formats and colors. */
@@ -189,7 +188,7 @@ class AndroidPlatformServices @Inject constructor(@ApplicationContext private va
 
     override val dates: DateFormats = AndroidDateFormats
 
-    override fun firstDayOfWeek(): DayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek.toKotlinDayOfWeek()
+    override fun firstDayOfWeek(): DayOfWeek = deviceFirstDayOfWeek()
 
     override fun logError(tag: String, message: String, error: Throwable?) {
         Log.e(tag, message, error)
@@ -200,9 +199,18 @@ class AndroidPlatformServices @Inject constructor(@ApplicationContext private va
     }
 }
 
-/** java.time formats in the current locale (read on every call, so a language change applies). */
+/**
+ * First weekday of the device's format locale.
+ *
+ * `WeekFields.of(Locale.getDefault())` is the display language, and on Android that call is
+ * desugared java.time data, which can disagree with the calendar the system actually uses.
+ * ICU's calendar is the on-device locale data and numbers Sunday as 1, the same as iOS.
+ */
+internal fun deviceFirstDayOfWeek(): DayOfWeek = dayOfWeekFromSundayBased(android.icu.util.Calendar.getInstance().firstDayOfWeek)
+
+/** java.time formats in the format locale (read on every call, so a language change applies). */
 private object AndroidDateFormats : DateFormats {
-    private val locale: Locale get() = Locale.getDefault()
+    private val locale: Locale get() = Locale.getDefault(Locale.Category.FORMAT)
 
     override fun fullDate(date: LocalDate): String =
         date.toJavaLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale))
@@ -211,6 +219,8 @@ private object AndroidDateFormats : DateFormats {
         date.toJavaLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale))
 
     override fun dayMonth(date: LocalDate): String = date.toJavaLocalDate().format(DateTimeFormatter.ofPattern("d MMM", locale))
+
+    override fun monthShort(date: LocalDate): String = date.toJavaLocalDate().format(DateTimeFormatter.ofPattern("MMM", locale))
 
     override fun shortTime(time: LocalTime): String =
         time.toJavaLocalTime().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale))

@@ -58,7 +58,10 @@ interface PlatformServices {
 
     val dates: DateFormats
 
-    /** First day of the week in the user's locale. */
+    /**
+     * First day of the week in the device locale: the format locale's calendar on Android, and
+     * `NSCalendar.firstWeekday` on iOS (which also honors the user's calendar setting).
+     */
     fun firstDayOfWeek(): DayOfWeek
 
     fun logError(tag: String, message: String, error: Throwable? = null)
@@ -102,6 +105,9 @@ interface DateFormats {
 
     /** E.g. "7 Nov". */
     fun dayMonth(date: LocalDate): String
+
+    /** Short month name in the user's locale, e.g. "Nov". */
+    fun monthShort(date: LocalDate): String
 
     /** E.g. "9:30 AM" or "09.30". */
     fun shortTime(time: LocalTime): String

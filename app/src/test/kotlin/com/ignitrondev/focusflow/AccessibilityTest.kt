@@ -33,7 +33,7 @@ import com.ignitrondev.focusflow.resources.Res
 import com.ignitrondev.focusflow.resources.history_today
 import com.ignitrondev.focusflow.resources.settings_section_timer
 import com.ignitrondev.focusflow.resources.settings_source_code
-import com.ignitrondev.focusflow.resources.statistics_last_seven_days
+import com.ignitrondev.focusflow.resources.statistics_this_week
 import com.ignitrondev.focusflow.testing.FakeTimeSource
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -137,7 +137,7 @@ class AccessibilityTest {
     fun timerScreen() = checkScreen(null, null)
 
     @Test
-    fun statisticsScreen() = checkScreen("nav_Statistics", string(Res.string.statistics_last_seven_days))
+    fun statisticsScreen() = checkScreen("nav_Statistics", string(Res.string.statistics_this_week))
 
     @Test
     fun historyScreen() = checkScreen("nav_History", string(Res.string.history_today))

@@ -104,8 +104,7 @@
     <string name="statistics_daily_average">Daily average this week</string>
     <string name="statistics_average_session">Average focus session</string>
     <string name="statistics_all_time">All time</string>
-    <string name="statistics_last_seven_days">Last 7 days</string>
-    <string name="statistics_chart_description">Focus time over the last 7 days: %1$s</string>
+    <string name="statistics_chart_description">Focus time this week: %1$s</string>
     <string name="duration_hours">%1$d h</string>
     <string name="duration_hours_minutes">%1$d h %2$d min</string>
     <string name="duration_minutes_short">%1$d min</string>
@@ -128,6 +127,10 @@
     <string name="share_card_streak">Streak</string>
     <string name="share_card_footer">Focus better. Work smarter.</string>
     <string name="share_card_week_range">%1$s – %2$s</string>
+    <!-- Same calendar month, e.g. "2 – 8 Nov". Month name comes from the device locale. -->
+    <string name="week_range_same_month">%1$d – %2$d %3$s</string>
+    <string name="share_card_empty">Start your first session</string>
+    <string name="share_text_empty">Start your first session with FocusFlow.</string>
     <string name="share_text_today">I focused %1$s today with FocusFlow.</string>
     <string name="share_text_week">I focused %1$s this week with FocusFlow.</string>
     <string name="share_card_description">FocusFlow statistics card: %1$s, focus time %2$s, %3$s</string>

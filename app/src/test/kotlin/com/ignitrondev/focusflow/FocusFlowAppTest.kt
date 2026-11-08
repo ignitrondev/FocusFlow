@@ -42,7 +42,7 @@ import com.ignitrondev.focusflow.resources.history_today
 import com.ignitrondev.focusflow.resources.settings_section_appearance
 import com.ignitrondev.focusflow.resources.settings_theme_dark
 import com.ignitrondev.focusflow.resources.statistics_empty_title
-import com.ignitrondev.focusflow.resources.statistics_last_seven_days
+import com.ignitrondev.focusflow.resources.statistics_this_week
 import com.ignitrondev.focusflow.resources.timer_action_start
 import com.ignitrondev.focusflow.testing.FakeTimeSource
 import com.ignitrondev.focusflow.testing.FakeTimerConfigRepository
@@ -199,7 +199,7 @@ class FocusFlowAppTest {
         composeRule.onNodeWithText("25 min", useUnmergedTree = true).assertExists()
 
         composeRule.onNodeWithTag("nav_Statistics").performClick()
-        waitForText(string(Res.string.statistics_last_seven_days))
+        waitForText(string(Res.string.statistics_this_week))
         composeRule.onAllNodesWithText("25 min").onFirst().assertExists()
     }
 

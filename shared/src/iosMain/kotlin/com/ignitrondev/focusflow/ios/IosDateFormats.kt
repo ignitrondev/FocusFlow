@@ -38,6 +38,7 @@ internal object IosDateFormats : DateFormats {
     private val full by lazy { formatter { dateStyle = NSDateFormatterFullStyle } }
     private val medium by lazy { formatter { dateStyle = NSDateFormatterMediumStyle } }
     private val dayMonth by lazy { formatter { setLocalizedDateFormatFromTemplate("dMMM") } }
+    private val month by lazy { formatter { setLocalizedDateFormatFromTemplate("MMM") } }
     private val time by lazy { formatter { timeStyle = NSDateFormatterShortStyle } }
     private val weekdays by lazy { formatter {} }
 
@@ -46,6 +47,8 @@ internal object IosDateFormats : DateFormats {
     override fun mediumDate(date: LocalDate): String = medium.stringFromDate(date.toNSDate())
 
     override fun dayMonth(date: LocalDate): String = dayMonth.stringFromDate(date.toNSDate())
+
+    override fun monthShort(date: LocalDate): String = month.stringFromDate(date.toNSDate())
 
     override fun shortTime(time: LocalTime): String = this.time.stringFromDate(
         nsDate {

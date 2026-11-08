@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,22 +63,23 @@ import androidx.compose.ui.unit.sp
 import com.ignitrondev.focusflow.core.ui.durationText
 import com.ignitrondev.focusflow.domain.statistics.DayFocus
 import com.ignitrondev.focusflow.domain.statistics.FocusStatistics
+import com.ignitrondev.focusflow.feature.statistics.weekRangeLabel
 import com.ignitrondev.focusflow.platform.DateFormats
 import com.ignitrondev.focusflow.platform.LocalDateFormats
 import com.ignitrondev.focusflow.resources.Res
 import com.ignitrondev.focusflow.resources.app_name
 import com.ignitrondev.focusflow.resources.share_card_daily_average
+import com.ignitrondev.focusflow.resources.share_card_empty
 import com.ignitrondev.focusflow.resources.share_card_focus_time
 import com.ignitrondev.focusflow.resources.share_card_footer
 import com.ignitrondev.focusflow.resources.share_card_sessions
 import com.ignitrondev.focusflow.resources.share_card_streak
-import com.ignitrondev.focusflow.resources.share_card_week_range
 import com.ignitrondev.focusflow.resources.share_period_today
 import com.ignitrondev.focusflow.resources.share_period_week
 import com.ignitrondev.focusflow.resources.streak_days
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -140,12 +142,10 @@ fun FocusShareCard(
             SharePeriod.Today -> stringResource(Res.string.share_period_today) + " · " +
                 dates.mediumDate(statistics.today.date)
 
-            SharePeriod.Week -> stringResource(Res.string.share_period_week) + " · " + stringResource(
-                Res.string.share_card_week_range,
-                dates.dayMonth(statistics.weekStart),
-                dates.dayMonth(statistics.today.date),
-            )
+            SharePeriod.Week -> stringResource(Res.string.share_period_week) + " · " +
+                weekRangeLabel(statistics.weekStart, statistics.weekEnd, dates)
         }
+        val awaitingFirstSession = focusMillis == 0L
         BoxWithConstraints(modifier.aspectRatio(format.aspectRatio).background(CardGradient)) {
             if (photo != null) {
                 Image(
@@ -188,27 +188,43 @@ fun FocusShareCard(
                     )
                     Spacer(Modifier.height(16.dp))
                 }
-                Text(stringResource(Res.string.share_card_focus_time).uppercase(), color = OnCardMuted, style = LabelStyle.onCard())
-                Text(
-                    durationText(focusMillis),
-                    color = OnCard,
-                    style = FocusTimeStyle.onCard(),
-                    maxLines = 1,
-                )
-                Spacer(Modifier.height(16.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                    Metric(stringResource(Res.string.share_card_sessions), sessions.toString())
-                    if (period == SharePeriod.Week) {
-                        Metric(stringResource(Res.string.share_card_daily_average), durationText(statistics.weekDailyAverageMillis))
-                    }
-                    Metric(
-                        stringResource(Res.string.share_card_streak),
-                        pluralStringResource(Res.plurals.streak_days, statistics.currentStreakDays, statistics.currentStreakDays),
+                if (awaitingFirstSession) {
+                    Text(
+                        stringResource(Res.string.share_card_empty),
+                        color = OnCard,
+                        style = TextStyle(
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            lineHeight = 34.sp,
+                            textAlign = TextAlign.Center,
+                        ).onCard(),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().testTag("shareCardEmpty"),
                     )
+                    Spacer(Modifier.weight(1f))
+                } else {
+                    Text(stringResource(Res.string.share_card_focus_time).uppercase(), color = OnCardMuted, style = LabelStyle.onCard())
+                    Text(
+                        durationText(focusMillis),
+                        color = OnCard,
+                        style = FocusTimeStyle.onCard(),
+                        maxLines = 1,
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                        Metric(stringResource(Res.string.share_card_sessions), sessions.toString())
+                        if (period == SharePeriod.Week) {
+                            Metric(stringResource(Res.string.share_card_daily_average), durationText(statistics.weekDailyAverageMillis))
+                        }
+                        Metric(
+                            stringResource(Res.string.share_card_streak),
+                            pluralStringResource(Res.plurals.streak_days, statistics.currentStreakDays, statistics.currentStreakDays),
+                        )
+                    }
+                    Spacer(Modifier.height(24.dp))
+                    WeekBars(statistics.weekDays, statistics.today.date, dates)
+                    Spacer(Modifier.height(16.dp))
                 }
-                Spacer(Modifier.height(24.dp))
-                WeekBars(statistics.lastSevenDays, dates)
-                Spacer(Modifier.height(16.dp))
                 Text(
                     stringResource(Res.string.share_card_footer),
                     color = OnCardMuted,
@@ -233,7 +249,7 @@ private fun Metric(label: String, value: String) {
 }
 
 @Composable
-private fun WeekBars(days: List<DayFocus>, dates: DateFormats) {
+private fun WeekBars(days: List<DayFocus>, today: LocalDate, dates: DateFormats) {
     val max = days.maxOf { it.focusMillis }.coerceAtLeast(1)
     Column {
         Canvas(Modifier.fillMaxWidth().height(64.dp)) {
@@ -246,7 +262,7 @@ private fun WeekBars(days: List<DayFocus>, dates: DateFormats) {
                 val height = (size.height * day.focusMillis / max).coerceAtLeast(if (day.focusMillis > 0) barWidth else 0f)
                 if (height > 0f) {
                     drawRoundRect(
-                        color = if (index == days.lastIndex) BarToday else OnCard,
+                        color = if (day.date == today) BarToday else OnCard,
                         topLeft = Offset(left, size.height - height),
                         size = Size(barWidth, height),
                         cornerRadius = radius,
@@ -291,27 +307,26 @@ private fun LogoMark(modifier: Modifier) {
 @Preview(widthDp = 360)
 @Composable
 private fun FocusShareCardPreview() {
+    val weekStart = LocalDate(2026, 11, 2)
     val today = LocalDate(2026, 11, 7)
     val days = remember {
-        (6L downTo 0L).mapIndexed { i, ago ->
-            DayFocus(
-                today.minus(ago.toInt(), DateTimeUnit.DAY),
-                (i % 4 + 1) * 25 * 60_000L, i % 4 + 1,
-            )
+        (0..6).map { offset ->
+            DayFocus(weekStart.plus(offset, DateTimeUnit.DAY), (offset % 4 + 1) * 25 * 60_000L, offset % 4 + 1)
         }
     }
     FocusShareCard(
         modifier = Modifier.padding(16.dp).clip(RoundedCornerShape(28.dp)),
         statistics = FocusStatistics(
-            today = days.last(),
+            today = days.first { it.date == today },
             weekFocusMillis = 450 * 60_000L,
             weekSessions = 18,
             weekDailyAverageMillis = 64 * 60_000L,
             averageSessionMillis = 25 * 60_000L,
             totalSessions = 40,
             totalFocusMillis = 1_000 * 60_000L,
-            lastSevenDays = days,
-            weekStart = today.minus(6, DateTimeUnit.DAY),
+            weekDays = days,
+            weekStart = weekStart,
+            weekEnd = LocalDate(2026, 11, 8),
             currentStreakDays = 5,
         ),
         role = "Software Engineer",
