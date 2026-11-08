@@ -88,7 +88,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.ignitrondev.focusflow.app.LocalAppDependencies
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowShapes
 import com.ignitrondev.focusflow.core.designsystem.theme.FocusFlowSpacing
@@ -97,6 +99,9 @@ import com.ignitrondev.focusflow.core.designsystem.theme.FocusTokens
 import com.ignitrondev.focusflow.core.ui.durationText
 import com.ignitrondev.focusflow.domain.statistics.DayFocus
 import com.ignitrondev.focusflow.domain.statistics.FocusStatistics
+import com.ignitrondev.focusflow.feature.achievement.AchievementsEntryButton
+import com.ignitrondev.focusflow.feature.achievement.AchievementsRoute
+import com.ignitrondev.focusflow.feature.achievement.AchievementsScreen
 import com.ignitrondev.focusflow.feature.statistics.share.ShareStatisticsSheet
 import com.ignitrondev.focusflow.platform.DateFormats
 import com.ignitrondev.focusflow.platform.LocalDateFormats
@@ -127,20 +132,49 @@ import org.jetbrains.compose.resources.stringResource
 @Serializable
 data object StatisticsRoute
 
+@Serializable
+data object StatisticsHomeRoute
+
 fun NavGraphBuilder.statisticsScreen() {
     composable<StatisticsRoute> {
-        val dependencies = LocalAppDependencies.current
-        val viewModel = viewModel {
-            StatisticsViewModel(
-                focusSessionRepository = dependencies.focusSessionRepository,
-                timeSource = dependencies.timeSource,
-                userPreferencesRepository = dependencies.userPreferencesRepository,
-                firstDayOfWeek = dependencies.platform::firstDayOfWeek,
+        StatisticsSection()
+    }
+}
+
+@Composable
+private fun StatisticsSection() {
+    val navController = rememberNavController()
+    // Kept in this parent, which stays composed across the nested route, so a pop can focus the entry.
+    // remember, not rememberSaveable: restoring the nested entry must not reset this back to false.
+    var restoreEntryFocus by remember { mutableStateOf(false) }
+    NavHost(navController = navController, startDestination = StatisticsHomeRoute, modifier = Modifier.fillMaxSize()) {
+        composable<StatisticsHomeRoute> {
+            val dependencies = LocalAppDependencies.current
+            val viewModel = viewModel {
+                StatisticsViewModel(
+                    focusSessionRepository = dependencies.focusSessionRepository,
+                    timeSource = dependencies.timeSource,
+                    userPreferencesRepository = dependencies.userPreferencesRepository,
+                    firstDayOfWeek = dependencies.platform::firstDayOfWeek,
+                )
+            }
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val shareRole by viewModel.shareRole.collectAsStateWithLifecycle()
+            StatisticsScreen(
+                uiState,
+                shareRole = shareRole,
+                onSaveShareRole = viewModel::saveShareRole,
+                onOpenAchievements = {
+                    restoreEntryFocus = true
+                    navController.navigate(AchievementsRoute)
+                },
+                restoreAchievementsFocus = restoreEntryFocus,
+                onAchievementsFocusRestored = { restoreEntryFocus = false },
             )
         }
-        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-        val shareRole by viewModel.shareRole.collectAsStateWithLifecycle()
-        StatisticsScreen(uiState, shareRole = shareRole, onSaveShareRole = viewModel::saveShareRole)
+        composable<AchievementsRoute> {
+            AchievementsScreen(onBack = { navController.popBackStack() })
+        }
     }
 }
 
@@ -151,6 +185,9 @@ fun StatisticsScreen(
     modifier: Modifier = Modifier,
     shareRole: String = "",
     onSaveShareRole: (String) -> Unit = {},
+    onOpenAchievements: () -> Unit = {},
+    restoreAchievementsFocus: Boolean = false,
+    onAchievementsFocusRestored: () -> Unit = {},
 ) {
     var sharing by rememberSaveable { mutableStateOf(false) }
     val statistics = (uiState as? StatisticsUiState.Success)?.statistics
@@ -171,6 +208,9 @@ fun StatisticsScreen(
             StatisticsContent(
                 statistics = statistics,
                 onShare = { sharing = true },
+                onOpenAchievements = onOpenAchievements,
+                restoreAchievementsFocus = restoreAchievementsFocus,
+                onAchievementsFocusRestored = onAchievementsFocusRestored,
                 modifier = Modifier.padding(innerPadding),
             )
         }
@@ -178,7 +218,14 @@ fun StatisticsScreen(
 }
 
 @Composable
-private fun StatisticsContent(statistics: FocusStatistics, onShare: () -> Unit, modifier: Modifier = Modifier) {
+private fun StatisticsContent(
+    statistics: FocusStatistics,
+    onShare: () -> Unit,
+    onOpenAchievements: () -> Unit,
+    restoreAchievementsFocus: Boolean,
+    onAchievementsFocusRestored: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val fontScale = LocalDensity.current.fontScale
     BoxWithConstraints(modifier.fillMaxSize()) {
         val stack = maxWidth < 360.dp || fontScale >= 1.3f
@@ -209,6 +256,11 @@ private fun StatisticsContent(statistics: FocusStatistics, onShare: () -> Unit, 
                     iconTint = FocusTokens.streak,
                     tag = "metricStreak",
                     modifier = Modifier.fillMaxWidth(),
+                )
+                AchievementsEntryButton(
+                    onOpen = onOpenAchievements,
+                    restoreFocus = restoreAchievementsFocus,
+                    onFocusRestored = onAchievementsFocusRestored,
                 )
             }
         }

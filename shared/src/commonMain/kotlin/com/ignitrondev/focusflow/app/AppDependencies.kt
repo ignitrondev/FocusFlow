@@ -16,6 +16,7 @@
 package com.ignitrondev.focusflow.app
 
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.ignitrondev.focusflow.domain.achievement.AchievementRepository
 import com.ignitrondev.focusflow.domain.repository.UserPreferencesRepository
 import com.ignitrondev.focusflow.domain.timer.FocusSessionRepository
 import com.ignitrondev.focusflow.domain.timer.TimeSource
@@ -34,6 +35,7 @@ interface AppDependencies {
     val userPreferencesRepository: UserPreferencesRepository
     val timeSource: TimeSource
     val platform: PlatformServices
+    val achievementRepository: AchievementRepository
 }
 
 val LocalAppDependencies = staticCompositionLocalOf<AppDependencies> { error("No AppDependencies provided") }

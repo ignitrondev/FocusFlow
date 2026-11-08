@@ -207,6 +207,10 @@ class AndroidPlatformServices @Inject constructor(@ApplicationContext private va
         return disabled
     }
 
+    override fun notifyAchievementUnlocked(achievementId: String, criteriaLabel: String) {
+        AchievementNotifications.post(context, achievementId, criteriaLabel)
+    }
+
     private companion object {
         const val TAG = "PlatformServices"
     }

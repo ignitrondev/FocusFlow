@@ -183,6 +183,32 @@ class IosPlatformServices : PlatformServices {
         return disabled
     }
 
+    /**
+     * STUB for Senior iOS Developer. Replace this on this same branch/PR. Do not open a new PR from main.
+     *
+     * This builds and posts nothing. FocusFlow still stores the unlock and shows it in Achievements.
+     * Do not request notification permission here.
+     *
+     * The replacement should post one local notification per call through [UNUserNotificationCenter],
+     * the same center [IosSessionAlerts] and [requestNotificationPermission] already use. One call is
+     * one notification. A first evaluation may call this up to 13 times; do not combine them.
+     * If authorization is denied or notifications are disabled, return without posting and without prompting.
+     *
+     * [achievementId] is the stable id (`sessions_1`, `streak_3`, `focus_hours_1`, …).
+     * [criteriaLabel] is already-localized criteria text. Use it as the notification content.
+     * There is no marketing copy.
+     *
+     * The shared caller marks the unlock as handled after this returns, including this no-op.
+     * Replace the stub before a build that evaluates achievements is given to anyone, or those
+     * unlocks will stay unmarked by a notification.
+     */
+    override fun notifyAchievementUnlocked(achievementId: String, criteriaLabel: String) {
+        // No UNNotificationRequest is created. The parameters are the contract above.
+        if (achievementId.isEmpty() && criteriaLabel.isEmpty()) {
+            NSLog("%@", "achievement notification stub")
+        }
+    }
+
     private fun openAppSettings() {
         val url = NSURL.URLWithString(UIApplicationOpenSettingsURLString) ?: return
         UIApplication.sharedApplication.openURL(url, options = emptyMap<Any?, Any>(), completionHandler = null)
