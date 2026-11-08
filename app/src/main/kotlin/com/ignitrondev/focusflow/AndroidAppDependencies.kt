@@ -16,6 +16,7 @@
 package com.ignitrondev.focusflow
 
 import com.ignitrondev.focusflow.app.AppDependencies
+import com.ignitrondev.focusflow.domain.achievement.AchievementRepository
 import com.ignitrondev.focusflow.domain.repository.UserPreferencesRepository
 import com.ignitrondev.focusflow.domain.timer.FocusSessionRepository
 import com.ignitrondev.focusflow.domain.timer.TimeSource
@@ -34,4 +35,5 @@ class AndroidAppDependencies @Inject constructor(
     override val userPreferencesRepository: UserPreferencesRepository,
     override val timeSource: TimeSource,
     override val platform: AndroidPlatformServices,
+    override val achievementRepository: AchievementRepository,
 ) : AppDependencies

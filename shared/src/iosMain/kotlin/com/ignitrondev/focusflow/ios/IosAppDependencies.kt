@@ -19,12 +19,17 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.ignitrondev.focusflow.app.AppDependencies
+import com.ignitrondev.focusflow.data.achievement.RoomAchievementRepository
 import com.ignitrondev.focusflow.data.database.FocusFlowDatabase
+import com.ignitrondev.focusflow.data.database.MIGRATION_1_2
 import com.ignitrondev.focusflow.data.repository.DataStoreTimerConfigRepository
 import com.ignitrondev.focusflow.data.repository.DataStoreUserPreferencesRepository
 import com.ignitrondev.focusflow.data.timer.RoomFocusSessionRepository
 import com.ignitrondev.focusflow.data.timer.RoomTimerRepository
+import com.ignitrondev.focusflow.domain.achievement.AchievementRepository
 import com.ignitrondev.focusflow.domain.timer.TimerEngine
+import com.ignitrondev.focusflow.feature.achievement.AchievementMonitor
+import com.ignitrondev.focusflow.feature.achievement.achievementCriteriaLabel
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +57,7 @@ class IosAppDependencies private constructor() : AppDependencies {
 
     private val database = Room.databaseBuilder<FocusFlowDatabase>(name = "$storage/focusflow.db")
         .setDriver(BundledSQLiteDriver())
+        .addMigrations(MIGRATION_1_2)
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()
     override val focusSessionRepository = RoomFocusSessionRepository(database.focusSessionDao())
@@ -74,6 +80,19 @@ class IosAppDependencies private constructor() : AppDependencies {
         scope = scope,
         logError = { message, error -> platform.logError("SessionAlerts", message, error) },
     ).also { it.start() }
+
+    override val achievementRepository: AchievementRepository = RoomAchievementRepository(database.achievementUnlockDao())
+
+    init {
+        AchievementMonitor(
+            sessions = focusSessionRepository.observeSessions(),
+            repository = achievementRepository,
+            timeSource = timeSource,
+            platform = platform,
+            firstDayOfWeek = platform::firstDayOfWeek,
+            criteriaLabel = ::achievementCriteriaLabel,
+        ).start(scope)
+    }
 
     companion object {
         val shared: IosAppDependencies by lazy { IosAppDependencies() }

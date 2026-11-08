@@ -30,7 +30,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun providesDatabase(@ApplicationContext context: Context): FocusFlowDatabase =
-        Room.databaseBuilder(context, FocusFlowDatabase::class.java, FocusFlowDatabase.NAME).build()
+        Room.databaseBuilder(context, FocusFlowDatabase::class.java, FocusFlowDatabase.NAME)
+            .addMigrations(MIGRATION_1_2)
+            .build()
 
     @Provides
     fun providesTimerStateDao(database: FocusFlowDatabase): TimerStateDao = database.timerStateDao()

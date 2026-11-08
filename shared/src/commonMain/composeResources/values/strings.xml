@@ -158,4 +158,28 @@
     <string name="notification_next_long_break">Well done, time for a %1$s.</string>
     <string name="notification_next_focus">Ready for the next focus session?</string>
     <string name="notification_next_started">%1$s started.</string>
+
+    <!-- Achievements (1.2.0). Criteria labels only; names and marketing copy are not final. -->
+    <string name="achievements_title">Achievements</string>
+    <string name="achievements_open">Achievements</string>
+    <string name="achievements_back">Back</string>
+    <string name="achievements_earned">Earned</string>
+    <string name="achievements_not_earned">Not yet earned</string>
+    <string name="achievements_no_completed_sessions">No completed focus sessions yet. Achievements stay on this device and unlock as you focus.</string>
+    <string name="achievements_progress_sessions">%1$d of %2$d completed sessions</string>
+    <string name="achievements_progress_days">%1$d of %2$d days</string>
+    <string name="achievements_progress_hours">%1$d h of %2$d h</string>
+    <string name="achievements_progress_hours_minutes">%1$d h %2$d min of %3$d h</string>
+    <plurals name="achievement_sessions">
+        <item quantity="one">%1$d completed session</item>
+        <item quantity="other">%1$d completed sessions</item>
+    </plurals>
+    <plurals name="achievement_streak_days">
+        <item quantity="one">%1$d-day streak</item>
+        <item quantity="other">%1$d-day streak</item>
+    </plurals>
+    <plurals name="achievement_focus_hours">
+        <item quantity="one">%1$d hour of focus</item>
+        <item quantity="other">%1$d hours of focus</item>
+    </plurals>
 </resources>

@@ -65,6 +65,17 @@ interface PlatformServices {
     fun firstDayOfWeek(): DayOfWeek
 
     fun logError(tag: String, message: String, error: Throwable? = null)
+
+    /**
+     * Posts one local notification for a newly unlocked achievement.
+     * Do not request notification permission here; reuse the existing timer/session alert permission.
+     * If notifications are not allowed, this must no-op. Unlocked state stays visible in the app.
+     * Each call is one notification and must not be combined with another. The first evaluation of
+     * existing history may call this once per newly unlocked achievement, up to 13 times.
+     * @param achievementId stable id such as sessions_1, streak_3, or focus_hours_1
+     * @param criteriaLabel already-localized criteria text from shared UI, not invented marketing copy
+     */
+    fun notifyAchievementUnlocked(achievementId: String, criteriaLabel: String)
 }
 
 /** What the system allows for session alerts, and the actions to change it. */

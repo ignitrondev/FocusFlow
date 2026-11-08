@@ -29,13 +29,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Guards the schemas committed in `app/schemas`. A database is built exactly as described by an
- * exported schema file, then opened with Room, which refuses to open it if the current entities
+ * Guards the schemas committed under `shared/schemas`. A database is built exactly as described by
+ * an exported schema file, then opened with Room, which refuses to open it if the current entities
  * do not match that schema's identity hash. Changing an entity without bumping the version and
  * exporting a new schema therefore fails here instead of on users' devices.
- *
- * When version 2 arrives: create the database from 1.json here, run the migration with
- * `Room.databaseBuilder(...).addMigrations(...)`, and assert the data survived.
  */
 @RunWith(AndroidJUnit4::class)
 class DatabaseSchemaTest {
@@ -45,7 +42,10 @@ class DatabaseSchemaTest {
 
     private fun createFromSchema(version: Int, name: String) {
         val json = JSONObject(File(schemaDir, "$version.json").readText()).getJSONObject("database")
-        val file = context.getDatabasePath(name).apply { parentFile?.mkdirs() }
+        val file = context.getDatabasePath(name).apply {
+            parentFile?.mkdirs()
+            if (exists()) delete()
+        }
         SQLiteDatabase.openOrCreateDatabase(file, null).use { db ->
             val entities = json.getJSONArray("entities")
             for (i in 0 until entities.length()) {
@@ -79,25 +79,67 @@ class DatabaseSchemaTest {
 
     @Test
     fun exportedSchemaMatchesTheEntities() {
-        createFromSchema(version = 1, name = DB_NAME)
+        createFromSchema(version = 2, name = DB_NAME)
         SQLiteDatabase.openDatabase(context.getDatabasePath(DB_NAME).path, null, SQLiteDatabase.OPEN_READWRITE).use {
+            it.execSQL(
+                "INSERT INTO focus_sessions (id, session_type, started_at, ended_at, planned_duration_seconds, " +
+                    "actual_duration_seconds, completed) VALUES ('run-1', 'Focus', 0, 1500000, 1500, 1500, 1)",
+            )
+            it.execSQL("INSERT INTO achievement_unlocks (id, unlocked_at, notified) VALUES ('sessions_1', 10, 1)")
+        }
+
+        val database = Room.databaseBuilder(context, FocusFlowDatabase::class.java, DB_NAME)
+            .addMigrations(MIGRATION_1_2)
+            .build()
+        val (sessions, unlocks) = try {
+            runBlocking {
+                database.focusSessionDao().getAll() to database.achievementUnlockDao().getAll()
+            }
+        } finally {
+            database.close()
+        }
+
+        assertEquals(listOf("run-1"), sessions.map { it.id })
+        assertEquals("sessions_1", unlocks.single().id)
+        assertTrue(unlocks.single().notified)
+    }
+
+    @Test
+    fun migrationFromVersion1KeepsSessionsAndAddsAchievements() {
+        createFromSchema(version = 1, name = MIGRATE_DB)
+        SQLiteDatabase.openDatabase(context.getDatabasePath(MIGRATE_DB).path, null, SQLiteDatabase.OPEN_READWRITE).use {
             it.execSQL(
                 "INSERT INTO focus_sessions (id, session_type, started_at, ended_at, planned_duration_seconds, " +
                     "actual_duration_seconds, completed) VALUES ('run-1', 'Focus', 0, 1500000, 1500, 1500, 1)",
             )
         }
 
-        val database = Room.databaseBuilder(context, FocusFlowDatabase::class.java, DB_NAME).build()
-        val sessions = try {
-            runBlocking { database.focusSessionDao().getAll() }
-        } finally {
-            database.close()
-        }
-
+        val migrated = Room.databaseBuilder(context, FocusFlowDatabase::class.java, MIGRATE_DB)
+            .addMigrations(MIGRATION_1_2)
+            .build()
+        val sessions = runBlocking { migrated.focusSessionDao().getAll() }
         assertEquals(listOf("run-1"), sessions.map { it.id })
+        runBlocking {
+            migrated.achievementUnlockDao().insertAll(listOf(AchievementUnlockEntity("streak_3", 20L, notified = false)))
+            migrated.achievementUnlockDao().markNotified(listOf("streak_3"))
+        }
+        migrated.close()
+
+        val reopened = Room.databaseBuilder(context, FocusFlowDatabase::class.java, MIGRATE_DB)
+            .addMigrations(MIGRATION_1_2)
+            .build()
+        val unlock = try {
+            runBlocking { reopened.achievementUnlockDao().getAll().single() }
+        } finally {
+            reopened.close()
+        }
+        assertEquals("streak_3", unlock.id)
+        assertEquals(20L, unlock.unlockedAt)
+        assertTrue(unlock.notified)
     }
 
     private companion object {
         const val DB_NAME = "schema-test.db"
+        const val MIGRATE_DB = "schema-migrate.db"
     }
 }

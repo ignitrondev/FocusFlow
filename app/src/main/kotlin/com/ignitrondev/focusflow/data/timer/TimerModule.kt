@@ -15,9 +15,11 @@
  */
 package com.ignitrondev.focusflow.data.timer
 
+import com.ignitrondev.focusflow.data.achievement.RoomAchievementRepository
 import com.ignitrondev.focusflow.data.database.FocusFlowDatabase
 import com.ignitrondev.focusflow.data.database.FocusSessionDao
 import com.ignitrondev.focusflow.data.database.TimerStateDao
+import com.ignitrondev.focusflow.domain.achievement.AchievementRepository
 import com.ignitrondev.focusflow.domain.timer.FocusSessionRepository
 import com.ignitrondev.focusflow.domain.timer.SessionCompletionListener
 import com.ignitrondev.focusflow.domain.timer.TimeSource
@@ -59,6 +61,11 @@ object TimerModule {
     @Singleton
     fun providesFocusSessionRepository(focusSessionDao: FocusSessionDao): FocusSessionRepository =
         RoomFocusSessionRepository(focusSessionDao)
+
+    @Provides
+    @Singleton
+    fun providesAchievementRepository(database: FocusFlowDatabase): AchievementRepository =
+        RoomAchievementRepository(database.achievementUnlockDao())
 
     @Provides
     fun providesTimerEngine(): TimerEngine = TimerEngine(newRunId = { UUID.randomUUID().toString() })

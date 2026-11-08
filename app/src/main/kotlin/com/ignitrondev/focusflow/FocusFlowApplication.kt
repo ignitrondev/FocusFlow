@@ -24,10 +24,13 @@ import javax.inject.Inject
 class FocusFlowApplication : Application() {
     @Inject lateinit var timerSystemIntegration: TimerSystemIntegration
 
+    @Inject lateinit var achievementEvaluation: AchievementEvaluation
+
     override fun onCreate() {
         super.onCreate()
         // Recovers the timer and keeps its alarm and notification in sync, also when the process
         // was started in the background by the deadline alarm or after a reboot.
         timerSystemIntegration.start()
+        achievementEvaluation.start()
     }
 }

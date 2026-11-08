@@ -25,8 +25,8 @@ import androidx.room.RoomDatabaseConstructor
  * Destructive migrations are not allowed: they would delete the user's history.
  */
 @Database(
-    entities = [TimerStateEntity::class, FocusSessionEntity::class],
-    version = 1,
+    entities = [TimerStateEntity::class, FocusSessionEntity::class, AchievementUnlockEntity::class],
+    version = 2,
     exportSchema = true,
 )
 @ConstructedBy(FocusFlowDatabaseConstructor::class)
@@ -34,6 +34,8 @@ abstract class FocusFlowDatabase : RoomDatabase() {
     abstract fun timerStateDao(): TimerStateDao
 
     abstract fun focusSessionDao(): FocusSessionDao
+
+    abstract fun achievementUnlockDao(): AchievementUnlockDao
 
     companion object {
         const val NAME = "focusflow.db"
