@@ -21,6 +21,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.PixelCopy
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasTestTag
@@ -29,6 +30,8 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -36,6 +39,7 @@ import com.ignitrondev.focusflow.data.database.FocusSessionDao
 import com.ignitrondev.focusflow.data.database.FocusSessionEntity
 import com.ignitrondev.focusflow.domain.model.ThemeMode
 import com.ignitrondev.focusflow.domain.timer.SessionType
+import com.ignitrondev.focusflow.platform.ShareImage
 import com.ignitrondev.focusflow.resources.Res
 import com.ignitrondev.focusflow.resources.history_today
 import com.ignitrondev.focusflow.resources.settings_section_appearance
@@ -43,6 +47,7 @@ import com.ignitrondev.focusflow.resources.statistics_this_week
 import com.ignitrondev.focusflow.resources.timer_action_start
 import com.ignitrondev.focusflow.testing.FakeTimeSource
 import com.ignitrondev.focusflow.testing.FakeUserPreferencesRepository
+import com.ignitrondev.focusflow.testing.resetFileProviderCache
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
@@ -152,6 +157,25 @@ class ReadmeScreenshotsTest {
         saveShot("achievements_dark")
         repeat(4) { composeRule.onNode(hasScrollAction()).performTouchInput { swipeUp() } }
         saveShot("achievements_dark_end")
+    }
+
+    /** The story card exactly as FocusFlow exports it for Instagram (1080x1920), for promo material. */
+    @Test
+    fun renderShareStory() {
+        resetFileProviderCache()
+        composeRule.onNodeWithTag("nav_Statistics").performClick()
+        composeRule.waitUntilAtLeastOneExists(hasTestTag("shareStatistics"), TIMEOUT_MILLIS)
+        composeRule.onNodeWithTag("shareStatistics").performClick()
+        composeRule.waitUntilAtLeastOneExists(hasTestTag("shareCard"), TIMEOUT_MILLIS)
+        composeRule.onNodeWithTag("shareRole").performTextInput("Software Engineer")
+        composeRule.onNodeWithTag("shareFormatStory").performClick()
+        composeRule.waitForIdle()
+        // Robolectric does not draw the sheet's window on its own; capturing draws it once.
+        composeRule.onNodeWithTag("shareCard").captureToImage()
+        composeRule.onNodeWithTag("shareButton").performScrollTo().performClick()
+        composeRule.waitUntil(20_000) { shadowOf(composeRule.activity).nextStartedActivity != null }
+        val exported = File(File(composeRule.activity.cacheDir, "shared"), ShareImage.FILE_NAME)
+        exported.copyTo(File(outputDir, "share_story.jpg"), overwrite = true)
     }
 
     /** Fourteen days in a row of focus sessions with their breaks, and one session stopped early today. */
