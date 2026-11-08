@@ -44,7 +44,11 @@ import org.jetbrains.compose.resources.stringResource
 import platform.Foundation.NSBundle
 import platform.Foundation.NSCalendar
 import platform.Foundation.NSLog
+import platform.Foundation.NSNotificationCenter
+import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSURL
+import platform.UIKit.UIAccessibilityIsReduceMotionEnabled
+import platform.UIKit.UIAccessibilityReduceMotionStatusDidChangeNotification
 import platform.UIKit.UIAlertController
 import platform.UIKit.UIAlertControllerStyleAlert
 import platform.UIKit.UIApplication
@@ -156,18 +160,28 @@ class IosPlatformServices : PlatformServices {
     }
 
     /**
-     * STUB for the Senior iOS Developer — replace this on this same pull request.
-     *
-     * Return true when Reduce Motion is on: `UIAccessibility.isReduceMotionEnabled`
-     * (`UIAccessibilityIsReduceMotionEnabled()`). Re-read it when the app returns to the
-     * foreground and when `UIAccessibilityReduceMotionStatusDidChangeNotification` is posted.
-     *
-     * This stub returns false (animations allowed) so shared Compose keeps moving until that
-     * actual lands. Do not build a separate SwiftUI navbar; SegmentedNavBar is the UI on both
-     * platforms.
+     * Reduce Motion lives in Settings, outside FocusFlow. Re-read it on every return to the
+     * foreground, and while the app is resumed if the system posts a status change. True skips
+     * the navbar tab transition.
      */
     @Composable
-    override fun rememberSystemAnimationsDisabled(): Boolean = false
+    override fun rememberSystemAnimationsDisabled(): Boolean {
+        var disabled by remember { mutableStateOf(systemReduceMotionEnabled()) }
+        LifecycleResumeEffect(Unit) {
+            val center = NSNotificationCenter.defaultCenter
+            // Subscribe first so a change between the read and the observer is not missed.
+            val observer = center.addObserverForName(
+                UIAccessibilityReduceMotionStatusDidChangeNotification,
+                null,
+                NSOperationQueue.mainQueue,
+            ) { _ ->
+                disabled = systemReduceMotionEnabled()
+            }
+            disabled = systemReduceMotionEnabled()
+            onPauseOrDispose { center.removeObserver(observer) }
+        }
+        return disabled
+    }
 
     private fun openAppSettings() {
         val url = NSURL.URLWithString(UIApplicationOpenSettingsURLString) ?: return
@@ -190,3 +204,6 @@ private suspend fun notificationStatus(): UNAuthorizationStatus = suspendCancell
         continuation.resume(settings?.authorizationStatus ?: UNAuthorizationStatusNotDetermined)
     }
 }
+
+/** Settings → Accessibility → Motion → Reduce Motion. */
+private fun systemReduceMotionEnabled(): Boolean = UIAccessibilityIsReduceMotionEnabled()
