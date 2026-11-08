@@ -60,6 +60,9 @@ import platform.UserNotifications.UNAuthorizationStatusAuthorized
 import platform.UserNotifications.UNAuthorizationStatusEphemeral
 import platform.UserNotifications.UNAuthorizationStatusNotDetermined
 import platform.UserNotifications.UNAuthorizationStatusProvisional
+import platform.UserNotifications.UNMutableNotificationContent
+import platform.UserNotifications.UNNotificationRequest
+import platform.UserNotifications.UNNotificationSound
 import platform.UserNotifications.UNUserNotificationCenter
 
 /** The iOS side of the shared UI: notification permission, photos, sharing, formats. */
@@ -184,28 +187,44 @@ class IosPlatformServices : PlatformServices {
     }
 
     /**
-     * STUB for Senior iOS Developer. Replace this on this same branch/PR. Do not open a new PR from main.
+     * One local notification per call, on the same [UNUserNotificationCenter] as session alerts.
+     * Does not ask for permission. When authorization is not already granted, this returns without
+     * posting; the unlock stays in the app, and the caller marks it handled after this returns.
      *
-     * This builds and posts nothing. FocusFlow still stores the unlock and shows it in Achievements.
-     * Do not request notification permission here.
-     *
-     * The replacement should post one local notification per call through [UNUserNotificationCenter],
-     * the same center [IosSessionAlerts] and [requestNotificationPermission] already use. One call is
-     * one notification. A first evaluation may call this up to 13 times; do not combine them.
-     * If authorization is denied or notifications are disabled, return without posting and without prompting.
-     *
-     * [achievementId] is the stable id (`sessions_1`, `streak_3`, `focus_hours_1`, …).
-     * [criteriaLabel] is already-localized criteria text. Use it as the notification content.
-     * There is no marketing copy.
-     *
-     * The shared caller marks the unlock as handled after this returns, including this no-op.
-     * Replace the stub before a build that evaluates achievements is given to anyone, or those
-     * unlocks will stay unmarked by a notification.
+     * [criteriaLabel] is the title and the body. There is no other copy.
+     * [achievementId] (`sessions_1`, `streak_3`, `focus_hours_1`, …) becomes the request id, so a
+     * burst of up to 13 calls stays as 13 notifications instead of replacing one another.
      */
     override fun notifyAchievementUnlocked(achievementId: String, criteriaLabel: String) {
-        // No UNNotificationRequest is created. The parameters are the contract above.
-        if (achievementId.isEmpty() && criteriaLabel.isEmpty()) {
-            NSLog("%@", "achievement notification stub")
+        val center = UNUserNotificationCenter.currentNotificationCenter()
+        // Reads the current authorization. Unlike [requestNotificationPermission], this does not prompt.
+        center.getNotificationSettingsWithCompletionHandler { settings ->
+            val status = settings?.authorizationStatus ?: UNAuthorizationStatusNotDetermined
+            if (status in ALLOWED) postAchievementNotification(center, achievementId, criteriaLabel)
+        }
+    }
+
+    private fun postAchievementNotification(center: UNUserNotificationCenter, achievementId: String, criteriaLabel: String) {
+        val identifier = achievementNotificationIdentifier(achievementId)
+        val content = UNMutableNotificationContent().apply {
+            setTitle(criteriaLabel)
+            setBody(criteriaLabel)
+            setSound(UNNotificationSound.defaultSound)
+            // Automatic grouping stacks notifications that share a thread. One thread per achievement
+            // keeps a first-launch burst from collapsing into a single group.
+            setThreadIdentifier(identifier)
+        }
+        // A null trigger delivers immediately. The same identifier replaces a pending or delivered
+        // request; distinct achievement ids therefore cannot overwrite each other.
+        val request = UNNotificationRequest.requestWithIdentifier(identifier, content, null)
+        center.addNotificationRequest(request) { error ->
+            if (error != null) {
+                logError(
+                    "Achievements",
+                    "Could not post an achievement notification",
+                    IllegalStateException(error.localizedDescription),
+                )
+            }
         }
     }
 
@@ -219,6 +238,12 @@ class IosPlatformServices : PlatformServices {
         const val MESSAGE_MILLIS = 1_500L
     }
 }
+
+/**
+ * Stable per achievement id. Session alerts use [IosSessionAlerts.PREFIX], so these requests
+ * are not removed when the timer re-plans its pending alerts.
+ */
+internal fun achievementNotificationIdentifier(achievementId: String): String = "focusflow.achievement.$achievementId"
 
 internal fun requestNotificationPermission(onDone: () -> Unit) {
     UNUserNotificationCenter.currentNotificationCenter()

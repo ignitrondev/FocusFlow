@@ -16,6 +16,7 @@
 package com.ignitrondev.focusflow.ios
 
 import com.ignitrondev.focusflow.core.time.dayOfWeekFromSundayBased
+import com.ignitrondev.focusflow.domain.achievement.Achievements
 import com.ignitrondev.focusflow.domain.timer.SessionType
 import com.ignitrondev.focusflow.domain.timer.UpcomingSessionEnd
 import kotlin.test.Test
@@ -41,6 +42,15 @@ class IosPlatformTest {
     @Test
     fun aChangedAlertTextGetsANewIdentifier() {
         assertNotEquals(IosSessionAlerts.identifier(end), IosSessionAlerts.identifier(end.copy(nextStartsAutomatically = true)))
+    }
+
+    @Test
+    fun eachAchievementGetsItsOwnNotificationIdentifier() {
+        val identifiers = Achievements.all.map { achievementNotificationIdentifier(it.id) }
+
+        assertEquals(13, identifiers.toSet().size)
+        assertEquals(Achievements.all.map { "focusflow.achievement.${it.id}" }, identifiers)
+        assertTrue(identifiers.none { it.startsWith(IosSessionAlerts.PREFIX) })
     }
 
     @Test
